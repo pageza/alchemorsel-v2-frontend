@@ -1,267 +1,274 @@
 <template>
-  <div class="user-profile">
-    <h1>User Profile</h1>
-    <form @submit.prevent="updateProfile">
-      <div>
-        <label for="username">Username:</label>
-        <input type="text" id="username" v-model="profile.username" required />
+  <div class="profile">
+    <div class="profile__container">
+      <h1>Profile</h1>
+      <div v-if="error" class="alert alert-danger">
+        {{ error }}
       </div>
-      <div>
-        <label for="email">Email:</label>
-        <input type="email" id="email" v-model="profile.email" required />
+      <div v-if="loading" class="profile__loading">
+        <div class="loading-spinner"></div>
+        <p>Loading profile...</p>
       </div>
-      <button type="submit">Update Profile</button>
-    </form>
-    <button @click="handleLogout" class="logout-button">Logout</button>
-
-    <div class="profile-history">
-      <h2>Profile History</h2>
-      <div v-if="history.length === 0" class="no-history">
-        No history available
-      </div>
-      <div v-else class="history-list">
-        <div v-for="entry in history" :key="entry.id" class="history-item">
-          <div class="history-field">{{ entry.field }}</div>
-          <div class="history-changes">
-            <div class="old-value">Old: {{ entry.old_value }}</div>
-            <div class="new-value">New: {{ entry.new_value }}</div>
-          </div>
-          <div class="history-meta">
-            Changed at: {{ formatDate(entry.changed_at) }}
-          </div>
+      <div v-else class="profile__content">
+        <div class="profile__info">
+          <h2>User Information</h2>
+          <form @submit.prevent="updateProfile" class="profile__form">
+            <div class="form-group">
+              <label for="username">Username</label>
+              <input
+                type="text"
+                id="username"
+                v-model="profile.username"
+                required
+                :disabled="updating"
+              />
+            </div>
+            <div class="form-group">
+              <label for="bio">Bio</label>
+              <textarea
+                id="bio"
+                v-model="profile.bio"
+                :disabled="updating"
+                rows="3"
+                placeholder="Tell us about yourself..."
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label for="profile_picture_url">Profile Picture URL</label>
+              <input
+                type="url"
+                id="profile_picture_url"
+                v-model="profile.profile_picture_url"
+                :disabled="updating"
+                placeholder="https://example.com/avatar.jpg"
+              />
+            </div>
+            <button type="submit" class="btn btn-primary" :disabled="updating">
+              {{ updating ? 'Updating...' : 'Update Profile' }}
+            </button>
+          </form>
         </div>
-      </div>
-      <div class="pagination">
-        <button 
-          :disabled="offset === 0" 
-          @click="loadHistory(offset - limit)"
-          class="pagination-button"
-        >
-          Previous
-        </button>
-        <button 
-          :disabled="history.length < limit" 
-          @click="loadHistory(offset + limit)"
-          class="pagination-button"
-        >
-          Next
-        </button>
+        <div class="profile__preferences">
+          <h2>Account Actions</h2>
+          <button @click="handleLogout" class="btn btn-danger">
+            Logout
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
+import { profileService } from '@/services/api';
+import { useAuthStore } from '@/stores/auth';
 
-export default {
-  setup() {
-    const router = useRouter();
-    const profile = ref({ username: '', email: '' });
-    const history = ref([]);
-    const limit = ref(10);
-    const offset = ref(0);
+interface UserProfile {
+  id: string;
+  user_id: string;
+  username: string;
+  bio: string;
+  profile_picture_url: string;
+  privacy_level: string;
+  created_at: string;
+  updated_at: string;
+}
 
-    const fetchProfile = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          router.push('/login');
-          return;
-        }
+const router = useRouter();
+const auth = useAuthStore();
+const profile = ref<UserProfile>({
+  id: '',
+  user_id: '',
+  username: '',
+  bio: '',
+  profile_picture_url: '',
+  privacy_level: 'public',
+  created_at: '',
+  updated_at: ''
+});
+const loading = ref(false);
+const updating = ref(false);
+const error = ref('');
 
-        const response = await axios.get('/api/v1/profile', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        profile.value = response.data;
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          localStorage.removeItem('token');
-          router.push('/login');
-        }
-      }
-    };
-
-    const loadHistory = async (newOffset = 0) => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          router.push('/login');
-          return;
-        }
-
-        offset.value = newOffset;
-        const response = await axios.get(`/api/v1/profile/history?limit=${limit.value}&offset=${offset.value}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        history.value = response.data;
-      } catch (error) {
-        console.error('Error fetching profile history:', error);
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          localStorage.removeItem('token');
-          router.push('/login');
-        }
-      }
-    };
-
-    const updateProfile = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          router.push('/login');
-          return;
-        }
-
-        await axios.put('/api/v1/profile', profile.value, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        alert('Profile updated successfully!');
-        // Reload history after update
-        loadHistory(0);
-      } catch (error) {
-        console.error('Error updating profile:', error);
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          localStorage.removeItem('token');
-          router.push('/login');
-        }
-      }
-    };
-
-    const handleLogout = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (token) {
-          await axios.post('/api/v1/profile/logout', {}, {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
-        }
-      } catch (error) {
-        console.error('Error during logout:', error);
-      } finally {
-        localStorage.removeItem('token');
-        router.push('/login');
-      }
-    };
-
-    const formatDate = (dateString) => {
-      return new Date(dateString).toLocaleString();
-    };
-
-    onMounted(() => {
-      fetchProfile();
-      loadHistory();
-    });
-
-    return { 
-      profile, 
-      updateProfile, 
-      handleLogout, 
-      history, 
-      limit, 
-      offset, 
-      loadHistory,
-      formatDate
-    };
-  },
+const fetchProfile = async () => {
+  try {
+    loading.value = true;
+    error.value = '';
+    const data = await profileService.getProfile();
+    profile.value = data;
+  } catch (err: any) {
+    console.error('Error fetching profile:', err);
+    error.value = err.message || 'Failed to load profile. Please try again.';
+    
+    if (err.message?.includes('401') || err.message?.includes('authentication')) {
+      router.push('/login');
+    }
+  } finally {
+    loading.value = false;
+  }
 };
+
+const updateProfile = async () => {
+  try {
+    updating.value = true;
+    error.value = '';
+    
+    await profileService.updateProfile({
+      username: profile.value.username,
+      bio: profile.value.bio,
+      profile_picture_url: profile.value.profile_picture_url
+    });
+    
+    error.value = '';
+  } catch (err: any) {
+    console.error('Error updating profile:', err);
+    error.value = err.message || 'Failed to update profile. Please try again.';
+  } finally {
+    updating.value = false;
+  }
+};
+
+const handleLogout = () => {
+  auth.logout();
+};
+
+onMounted(() => {
+  fetchProfile();
+});
 </script>
 
-<style scoped>
-.user-profile {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-}
+<style lang="scss" scoped>
+.profile {
+  padding: 2rem;
 
-.logout-button {
-  margin-top: 20px;
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-}
+  &__container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
 
-.logout-button:hover {
-  background-color: #c82333;
-}
+  h1 {
+    color: var(--primary-color);
+    margin-bottom: 2rem;
+  }
 
-.profile-history {
-  margin-top: 40px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
-}
+  &__loading {
+    text-align: center;
+    padding: 4rem 2rem;
 
-.history-list {
-  margin-top: 20px;
-}
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
 
-.history-item {
-  padding: 15px;
-  margin-bottom: 10px;
-  border: 1px solid #eee;
-  border-radius: 4px;
-}
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  }
 
-.history-field {
-  font-weight: bold;
-  margin-bottom: 5px;
-}
+  &__content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+  }
 
-.history-changes {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 5px;
-}
+  &__info,
+  &__preferences {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
-.old-value {
-  color: #dc3545;
-}
+    h2 {
+      color: var(--secondary-color);
+      margin-bottom: 1rem;
+    }
+  }
 
-.new-value {
-  color: #28a745;
-}
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
 
-.history-meta {
-  font-size: 0.9em;
-  color: #666;
-}
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 
-.pagination {
-  margin-top: 20px;
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-}
+    label {
+      font-weight: 500;
+      color: var(--text-color);
+    }
 
-.pagination-button {
-  padding: 5px 15px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background-color: white;
-  cursor: pointer;
-}
+    input,
+    textarea {
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
 
-.pagination-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+      &:focus {
+        outline: none;
+        border-color: var(--primary-color);
+      }
 
-.no-history {
-  text-align: center;
-  color: #666;
-  padding: 20px;
+      &:disabled {
+        background-color: #f5f5f5;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  .alert {
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+
+    &-danger {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    &-primary {
+      background-color: var(--primary-color);
+      color: white;
+
+      &:hover:not(:disabled) {
+        background-color: var(--primary-color-dark);
+      }
+    }
+
+    &-danger {
+      background-color: #dc3545;
+      color: white;
+
+      &:hover:not(:disabled) {
+        background-color: #c82333;
+      }
+    }
+  }
 }
-</style> 
+</style>   

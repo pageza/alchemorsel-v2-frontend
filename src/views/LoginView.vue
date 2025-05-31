@@ -1,75 +1,179 @@
 <template>
-  <div>
-    <h1>Login</h1>
-    <form @submit.prevent="login">
-      <div>
-        <label for="username">Username:</label>
-        <input type="text" id="username" v-model="username" required />
-      </div>
-      <div>
-        <label for="password">Password:</label>
-        <input type="password" id="password" v-model="password" required />
-      </div>
-      <button type="submit" :disabled="loading">
-        {{ loading ? 'Logging in...' : 'Login' }}
-      </button>
-      <p v-if="error" class="error">{{ error }}</p>
-      <p class="register-link">
-        Don't have an account? <router-link to="/register">Register here</router-link>
+  <div class="login">
+    <div class="login__container">
+      <h1>Sign In</h1>
+      <form class="login__form" @submit.prevent="handleSubmit">
+        <div v-if="error" class="alert alert-danger">
+          {{ error }}
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            v-model="email"
+            required
+            :disabled="loading"
+          />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            v-model="password"
+            required
+            :disabled="loading"
+          />
+        </div>
+        <button type="submit" class="btn btn-primary" :disabled="loading">
+          {{ loading ? 'Signing in...' : 'Sign In' }}
+        </button>
+      </form>
+      <p class="login__register">
+        Don't have an account?
+        <router-link to="/register">Register here</router-link>
       </p>
-    </form>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import axios from 'axios'
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from '@/stores/auth';
 
-const router = useRouter()
-const username = ref('')
-const password = ref('')
-const loading = ref(false)
-const error = ref('')
+const router = useRouter();
+const email = ref("");
+const password = ref("");
+const loading = ref(false);
+const error = ref("");
+const auth = useAuthStore();
 
-const login = async () => {
+const handleSubmit = async () => {
   try {
-    loading.value = true
-    error.value = ''
-    
-    const response = await axios.post('/api/v1/auth/login', {
-      email: username.value,
-      password: password.value
-    })
-
-    if (response.data.token) {
-      localStorage.setItem('token', response.data.token)
-      router.push('/profile')
-    }
+    loading.value = true;
+    error.value = "";
+    await auth.login({
+      email: email.value,
+      password: password.value,
+    });
+    router.push("/recipes");
   } catch (err: any) {
-    console.error('Login error:', err)
-    error.value = err.response?.data?.message || 'Login failed. Please try again.'
+    error.value = err.message || "Failed to sign in. Please try again.";
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 </script>
 
-<style scoped>
-/* Add your styles here */
+<style lang="scss" scoped>
+.login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background-color: var(--background-color);
 
-.register-link {
-  text-align: center;
-  margin-top: 1rem;
-  color: #666;
-}
+  &__container {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+  }
 
-.register-link a {
-  color: #4CAF50;
-  text-decoration: none;
-}
+  h1 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 2rem;
+  }
 
-.register-link a:hover {
-  text-decoration: underline;
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      font-weight: 500;
+      color: var(--text-color);
+    }
+
+    input {
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+
+      &:focus {
+        outline: none;
+        border-color: var(--primary-color);
+      }
+
+      &:disabled {
+        background-color: #f5f5f5;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  &__register {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: var(--text-color);
+
+    a {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .alert {
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+
+    &-danger {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    &-primary {
+      background-color: var(--primary-color);
+      color: white;
+
+      &:hover:not(:disabled) {
+        background-color: var(--primary-color-dark);
+      }
+    }
+  }
 }
-</style> 
+</style>   

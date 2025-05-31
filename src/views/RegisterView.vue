@@ -1,189 +1,192 @@
 <template>
   <div class="register">
-    <h1>Register</h1>
-    <form @submit.prevent="handleRegister" class="register-form">
-      <div class="form-group">
-        <label for="name">Name</label>
-        <input
-          type="text"
-          id="name"
-          v-model="form.name"
-          required
-          placeholder="Enter your name"
-        />
-      </div>
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          v-model="form.email"
-          required
-          placeholder="Enter your email"
-        />
-      </div>
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          v-model="form.password"
-          required
-          placeholder="Enter your password"
-        />
-      </div>
-      <div class="form-group">
-        <label for="confirmPassword">Confirm Password</label>
-        <input
-          type="password"
-          id="confirmPassword"
-          v-model="form.confirmPassword"
-          required
-          placeholder="Confirm your password"
-        />
-      </div>
-      <button type="submit" :disabled="loading">
-        {{ loading ? 'Registering...' : 'Register' }}
-      </button>
-      <p v-if="error" class="error">{{ error }}</p>
-      <p class="login-link">
-        Already have an account? <router-link to="/login">Login here</router-link>
+    <div class="register__container">
+      <h1>Create Account</h1>
+      <form class="register__form" @submit.prevent="handleSubmit">
+        <div v-if="error" class="alert alert-danger">
+          {{ error }}
+        </div>
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input
+            type="text"
+            id="name"
+            v-model="name"
+            required
+            :disabled="loading"
+          />
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            v-model="email"
+            required
+            :disabled="loading"
+          />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            v-model="password"
+            required
+            :disabled="loading"
+            minlength="6"
+          />
+        </div>
+        <button type="submit" class="btn btn-primary" :disabled="loading">
+          {{ loading ? 'Creating Account...' : 'Create Account' }}
+        </button>
+      </form>
+      <p class="register__login">
+        Already have an account?
+        <router-link to="/login">Sign in here</router-link>
       </p>
-    </form>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import axios from 'axios'
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from '@/stores/auth';
 
-const router = useRouter()
-const loading = ref(false)
-const error = ref('')
+const router = useRouter();
+const name = ref("");
+const email = ref("");
+const password = ref("");
+const loading = ref(false);
+const error = ref("");
+const auth = useAuthStore();
 
-const form = reactive({
-  name: '',
-  email: '',
-  password: '',
-  confirmPassword: ''
-})
-
-const handleRegister = async () => {
-  if (form.password !== form.confirmPassword) {
-    error.value = 'Passwords do not match'
-    return
-  }
-
+const handleSubmit = async () => {
   try {
-    loading.value = true
-    error.value = ''
-    
-    const response = await axios.post('/api/v1/auth/register', {
-      name: form.name,
-      email: form.email,
-      password: form.password
-    })
-
-    if (response.data.token) {
-      // Store the token
-      localStorage.setItem('token', response.data.token)
-      // Redirect to profile page
-      router.push('/profile')
-    }
+    loading.value = true;
+    error.value = "";
+    await auth.register({
+      name: name.value,
+      email: email.value,
+      password: password.value,
+    });
+    router.push("/recipes");
   } catch (err: any) {
-    console.error('Registration error:', err)
-    error.value = err.response?.data?.message || 'Registration failed. Please try again.'
+    error.value = err.message || "Failed to create account. Please try again.";
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .register {
-  max-width: 400px;
-  margin: 2rem auto;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  background-color: white;
-}
+  background-color: var(--background-color);
 
-h1 {
-  text-align: center;
-  color: #333;
-  margin-bottom: 2rem;
-}
+  &__container {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+  }
 
-.register-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
+  h1 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 2rem;
+  }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
 
-label {
-  font-weight: 500;
-  color: #555;
-}
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 
-input {
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-}
+    label {
+      font-weight: 500;
+      color: var(--text-color);
+    }
 
-input:focus {
-  outline: none;
-  border-color: #4CAF50;
-  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
-}
+    input {
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
 
-button {
-  padding: 0.75rem;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
+      &:focus {
+        outline: none;
+        border-color: var(--primary-color);
+      }
 
-button:hover {
-  background-color: #45a049;
-}
+      &:disabled {
+        background-color: #f5f5f5;
+        cursor: not-allowed;
+      }
+    }
+  }
 
-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
+  &__login {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: var(--text-color);
 
-.error {
-  color: #dc3545;
-  text-align: center;
-  margin-top: 1rem;
-}
+    a {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
 
-.login-link {
-  text-align: center;
-  margin-top: 1rem;
-  color: #666;
-}
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
 
-.login-link a {
-  color: #4CAF50;
-  text-decoration: none;
-}
+  .alert {
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
 
-.login-link a:hover {
-  text-decoration: underline;
+    &-danger {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    &-primary {
+      background-color: var(--primary-color);
+      color: white;
+
+      &:hover:not(:disabled) {
+        background-color: var(--primary-color-dark);
+      }
+    }
+  }
 }
-</style> 
+</style>   
