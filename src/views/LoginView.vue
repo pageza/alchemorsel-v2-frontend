@@ -10,35 +10,66 @@
         <label for="password">Password:</label>
         <input type="password" id="password" v-model="password" required />
       </div>
-      <button type="submit">Login</button>
+      <button type="submit" :disabled="loading">
+        {{ loading ? 'Logging in...' : 'Login' }}
+      </button>
+      <p v-if="error" class="error">{{ error }}</p>
+      <p class="register-link">
+        Don't have an account? <router-link to="/register">Register here</router-link>
+      </p>
     </form>
   </div>
 </template>
 
-<script>
-import { ref } from 'vue';
-import axios from 'axios';
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import axios from 'axios'
 
-export default {
-  setup() {
-    const username = ref('');
-    const password = ref('');
+const router = useRouter()
+const username = ref('')
+const password = ref('')
+const loading = ref(false)
+const error = ref('')
 
-    const login = async () => {
-      try {
-        const response = await axios.post('/api/login', { username: username.value, password: password.value });
-        console.log('Login successful:', response.data);
-        // Redirect to profile page or handle login success
-      } catch (error) {
-        console.error('Error logging in:', error);
-      }
-    };
+const login = async () => {
+  try {
+    loading.value = true
+    error.value = ''
+    
+    const response = await axios.post('/api/v1/auth/login', {
+      email: username.value,
+      password: password.value
+    })
 
-    return { username, password, login };
-  },
-};
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token)
+      router.push('/profile')
+    }
+  } catch (err: any) {
+    console.error('Login error:', err)
+    error.value = err.response?.data?.message || 'Login failed. Please try again.'
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <style scoped>
 /* Add your styles here */
+
+.register-link {
+  text-align: center;
+  margin-top: 1rem;
+  color: #666;
+}
+
+.register-link a {
+  color: #4CAF50;
+  text-decoration: none;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}
 </style> 

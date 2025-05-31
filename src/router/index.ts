@@ -3,12 +3,12 @@ import type { RouteRecordRaw } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import UserProfileView from '../views/UserProfileView.vue'
 import LoginView from '../views/LoginView.vue'
+import RegisterView from '../views/RegisterView.vue'
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    name: 'home',
-    component: HomeView
+    redirect: '/login'
   },
   {
     path: '/profile',
@@ -21,6 +21,11 @@ const routes: RouteRecordRaw[] = [
     component: LoginView
   },
   {
+    path: '/register',
+    name: 'Register',
+    component: RegisterView
+  },
+  {
     path: '/about',
     name: 'about',
     component: () => import('../views/AboutView.vue')
@@ -28,7 +33,7 @@ const routes: RouteRecordRaw[] = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHistory(),
   routes
 })
 
