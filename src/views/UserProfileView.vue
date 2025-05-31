@@ -1,5 +1,5 @@
 <template>
-  <div class="user-profile">
+  <div>
     <h1>User Profile</h1>
     <form @submit.prevent="updateProfile">
       <div>
@@ -16,20 +16,34 @@
 </template>
 
 <script>
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+
 export default {
-  data() {
-    return {
-      profile: {
-        username: '',
-        email: '',
-      },
+  setup() {
+    const profile = ref({ username: '', email: '' });
+
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get('/api/user/profile');
+        profile.value = response.data;
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
     };
-  },
-  methods: {
-    async updateProfile() {
-      // TODO: Implement API call to update profile
-      console.log('Profile updated:', this.profile);
-    },
+
+    const updateProfile = async () => {
+      try {
+        await axios.put('/api/user/profile', profile.value);
+        alert('Profile updated successfully!');
+      } catch (error) {
+        console.error('Error updating profile:', error);
+      }
+    };
+
+    onMounted(fetchProfile);
+
+    return { profile, updateProfile };
   },
 };
 </script>
