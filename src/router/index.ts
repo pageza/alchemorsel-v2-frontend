@@ -1,11 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
+import HomeView from '../views/HomeView.vue'
+import UserProfileView from '../views/UserProfileView.vue'
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'home',
-    component: () => import('../views/HomeView.vue')
+    component: HomeView
+  },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: UserProfileView
   },
   {
     path: '/about',
@@ -15,7 +22,7 @@ const routes: RouteRecordRaw[] = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(process.env.BASE_URL),
   routes
 })
 
