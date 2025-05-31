@@ -1,9 +1,9 @@
 import axios, { type InternalAxiosRequestConfig, type AxiosResponse, type AxiosError } from 'axios';
 
-const BACKEND_URL = 'http://localhost:8080';
+const BACKEND_URL = 'https://recipe-app-tunnel-35jmqf39.devinapps.com/api/v1';
 
 const api = axios.create({
-  baseURL: `${BACKEND_URL}/api/v1`,
+  baseURL: BACKEND_URL,
   headers: {
     'Accept': '*/*',
     'Cache-Control': 'no-cache'
