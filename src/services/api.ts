@@ -59,8 +59,36 @@ export interface UserProfile {
   bio: string;
   profile_picture_url: string;
   privacy_level: string;
+  cooking_ability_level: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface DietaryPreference {
+  id?: string;
+  user_id?: string;
+  preference_type: string;
+  custom_name?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Allergen {
+  id?: string;
+  user_id?: string;
+  allergen_name: string;
+  severity_level: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface UserAppliance {
+  id?: string;
+  user_id?: string;
+  appliance_type: string;
+  custom_name?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export const authService = {
@@ -87,6 +115,33 @@ export const profileService = {
 
   async updateProfile(updates: Partial<UserProfile>): Promise<void> {
     await api.put('/profile', updates);
+  },
+
+  async getDietaryPreferences(): Promise<DietaryPreference[]> {
+    const response = await api.get<DietaryPreference[]>('/profile/dietary-preferences');
+    return response.data;
+  },
+
+  async updateDietaryPreferences(preferences: DietaryPreference[]): Promise<void> {
+    await api.put('/profile/dietary-preferences', preferences);
+  },
+
+  async getAllergens(): Promise<Allergen[]> {
+    const response = await api.get<Allergen[]>('/profile/allergens');
+    return response.data;
+  },
+
+  async updateAllergens(allergens: Allergen[]): Promise<void> {
+    await api.put('/profile/allergens', allergens);
+  },
+
+  async getAppliances(): Promise<UserAppliance[]> {
+    const response = await api.get<UserAppliance[]>('/profile/appliances');
+    return response.data;
+  },
+
+  async updateAppliances(appliances: UserAppliance[]): Promise<void> {
+    await api.put('/profile/appliances', appliances);
   },
 
   async logout(): Promise<void> {
