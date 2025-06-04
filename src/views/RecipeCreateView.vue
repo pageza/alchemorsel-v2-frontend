@@ -36,7 +36,16 @@
           <p>Our AI chef is creating your recipe...</p>
         </div>
 
-        <button type="submit" class="btn btn-primary" :disabled="loading">
+        <div v-if="rawRecipe" class="raw-recipe">
+          <h2>Generated Recipe Preview</h2>
+          <pre class="raw-recipe__content">{{ JSON.stringify(rawRecipe, null, 2) }}</pre>
+          <div class="raw-recipe__actions">
+            <button type="button" class="btn btn-secondary" @click="handleEdit">Edit Recipe</button>
+            <button type="button" class="btn btn-primary" @click="handleSave">Save Recipe</button>
+          </div>
+        </div>
+
+        <button v-if="!rawRecipe" type="submit" class="btn btn-primary" :disabled="loading">
           {{ loading ? 'Creating Recipe...' : 'Generate Recipe' }}
         </button>
       </form>
@@ -48,11 +57,14 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { recipeService } from "@/services/api";
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
+const authStore = useAuthStore();
 const loading = ref(false);
 const error = ref<string | null>(null);
 const query = ref("");
+const rawRecipe = ref<any>(null);
 
 const handleSubmit = async () => {
   try {
@@ -61,14 +73,52 @@ const handleSubmit = async () => {
 
     const response = await recipeService.generateRecipe({ query: query.value });
     console.log("Generated recipe response:", response);
-    if (response.recipe && response.recipe.id) {
-      router.push({ name: 'RecipeDetail', params: { id: response.recipe.id } });
+    rawRecipe.value = response.recipe;  // Store just the recipe data
+  } catch (err: any) {
+    console.error("Failed to create recipe:", err);
+    error.value = err.message || "Recipe generation is not yet available in the backend. Please check back later.";
+  } finally {
+    loading.value = false;
+  }
+};
+
+const handleEdit = () => {
+  // TODO: Implement recipe editing
+  console.log("Edit recipe:", rawRecipe.value);
+};
+
+const handleSave = async () => {
+  try {
+    if (!authStore.isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+
+    loading.value = true;
+    error.value = null;
+    
+    // Format the recipe data according to the backend's expected structure
+    const recipeData = {
+      name: rawRecipe.value.name,
+      description: rawRecipe.value.description,
+      category: rawRecipe.value.category || 'Uncategorized',
+      ingredients: rawRecipe.value.ingredients,
+      instructions: rawRecipe.value.instructions,
+      prep_time: rawRecipe.value.prep_time,
+      cook_time: rawRecipe.value.cook_time,
+      servings: rawRecipe.value.servings,
+      difficulty: rawRecipe.value.difficulty
+    };
+    
+    const response = await recipeService.saveRecipe(recipeData);
+    if (response.id) {
+      router.push({ name: 'RecipeDetail', params: { id: response.id } });
     } else {
       throw new Error("No recipe ID received from server");
     }
   } catch (err: any) {
-    console.error("Failed to create recipe:", err);
-    error.value = err.message || "Recipe generation is not yet available in the backend. Please check back later.";
+    console.error("Failed to save recipe:", err);
+    error.value = err.message || "Failed to save recipe. Please try again.";
   } finally {
     loading.value = false;
   }
@@ -203,6 +253,47 @@ const handleSubmit = async () => {
         background-color: var(--primary-color-dark);
         transform: translateY(-1px);
       }
+    }
+  }
+
+  .raw-recipe {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background-color: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+
+    h2 {
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+
+    &__content {
+      background-color: #1e293b;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-family: monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+
+    &__actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+  }
+
+  .btn-secondary {
+    background-color: #64748b;
+    color: white;
+
+    &:hover {
+      background-color: #475569;
     }
   }
 }

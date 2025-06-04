@@ -42,7 +42,12 @@
     </div>
 
     <div v-else class="recipes__grid">
-      <div v-for="recipe in paginatedRecipes" :key="recipe.id" class="recipe-card">
+      <div 
+        v-for="recipe in paginatedRecipes" 
+        :key="recipe.id" 
+        class="recipe-card"
+        @click="router.push({ name: 'RecipeDetail', params: { id: recipe.id }})"
+      >
         <div class="recipe-card__image">
           <img :src="recipe.image || '/placeholder-recipe.jpg'" :alt="recipe.name" />
         </div>
@@ -108,7 +113,9 @@ const itemsPerPage = 12
 const categories = ['Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Snacks', 'Beverages']
 
 const filteredRecipes = computed(() => {
-  let filtered = recipes.value
+  console.log('filteredRecipes - recipes.value:', recipes.value)
+  let filtered = Array.isArray(recipes.value) ? recipes.value : []
+  console.log('filteredRecipes - initial filtered:', filtered)
 
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
@@ -122,15 +129,19 @@ const filteredRecipes = computed(() => {
     filtered = filtered.filter(recipe => recipe.category === selectedCategory.value)
   }
 
+  console.log('filteredRecipes - final filtered:', filtered)
   return filtered
 })
 
 const totalPages = computed(() => Math.ceil(filteredRecipes.value.length / itemsPerPage))
 
 const paginatedRecipes = computed(() => {
+  console.log('paginatedRecipes - filteredRecipes.value:', filteredRecipes.value)
   const start = (currentPage.value - 1) * itemsPerPage
   const end = start + itemsPerPage
-  return filteredRecipes.value.slice(start, end)
+  const recipes = Array.isArray(filteredRecipes.value) ? filteredRecipes.value : []
+  console.log('paginatedRecipes - recipes to slice:', recipes)
+  return recipes.slice(start, end)
 })
 
 const fetchRecipes = async () => {
@@ -138,7 +149,9 @@ const fetchRecipes = async () => {
     loading.value = true
     error.value = ''
     const data = await recipeService.listRecipes()
-    recipes.value = data
+    console.log('API Response:', data)
+    recipes.value = Array.isArray(data) ? data : []
+    console.log('recipes.value after assignment:', recipes.value)
   } catch (err: any) {
     console.error('Error fetching recipes:', err)
     error.value = err.message || 'Failed to load recipes. Please try again.'
@@ -268,12 +281,14 @@ onMounted(() => {
 .recipe-card {
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  transition: transform 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
 
   &:hover {
     transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
 
   &__image {

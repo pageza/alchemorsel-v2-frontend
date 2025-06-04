@@ -5,8 +5,7 @@ const BACKEND_URL = 'http://localhost:8080';
 const api = axios.create({
   baseURL: `${BACKEND_URL}/api/v1`,
   headers: {
-    'Accept': '*/*',
-    'Cache-Control': 'no-cache'
+    'Accept': '*/*'
   }
 });
 
@@ -97,7 +96,7 @@ export const profileService = {
 export const recipeService = {
   async listRecipes(): Promise<any[]> {
     const response = await api.get('/recipes');
-    return response.data;
+    return response.data.recipes;
   },
 
   async getRecipe(id: string): Promise<any> {
@@ -129,8 +128,14 @@ export const recipeService = {
   async generateRecipe(request: { query: string }): Promise<any> {
     const response = await api.post('/llm/query', {
       query: `Generate a recipe: ${request.query}`,
-      intent: 'generate_recipe'
+      intent: 'generate_recipe',
+      system_message: 'You are a professional chef. Please provide your response in JSON format.'
     });
+    return response.data;
+  },
+
+  async saveRecipe(recipe: any): Promise<any> {
+    const response = await api.post('/recipes', recipe);
     return response.data;
   },
 

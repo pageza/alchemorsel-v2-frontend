@@ -6,6 +6,7 @@ import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import RecipeView from '../views/RecipeView.vue'
 import RecipeCreateView from '../views/RecipeCreateView.vue'
+import RecipeDetailView from '../views/RecipeDetailView.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -39,6 +40,12 @@ const routes: RouteRecordRaw[] = [
     path: '/recipes/create',
     name: 'recipe-create',
     component: RecipeCreateView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/recipes/:id',
+    name: 'RecipeDetail',
+    component: RecipeDetailView,
     meta: { requiresAuth: true }
   },
   {
