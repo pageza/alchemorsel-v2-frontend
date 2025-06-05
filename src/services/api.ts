@@ -5,7 +5,8 @@ const BACKEND_URL = 'http://localhost:8080';
 const api = axios.create({
   baseURL: `${BACKEND_URL}/api/v1`,
   headers: {
-    'Accept': '*/*'
+    'Accept': '*/*',
+    'Content-Type': 'application/json',
   }
 });
 
@@ -16,6 +17,8 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
+}, (error) => {
+  return Promise.reject(error);
 });
 
 api.interceptors.response.use(
@@ -23,6 +26,10 @@ api.interceptors.response.use(
     return response;
   },
   (error: AxiosError) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
     if (error.code === 'ERR_NETWORK') {
       throw new Error('Unable to connect to the server. Please check if the backend server is running.');
     }
@@ -32,7 +39,7 @@ api.interceptors.response.use(
     if (error.response?.data && typeof error.response.data === 'object' && 'error' in error.response.data) {
       throw new Error((error.response.data as any).error);
     }
-    throw error;
+    return Promise.reject(error);
   }
 );
 
@@ -45,6 +52,9 @@ export interface RegisterData {
   name: string;
   email: string;
   password: string;
+  username: string;
+  dietary_preferences: string[];
+  allergies: string[];
 }
 
 export interface AuthResponse {
@@ -58,6 +68,26 @@ export interface UserProfile {
   bio: string;
   profile_picture_url: string;
   privacy_level: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Recipe {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  ingredients: string[];
+  instructions: string[];
+  prep_time: number;
+  cook_time: number;
+  servings: number;
+  difficulty: string;
+  calories?: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
+  user_id: string;
   created_at: string;
   updated_at: string;
 }
@@ -94,23 +124,23 @@ export const profileService = {
 };
 
 export const recipeService = {
-  async listRecipes(): Promise<any[]> {
-    const response = await api.get('/recipes');
-    return response.data.recipes;
-  },
-
-  async getRecipe(id: string): Promise<any> {
-    const response = await api.get(`/recipes/${id}`);
+  async listRecipes(): Promise<Recipe[]> {
+    const response = await api.get<Recipe[]>('/recipes');
     return response.data;
   },
 
-  async createRecipe(recipe: any): Promise<any> {
-    const response = await api.post('/recipes', recipe);
+  async getRecipe(id: string): Promise<Recipe> {
+    const response = await api.get<Recipe>(`/recipes/${id}`);
     return response.data;
   },
 
-  async updateRecipe(id: string, recipe: any): Promise<any> {
-    const response = await api.put(`/recipes/${id}`, recipe);
+  async createRecipe(recipe: Omit<Recipe, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<Recipe> {
+    const response = await api.post<Recipe>('/recipes', recipe);
+    return response.data;
+  },
+
+  async updateRecipe(id: string, recipe: Partial<Recipe>): Promise<Recipe> {
+    const response = await api.put<Recipe>(`/recipes/${id}`, recipe);
     return response.data;
   },
 
@@ -125,11 +155,10 @@ export const recipeService = {
     return response.data;
   },
 
-  async generateRecipe(request: { query: string }): Promise<any> {
-    const response = await api.post('/llm/query', {
-      query: `Generate a recipe: ${request.query}`,
-      intent: 'generate_recipe',
-      system_message: 'You are a professional chef. Please provide your response in JSON format.'
+  async generateRecipe(query: string): Promise<Recipe> {
+    const response = await api.post<Recipe>('/llm/query', { 
+      query: query,
+      intent: 'generate'
     });
     return response.data;
   },

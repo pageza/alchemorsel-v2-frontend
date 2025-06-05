@@ -17,6 +17,16 @@
           />
         </div>
         <div class="form-group">
+          <label for="username">Username</label>
+          <input
+            type="text"
+            id="username"
+            v-model="username"
+            required
+            :disabled="loading"
+          />
+        </div>
+        <div class="form-group">
           <label for="email">Email</label>
           <input
             type="email"
@@ -37,6 +47,34 @@
             minlength="6"
           />
         </div>
+        <div class="form-group">
+          <label>Dietary Preferences</label>
+          <div class="checkbox-group">
+            <label v-for="pref in dietaryPreferences" :key="pref.id" class="checkbox-label">
+              <input
+                type="checkbox"
+                :value="pref.id"
+                v-model="selectedDietaryPreferences"
+                :disabled="loading"
+              />
+              {{ pref.label }}
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Allergies</label>
+          <div class="checkbox-group">
+            <label v-for="allergy in commonAllergies" :key="allergy" class="checkbox-label">
+              <input
+                type="checkbox"
+                :value="allergy"
+                v-model="selectedAllergies"
+                :disabled="loading"
+              />
+              {{ allergy }}
+            </label>
+          </div>
+        </div>
         <button type="submit" class="btn btn-primary" :disabled="loading">
           {{ loading ? 'Creating Account...' : 'Create Account' }}
         </button>
@@ -56,20 +94,54 @@ import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
 const name = ref("");
+const username = ref("");
 const email = ref("");
 const password = ref("");
 const loading = ref(false);
 const error = ref("");
 const auth = useAuthStore();
 
+const dietaryPreferences = [
+  { id: 'vegan', label: 'Vegan' },
+  { id: 'vegetarian', label: 'Vegetarian' },
+  { id: 'keto', label: 'Keto' },
+  { id: 'paleo', label: 'Paleo' },
+  { id: 'gluten_free', label: 'Gluten Free' },
+  { id: 'dairy_free', label: 'Dairy Free' }
+];
+
+const commonAllergies = [
+  'Peanuts',
+  'Tree Nuts',
+  'Milk',
+  'Eggs',
+  'Soy',
+  'Wheat',
+  'Fish',
+  'Shellfish'
+];
+
+const selectedDietaryPreferences = ref<string[]>([]);
+const selectedAllergies = ref<string[]>([]);
+
 const handleSubmit = async () => {
   try {
     loading.value = true;
     error.value = "";
+    
+    if (selectedDietaryPreferences.value.length === 0 && selectedAllergies.value.length === 0) {
+      error.value = "Please select at least one dietary preference or allergy";
+      loading.value = false;
+      return;
+    }
+
     await auth.register({
       name: name.value,
+      username: username.value,
       email: email.value,
       password: password.value,
+      dietary_preferences: selectedDietaryPreferences.value,
+      allergies: selectedAllergies.value
     });
     router.push("/recipes");
   } catch (err: any) {
@@ -186,6 +258,26 @@ const handleSubmit = async () => {
       &:hover:not(:disabled) {
         background-color: var(--primary-color-dark);
       }
+    }
+  }
+
+  .checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+
+    input[type="checkbox"] {
+      width: 1rem;
+      height: 1rem;
+      cursor: pointer;
     }
   }
 }

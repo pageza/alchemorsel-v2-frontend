@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { authService, profileService } from '@/services/api';
+import type { RegisterData } from '@/services/api';
 
 export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref(!!localStorage.getItem('token'));
@@ -12,7 +13,7 @@ export const useAuthStore = defineStore('auth', () => {
     return response;
   }
 
-  async function register(data: { name: string; email: string; password: string }) {
+  async function register(data: RegisterData) {
     const response = await authService.register(data);
     localStorage.setItem('token', response.token);
     isAuthenticated.value = true;

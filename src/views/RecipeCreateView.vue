@@ -71,20 +71,77 @@ const handleSubmit = async () => {
     loading.value = true;
     error.value = null;
 
-    const response = await recipeService.generateRecipe({ query: query.value });
+    const response = await recipeService.generateRecipe(query.value);
     console.log("Generated recipe response:", response);
-    rawRecipe.value = response.recipe;  // Store just the recipe data
+    rawRecipe.value = response;  // Store the recipe data directly
   } catch (err: any) {
     console.error("Failed to create recipe:", err);
-    error.value = err.message || "Recipe generation is not yet available in the backend. Please check back later.";
+    error.value = err.message || "Failed to generate recipe. Please try again.";
   } finally {
     loading.value = false;
   }
 };
 
 const handleEdit = () => {
-  // TODO: Implement recipe editing
-  console.log("Edit recipe:", rawRecipe.value);
+  // Create a form to edit the recipe
+  const recipe = rawRecipe.value.recipe; // Access the recipe from the response object
+  const form = document.createElement('form');
+  form.innerHTML = `
+    <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+      <div style="background: white; padding: 2rem; border-radius: 8px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
+        <h2 style="margin-bottom: 1rem;">Edit Recipe</h2>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <div>
+            <label style="display: block; margin-bottom: 0.5rem;">Name</label>
+            <input type="text" id="recipe-name" value="${recipe.name}" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 0.5rem;">Description</label>
+            <textarea id="recipe-description" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; min-height: 100px;">${recipe.description}</textarea>
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 0.5rem;">Ingredients (one per line)</label>
+            <textarea id="recipe-ingredients" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; min-height: 150px;">${Array.isArray(recipe.ingredients) ? recipe.ingredients.join('\n') : ''}</textarea>
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 0.5rem;">Instructions (one per line)</label>
+            <textarea id="recipe-instructions" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; min-height: 200px;">${Array.isArray(recipe.instructions) ? recipe.instructions.join('\n') : ''}</textarea>
+          </div>
+          <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
+            <button type="button" id="cancel-edit" style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer;">Cancel</button>
+            <button type="submit" style="padding: 0.5rem 1rem; border: none; border-radius: 4px; background: var(--primary-color); color: white; cursor: pointer;">Save Changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = (document.getElementById('recipe-name') as HTMLInputElement).value;
+    const description = (document.getElementById('recipe-description') as HTMLTextAreaElement).value;
+    const ingredients = (document.getElementById('recipe-ingredients') as HTMLTextAreaElement).value.split('\n').filter(i => i.trim());
+    const instructions = (document.getElementById('recipe-instructions') as HTMLTextAreaElement).value.split('\n').filter(i => i.trim());
+
+    rawRecipe.value = {
+      ...rawRecipe.value,
+      recipe: {
+        ...recipe,
+        name,
+        description,
+        ingredients,
+        instructions
+      }
+    };
+
+    document.body.removeChild(form);
+  });
+
+  form.querySelector('#cancel-edit')?.addEventListener('click', () => {
+    document.body.removeChild(form);
+  });
+
+  document.body.appendChild(form);
 };
 
 const handleSave = async () => {
