@@ -10,6 +10,15 @@ const api = axios.create({
   }
 });
 
+// Function to update the token in localStorage
+export const updateAuthToken = (token: string | null) => {
+  if (token) {
+    localStorage.setItem('token', token);
+  } else {
+    localStorage.removeItem('token');
+  }
+};
+
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -26,19 +35,25 @@ api.interceptors.response.use(
     return response;
   },
   (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
+    // Only redirect on 401 if it's not a login attempt
+    if (error.response?.status === 401 && !error.config?.url?.includes('/auth/login')) {
+      updateAuthToken(null);
       window.location.href = '/login';
+      return Promise.reject(new Error('Session expired. Please log in again.'));
     }
+
     if (error.code === 'ERR_NETWORK') {
-      throw new Error('Unable to connect to the server. Please check if the backend server is running.');
+      return Promise.reject(new Error('Unable to connect to the server. Please check if the backend server is running.'));
     }
+
     if (error.response?.status === 0) {
-      throw new Error('CORS error: Unable to access the server. Please check if CORS is enabled on the backend.');
+      return Promise.reject(new Error('Unable to connect to the server. Please check if the backend server is running.'));
     }
+
     if (error.response?.data && typeof error.response.data === 'object' && 'error' in error.response.data) {
-      throw new Error((error.response.data as any).error);
+      return Promise.reject(new Error((error.response.data as any).error));
     }
+
     return Promise.reject(error);
   }
 );
@@ -90,6 +105,7 @@ export interface Recipe {
   user_id: string;
   created_at: string;
   updated_at: string;
+  tags?: string[];
 }
 
 export const authService = {
@@ -148,11 +164,27 @@ export const recipeService = {
     await api.delete(`/recipes/${id}`);
   },
 
-  async searchRecipes(query: string, filters?: any): Promise<any> {
-    const response = await api.get('/recipes', {
-      params: { query, ...filters }
-    });
-    return response.data;
+  async searchRecipes(query: string, filters?: {
+    category?: string;
+    dietary?: string[];
+    exclude?: string[];
+  }): Promise<{ recipes: Recipe[] }> {
+    const params: Record<string, string> = { q: query }
+    
+    if (filters?.category) {
+      params.category = filters.category
+    }
+    
+    if (filters?.dietary?.length) {
+      params.dietary = filters.dietary.join(',')
+    }
+    
+    if (filters?.exclude?.length) {
+      params.exclude = filters.exclude.join(',')
+    }
+
+    const response = await api.get<{ recipes: Recipe[] }>('/recipes', { params })
+    return response.data
   },
 
   async generateRecipe(query: string): Promise<Recipe> {
@@ -174,6 +206,25 @@ export const recipeService = {
 
   async unfavoriteRecipe(id: string): Promise<void> {
     await api.delete(`/recipes/${id}/favorite`);
+  }
+};
+
+export const llmService = {
+  async generateRecipe(query: string): Promise<{ recipe: Recipe; draft_id: string }> {
+    const response = await api.post<{ recipe: Recipe; draft_id: string }>('/llm/query', {
+      query,
+      intent: 'generate'
+    });
+    return response.data;
+  },
+
+  async modifyRecipe(query: string, draftId: string): Promise<{ recipe: Recipe; draft_id: string }> {
+    const response = await api.post<{ recipe: Recipe; draft_id: string }>('/llm/query', {
+      query,
+      intent: 'modify',
+      draft_id: draftId
+    });
+    return response.data;
   }
 };
 

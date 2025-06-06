@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type RouteLocationNormalized, type NavigationGuardNext } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import UserProfileView from '../views/UserProfileView.vue'
@@ -60,10 +60,14 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, _from, next) => {
+router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
   const token = localStorage.getItem('token')
   if (to.meta.requiresAuth && !token) {
-    next('/login')
+    if (from.path !== '/login') {
+      next('/login')
+    } else {
+      next(false)
+    }
   } else {
     next()
   }

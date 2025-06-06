@@ -8,10 +8,73 @@
           v-model="searchQuery" 
           placeholder="Search recipes..." 
           class="search-input"
+          @input="handleSearch"
         />
         <router-link to="/recipes/create" class="btn btn-primary">
           Create Recipe
         </router-link>
+      </div>
+    </div>
+
+    <!-- Search Results Modal -->
+    <div v-if="showSearchModal" class="search-modal">
+      <div class="search-modal__content">
+        <div class="search-modal__header">
+          <h2>Search Results</h2>
+          <button @click="showSearchModal = false" class="btn btn-icon">×</button>
+        </div>
+        
+        <div v-if="searchLoading" class="search-modal__loading">
+          <div class="loading-spinner"></div>
+          <p>Searching recipes...</p>
+        </div>
+
+        <div v-else-if="searchError" class="search-modal__error">
+          <p>{{ searchError }}</p>
+        </div>
+
+        <div v-else-if="searchResults.length === 0" class="search-modal__empty">
+          <h3>No exact matches found</h3>
+          <p>Would you like to:</p>
+          <div class="search-modal__actions">
+            <button @click="createNewRecipe" class="btn btn-primary">
+              Create New Recipe
+            </button>
+          </div>
+        </div>
+
+        <div v-else class="search-modal__results">
+          <h3>Found {{ searchResults.length }} similar recipes</h3>
+          <div class="search-modal__list">
+            <div 
+              v-for="recipe in searchResults" 
+              :key="recipe.id" 
+              class="search-modal__item"
+            >
+              <div class="search-modal__item-content">
+                <h4>{{ recipe.name }}</h4>
+                <p>{{ recipe.description }}</p>
+                <div class="search-modal__item-meta">
+                  <span class="category">{{ recipe.category }}</span>
+                  <span class="ingredients">{{ recipe.ingredients?.length || 0 }} ingredients</span>
+                </div>
+              </div>
+              <div class="search-modal__item-actions">
+                <button @click="viewRecipe(recipe)" class="btn btn-secondary">
+                  View
+                </button>
+                <button @click="modifyRecipe(recipe)" class="btn btn-primary">
+                  Modify
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="search-modal__actions">
+            <button @click="createNewRecipe" class="btn btn-primary">
+              Create New Recipe
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -89,7 +152,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { recipeService } from '@/services/api'
+import { recipeService, llmService } from '@/services/api'
+import { useDebounce } from '@/composables/useDebounce'
 
 interface Recipe {
   id: string
@@ -99,6 +163,7 @@ interface Recipe {
   image?: string
   ingredients?: string[]
   created_at: string
+  tags?: string[]
 }
 
 const router = useRouter()
@@ -111,6 +176,11 @@ const currentPage = ref(1)
 const itemsPerPage = 12
 
 const categories = ['Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Snacks', 'Beverages']
+
+const showSearchModal = ref(false)
+const searchResults = ref<Recipe[]>([])
+const searchLoading = ref(false)
+const searchError = ref('')
 
 const filteredRecipes = computed(() => {
   console.log('filteredRecipes - recipes.value:', recipes.value)
@@ -150,7 +220,7 @@ const fetchRecipes = async () => {
     error.value = ''
     const data = await recipeService.listRecipes()
     console.log('API Response:', data)
-    recipes.value = Array.isArray(data) ? data : []
+    recipes.value = Array.isArray(data.recipes) ? data.recipes : []
     console.log('recipes.value after assignment:', recipes.value)
   } catch (err: any) {
     console.error('Error fetching recipes:', err)
@@ -162,6 +232,58 @@ const fetchRecipes = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const debouncedSearch = useDebounce(async (query: string) => {
+  if (!query.trim()) {
+    showSearchModal.value = false
+    return
+  }
+
+  try {
+    searchLoading.value = true
+    searchError.value = ''
+    const response = await recipeService.searchRecipes(query)
+    searchResults.value = response.recipes || []
+    showSearchModal.value = true
+  } catch (err: any) {
+    searchError.value = err.message || 'Failed to search recipes'
+  } finally {
+    searchLoading.value = false
+  }
+}, 300)
+
+const handleSearch = () => {
+  debouncedSearch(searchQuery.value)
+}
+
+const viewRecipe = (recipe: Recipe) => {
+  showSearchModal.value = false
+  router.push({ name: 'RecipeDetail', params: { id: recipe.id } })
+}
+
+const modifyRecipe = async (recipe: Recipe) => {
+  showSearchModal.value = false
+  try {
+    const { recipe: modifiedRecipe, draft_id } = await llmService.modifyRecipe(
+      `Modify this recipe: ${recipe.name}`,
+      recipe.id
+    )
+    router.push({ 
+      name: 'RecipeCreate',
+      query: { 
+        draft_id,
+        mode: 'modify'
+      }
+    })
+  } catch (err: any) {
+    error.value = err.message || 'Failed to modify recipe'
+  }
+}
+
+const createNewRecipe = () => {
+  showSearchModal.value = false
+  router.push({ name: 'RecipeCreate' })
 }
 
 onMounted(() => {
@@ -322,7 +444,8 @@ onMounted(() => {
 
   &__meta {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 0.5rem;
     font-size: 0.9rem;
 
     .category {
@@ -331,6 +454,7 @@ onMounted(() => {
       padding: 0.25rem 0.5rem;
       border-radius: 12px;
       font-size: 0.8rem;
+      align-self: flex-start;
     }
 
     .ingredients {
@@ -393,6 +517,106 @@ onMounted(() => {
     &__grid {
       grid-template-columns: 1fr;
     }
+  }
+}
+
+.search-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+
+  &__content {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+
+    h2 {
+      margin: 0;
+      color: var(--primary-color);
+    }
+  }
+
+  &__loading,
+  &__error,
+  &__empty {
+    text-align: center;
+    padding: 2rem;
+  }
+
+  &__list {
+    margin: 1rem 0;
+  }
+
+  &__item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+
+    &-content {
+      flex: 1;
+
+      h4 {
+        margin: 0 0 0.5rem;
+        color: var(--primary-color);
+      }
+
+      p {
+        margin: 0 0 0.5rem;
+        color: #666;
+      }
+    }
+
+    &-meta {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    &-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+  }
+
+  &__actions {
+    margin-top: 1.5rem;
+    text-align: center;
+  }
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0.5rem;
+
+  &:hover {
+    color: var(--primary-color);
   }
 }
 </style>   

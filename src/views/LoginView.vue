@@ -61,7 +61,6 @@ const handleSubmit = async () => {
     router.push("/recipes");
   } catch (err: any) {
     error.value = err.message || "Failed to sign in. Please try again.";
-  } finally {
     loading.value = false;
   }
 };

@@ -60,6 +60,7 @@
               {{ pref.label }}
             </label>
           </div>
+          <p class="form-hint">Select any dietary preferences that apply to you</p>
         </div>
         <div class="form-group">
           <label>Allergies</label>
@@ -74,6 +75,10 @@
               {{ allergy }}
             </label>
           </div>
+          <p class="form-hint warning">
+            Note: If you have any allergies, please select them above. While we try to accommodate dietary restrictions, 
+            you are responsible for verifying the safety of any recipes for your specific needs.
+          </p>
         </div>
         <button type="submit" class="btn btn-primary" :disabled="loading">
           {{ loading ? 'Creating Account...' : 'Create Account' }}
@@ -129,12 +134,6 @@ const handleSubmit = async () => {
     loading.value = true;
     error.value = "";
     
-    if (selectedDietaryPreferences.value.length === 0 && selectedAllergies.value.length === 0) {
-      error.value = "Please select at least one dietary preference or allergy";
-      loading.value = false;
-      return;
-    }
-
     await auth.register({
       name: name.value,
       username: username.value,
@@ -278,6 +277,21 @@ const handleSubmit = async () => {
       width: 1rem;
       height: 1rem;
       cursor: pointer;
+    }
+  }
+
+  .form-hint {
+    font-size: 0.875rem;
+    color: var(--text-color);
+    margin-top: 0.5rem;
+
+    &.warning {
+      color: #856404;
+      background-color: #fff3cd;
+      border: 1px solid #ffeeba;
+      padding: 0.75rem;
+      border-radius: 4px;
+      margin-top: 0.75rem;
     }
   }
 }
