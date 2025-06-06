@@ -40,6 +40,12 @@
           </li>
         </ol>
       </div>
+
+      <div class="recipe-detail__actions">
+        <button @click="handleModify" class="btn btn-primary">
+          Modify Recipe
+        </button>
+      </div>
     </div>
     <div v-else-if="loading" class="loading-state">
       <div class="loading-spinner"></div>
@@ -53,13 +59,35 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
-import { recipeService } from '@/services/api';
+import { useRoute, useRouter } from 'vue-router';
+import { recipeService, llmService } from '@/services/api';
 
 const route = useRoute();
+const router = useRouter();
 const recipe = ref<any>(null);
 const loading = ref(true);
 const error = ref<string | null>(null);
+
+const handleModify = async () => {
+  if (!recipe.value) return;
+  
+  try {
+    const { recipe: modifiedRecipe, draft_id } = await llmService.modifyRecipe(
+      `Modify this recipe: ${recipe.value.name}`,
+      recipe.value.id
+    );
+    router.push({ 
+      name: 'RecipeCreate',
+      query: { 
+        draft_id,
+        mode: 'modify'
+      }
+    });
+  } catch (err: any) {
+    console.error('Failed to modify recipe:', err);
+    error.value = err.message || 'Failed to modify recipe';
+  }
+};
 
 onMounted(async () => {
   try {
@@ -192,6 +220,14 @@ onMounted(async () => {
     border-radius: 8px;
     margin: 2rem auto;
     max-width: 800px;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
   }
 
   @keyframes spin {
