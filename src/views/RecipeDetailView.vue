@@ -1,238 +1,187 @@
 <template>
-  <div class="recipe-detail">
-    <div class="recipe-detail__container" v-if="recipe">
-      <h1>{{ recipe.name }}</h1>
-      <p class="recipe-detail__description">{{ recipe.description }}</p>
-      
-      <div class="recipe-detail__meta">
-        <div class="meta-item">
-          <span class="label">Prep Time:</span>
-          <span class="value">{{ recipe.prep_time }}</span>
+  <div class="detail-bg">
+    <div class="detail-card">
+      <v-btn class="back-arrow" icon @click="goBack">
+        <v-icon>mdi-arrow-left</v-icon>
+      </v-btn>
+      <img :src="recipe.image" :alt="recipe.name" class="detail-image" />
+      <div class="detail-title">{{ recipe.name }}</div>
+      <div class="detail-meta">
+        <span>{{ recipe.time }}</span>
+        <span>•</span>
+        <span>{{ recipe.kcal }} kcal</span>
+        <span>•</span>
+        <span>{{ recipe.type }}</span>
+      </div>
+      <div class="detail-controls">
+        <div class="servings-group">
+          <div class="label">Servings</div>
+          <div class="servings-input">
+            <v-btn icon @click="decrementServings">-</v-btn>
+            <span class="servings-value">{{ servings }}</span>
+            <v-btn icon @click="incrementServings">+</v-btn>
+          </div>
         </div>
-        <div class="meta-item">
-          <span class="label">Cook Time:</span>
-          <span class="value">{{ recipe.cook_time }}</span>
-        </div>
-        <div class="meta-item">
-          <span class="label">Servings:</span>
-          <span class="value">{{ recipe.servings }}</span>
-        </div>
-        <div class="meta-item">
-          <span class="label">Difficulty:</span>
-          <span class="value">{{ recipe.difficulty }}</span>
+        <div class="unit-group">
+          <div class="label">Unit</div>
+          <div class="unit-toggle">
+            <v-btn :variant="unit === 'US' ? 'flat' : 'outlined'" @click="unit = 'US'">US</v-btn>
+            <v-btn :variant="unit === 'Metric' ? 'flat' : 'outlined'" @click="unit = 'Metric'">Metric</v-btn>
+          </div>
         </div>
       </div>
-
-      <div class="recipe-detail__section">
-        <h2>Ingredients</h2>
-        <ul class="ingredients-list">
-          <li v-for="(ingredient, index) in recipe.ingredients" :key="index">
-            {{ ingredient }}
-          </li>
-        </ul>
-      </div>
-
-      <div class="recipe-detail__section">
-        <h2>Instructions</h2>
-        <ol class="instructions-list">
-          <li v-for="(instruction, index) in recipe.instructions" :key="index">
-            {{ instruction }}
-          </li>
-        </ol>
-      </div>
-
-      <div class="recipe-detail__actions">
-        <button @click="handleModify" class="btn btn-primary">
-          Modify Recipe
-        </button>
-      </div>
-    </div>
-    <div v-else-if="loading" class="loading-state">
-      <div class="loading-spinner"></div>
-      <p>Loading recipe...</p>
-    </div>
-    <div v-else class="error-message">
-      {{ error || 'Recipe not found' }}
+      <v-btn class="modify-btn" @click="goToEdit">Modify</v-btn>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { recipeService, llmService } from '@/services/api';
+import { ref, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
-const route = useRoute();
-const router = useRouter();
-const recipe = ref<any>(null);
-const loading = ref(true);
-const error = ref<string | null>(null);
+const route = useRoute()
+const router = useRouter()
+const servings = ref(4)
+const unit = ref('US')
 
-const handleModify = async () => {
-  if (!recipe.value) return;
-  
-  try {
-    const { recipe: modifiedRecipe, draft_id } = await llmService.modifyRecipe(
-      `Modify this recipe: ${recipe.value.name}`,
-      recipe.value.id
-    );
-    router.push({ 
-      name: 'RecipeCreate',
-      query: { 
-        draft_id,
-        mode: 'modify'
-      }
-    });
-  } catch (err: any) {
-    console.error('Failed to modify recipe:', err);
-    error.value = err.message || 'Failed to modify recipe';
-  }
-};
+function decrementServings() {
+  if (servings.value > 1) servings.value--
+}
+function incrementServings() {
+  servings.value++
+}
 
-onMounted(async () => {
-  try {
-    const recipeId = route.params.id as string;
-    recipe.value = await recipeService.getRecipe(recipeId);
-  } catch (err: any) {
-    console.error('Failed to load recipe:', err);
-    error.value = err.message || 'Failed to load recipe';
-  } finally {
-    loading.value = false;
-  }
-});
+function goBack() {
+  router.push('/recipes')
+}
+
+function goToEdit() {
+  router.push({ name: 'recipe-edit', params: { id: route.params.id } })
+}
+
+const allRecipes = [
+  { name: 'Chocolate Chip Cookies', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80', time: '30 min', kcal: 250, type: 'Dessert' },
+  // ...add more as needed
+]
+
+const recipe = computed(() => {
+  const name = route.params.name?.toString().replace(/-/g, ' ')
+  return allRecipes.find(r => r.name.toLowerCase() === name?.toLowerCase()) || allRecipes[0]
+})
 </script>
 
-<style lang="scss" scoped>
-.recipe-detail {
+<style scoped>
+.detail-bg {
+  background: #23190f;
   min-height: 100vh;
-  padding: 2rem;
-  background-color: var(--background-color);
-
-  &__container {
-    max-width: 800px;
-    margin: 0 auto;
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  h1 {
-    color: var(--primary-color);
-    margin-bottom: 1rem;
-    font-size: 2rem;
-  }
-
-  &__description {
-    color: #666;
-    font-size: 1.1rem;
-    margin-bottom: 2rem;
-    line-height: 1.6;
-  }
-
-  &__meta {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-    padding: 1rem;
-    background-color: #f8fafc;
-    border-radius: 8px;
-
-    .meta-item {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-
-      .label {
-        font-size: 0.9rem;
-        color: #666;
-      }
-
-      .value {
-        font-weight: 500;
-        color: var(--text-color);
-      }
-    }
-  }
-
-  &__section {
-    margin-bottom: 2rem;
-
-    h2 {
-      color: var(--primary-color);
-      margin-bottom: 1rem;
-      font-size: 1.5rem;
-    }
-  }
-
-  .ingredients-list {
-    list-style: none;
-    padding: 0;
-
-    li {
-      padding: 0.5rem 0;
-      border-bottom: 1px solid #eee;
-      color: var(--text-color);
-
-      &:last-child {
-        border-bottom: none;
-      }
-    }
-  }
-
-  .instructions-list {
-    padding-left: 1.5rem;
-
-    li {
-      margin-bottom: 1rem;
-      line-height: 1.6;
-      color: var(--text-color);
-    }
-  }
-
-  .loading-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    padding: 2rem;
-
-    p {
-      color: #666;
-    }
-  }
-
-  .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid #f3f3f3;
-    border-top: 3px solid var(--primary-color);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  .error-message {
-    text-align: center;
-    color: #dc2626;
-    padding: 2rem;
-    background-color: #fee2e2;
-    border-radius: 8px;
-    margin: 2rem auto;
-    max-width: 800px;
-  }
-
-  &__actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid #eee;
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
+  width: 100vw;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 48px;
+}
+.detail-card {
+  background: #2d221a;
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 48px 32px 48px;
+  min-width: 600px;
+  max-width: 700px;
+  position: relative;
+}
+.detail-image {
+  width: 420px;
+  height: 260px;
+  object-fit: cover;
+  border-radius: 18px;
+  margin-bottom: 32px;
+}
+.detail-title {
+  font-family: 'Merriweather', serif;
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #f5e6c8;
+  text-align: center;
+  margin-bottom: 18px;
+}
+.detail-meta {
+  color: #e0c9a6;
+  font-size: 1.2rem;
+  margin-bottom: 36px;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: center;
+}
+.detail-controls {
+  display: flex;
+  flex-direction: row;
+  gap: 64px;
+  margin-bottom: 36px;
+  width: 100%;
+  justify-content: center;
+}
+.label {
+  color: #f5e6c8;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  text-align: center;
+}
+.servings-group, .unit-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.servings-input {
+  display: flex;
+  align-items: center;
+  background: #3a2a1a;
+  border-radius: 10px;
+  padding: 4px 18px;
+  gap: 18px;
+}
+.servings-value {
+  color: #f5e6c8;
+  font-size: 1.3rem;
+  font-family: 'Merriweather', serif;
+  min-width: 32px;
+  text-align: center;
+}
+.unit-toggle {
+  display: flex;
+  gap: 8px;
+  background: #3a2a1a;
+  border-radius: 10px;
+  padding: 4px 12px;
+}
+.modify-btn {
+  background: #a86c3a;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.2rem;
+  border-radius: 12px;
+  margin-top: 18px;
+  padding: 10px 48px;
+}
+.back-arrow {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  color: #e0c9a6;
+  background: #3a2a1a;
+  border-radius: 50%;
+  box-shadow: none;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  transition: background 0.18s;
+}
+.back-arrow:hover, .back-arrow:focus {
+  background: #4a3622;
 }
 </style> 

@@ -1,231 +1,56 @@
-import axios, { type InternalAxiosRequestConfig, type AxiosResponse, type AxiosError } from 'axios';
+import axios from 'axios'
+import type { AxiosInstance, AxiosError } from 'axios'
+import { useAuthStore } from '@/stores/auth.store'
+import { useNotificationStore } from '@/stores/notification.store'
 
-const BACKEND_URL = 'http://localhost:8080';
-
-const api = axios.create({
-  baseURL: `${BACKEND_URL}/api/v1`,
-  headers: {
-    'Accept': '*/*',
-    'Content-Type': 'application/json',
-  }
-});
-
-// Function to update the token in localStorage
-export const updateAuthToken = (token: string | null) => {
-  if (token) {
-    localStorage.setItem('token', token);
-  } else {
-    localStorage.removeItem('token');
-  }
-};
-
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers = config.headers || {};
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-}, (error) => {
-  return Promise.reject(error);
-});
-
-api.interceptors.response.use(
-  (response: AxiosResponse) => {
-    return response;
-  },
-  (error: AxiosError) => {
-    // Only redirect on 401 if it's not a login attempt
-    if (error.response?.status === 401 && !error.config?.url?.includes('/auth/login')) {
-      updateAuthToken(null);
-      window.location.href = '/login';
-      return Promise.reject(new Error('Session expired. Please log in again.'));
-    }
-
-    if (error.code === 'ERR_NETWORK') {
-      return Promise.reject(new Error('Unable to connect to the server. Please check if the backend server is running.'));
-    }
-
-    if (error.response?.status === 0) {
-      return Promise.reject(new Error('Unable to connect to the server. Please check if the backend server is running.'));
-    }
-
-    if (error.response?.data && typeof error.response.data === 'object' && 'error' in error.response.data) {
-      return Promise.reject(new Error((error.response.data as any).error));
-    }
-
-    return Promise.reject(error);
-  }
-);
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface RegisterData {
-  name: string;
-  email: string;
-  password: string;
-  username: string;
-  dietary_preferences: string[];
-  allergies: string[];
-}
-
-export interface AuthResponse {
-  token: string;
-}
-
-export interface UserProfile {
-  id: string;
-  user_id: string;
-  username: string;
-  bio: string;
-  profile_picture_url: string;
-  privacy_level: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Recipe {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  ingredients: string[];
-  instructions: string[];
-  prep_time: number;
-  cook_time: number;
-  servings: number;
-  difficulty: string;
-  calories?: number;
-  protein?: number;
-  carbs?: number;
-  fat?: number;
-  user_id: string;
-  created_at: string;
-  updated_at: string;
-  tags?: string[];
-}
-
-export const authService = {
-  async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>('/auth/login', credentials);
-    return response.data;
-  },
-
-  async register(data: RegisterData): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>('/auth/register', data);
-    return response.data;
-  },
-
-  isAuthenticated(): boolean {
-    return !!localStorage.getItem('token');
-  }
-};
-
-export const profileService = {
-  async getProfile(): Promise<UserProfile> {
-    const response = await api.get<UserProfile>('/profile');
-    return response.data;
-  },
-
-  async updateProfile(updates: Partial<UserProfile>): Promise<void> {
-    await api.put('/profile', updates);
-  },
-
-  async logout(): Promise<void> {
-    await api.post('/profile/logout');
-  }
-};
-
-export const recipeService = {
-  async listRecipes(): Promise<Recipe[]> {
-    const response = await api.get<Recipe[]>('/recipes');
-    return response.data;
-  },
-
-  async getRecipe(id: string): Promise<Recipe> {
-    const response = await api.get<Recipe>(`/recipes/${id}`);
-    return response.data;
-  },
-
-  async createRecipe(recipe: Omit<Recipe, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<Recipe> {
-    const response = await api.post<Recipe>('/recipes', recipe);
-    return response.data;
-  },
-
-  async updateRecipe(id: string, recipe: Partial<Recipe>): Promise<Recipe> {
-    const response = await api.put<Recipe>(`/recipes/${id}`, recipe);
-    return response.data;
-  },
-
-  async deleteRecipe(id: string): Promise<void> {
-    await api.delete(`/recipes/${id}`);
-  },
-
-  async searchRecipes(query: string, filters?: {
-    category?: string;
-    dietary?: string[];
-    exclude?: string[];
-  }): Promise<{ recipes: Recipe[] }> {
-    const params: Record<string, string> = { q: query }
+class ApiService {
+  private instance: AxiosInstance
+  
+  constructor() {
+    this.instance = axios.create({
+      baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1',
+      timeout: 30000,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
     
-    if (filters?.category) {
-      params.category = filters.category
-    }
-    
-    if (filters?.dietary?.length) {
-      params.dietary = filters.dietary.join(',')
-    }
-    
-    if (filters?.exclude?.length) {
-      params.exclude = filters.exclude.join(',')
-    }
-
-    const response = await api.get<{ recipes: Recipe[] }>('/recipes', { params })
-    return response.data
-  },
-
-  async generateRecipe(query: string): Promise<Recipe> {
-    const response = await api.post<Recipe>('/llm/query', { 
-      query: query,
-      intent: 'generate'
-    });
-    return response.data;
-  },
-
-  async saveRecipe(recipe: any): Promise<any> {
-    const response = await api.post('/recipes', recipe);
-    return response.data;
-  },
-
-  async favoriteRecipe(id: string): Promise<void> {
-    await api.post(`/recipes/${id}/favorite`);
-  },
-
-  async unfavoriteRecipe(id: string): Promise<void> {
-    await api.delete(`/recipes/${id}/favorite`);
+    this.setupInterceptors()
   }
-};
-
-export const llmService = {
-  async generateRecipe(query: string): Promise<{ recipe: Recipe; draft_id: string }> {
-    const response = await api.post<{ recipe: Recipe; draft_id: string }>('/llm/query', {
-      query,
-      intent: 'generate'
-    });
-    return response.data;
-  },
-
-  async modifyRecipe(query: string, draftId: string): Promise<{ recipe: Recipe; draft_id: string }> {
-    const response = await api.post<{ recipe: Recipe; draft_id: string }>('/llm/query', {
-      query,
-      intent: 'modify',
-      draft_id: draftId
-    });
-    return response.data;
+  
+  private setupInterceptors(): void {
+    // Request interceptor
+    this.instance.interceptors.request.use(
+      (config) => {
+        const authStore = useAuthStore()
+        if (authStore.token) {
+          config.headers.Authorization = `Bearer ${authStore.token}`
+        }
+        return config
+      },
+      (error) => Promise.reject(error)
+    )
+    
+    // Response interceptor
+    this.instance.interceptors.response.use(
+      (response) => response,
+      async (error: AxiosError) => {
+        const authStore = useAuthStore()
+        const notificationStore = useNotificationStore()
+        
+        if (error.response?.status === 401) {
+          authStore.logout()
+          notificationStore.error('Session expired. Please login again.')
+        }
+        
+        return Promise.reject(error)
+      }
+    )
   }
-};
+  
+  get api(): AxiosInstance {
+    return this.instance
+  }
+}
 
-export default api;
+export default new ApiService().api 

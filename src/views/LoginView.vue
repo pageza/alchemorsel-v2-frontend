@@ -1,178 +1,99 @@
 <template>
-  <div class="login">
-    <div class="login__container">
-      <h1>Sign In</h1>
-      <form class="login__form" @submit.prevent="handleSubmit">
-        <div v-if="error" class="alert alert-danger">
-          {{ error }}
-        </div>
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input
-            type="email"
-            id="email"
-            v-model="email"
-            required
-            :disabled="loading"
-          />
-        </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            v-model="password"
-            required
-            :disabled="loading"
-          />
-        </div>
-        <button type="submit" class="btn btn-primary" :disabled="loading">
-          {{ loading ? 'Signing in...' : 'Sign In' }}
-        </button>
+  <div class="login-bg">
+    <div class="login-header">Sign In</div>
+    <div class="login-card">
+      <form @submit.prevent="onLogin">
+        <v-text-field v-model="email" label="Email Address" class="login-input" variant="outlined" hide-details />
+        <v-text-field v-model="password" label="Password" class="login-input" variant="outlined" type="password" hide-details />
+        <v-btn class="login-btn" type="submit">Sign In</v-btn>
       </form>
-      <p class="login__register">
-        Don't have an account?
-        <router-link to="/register">Register here</router-link>
-      </p>
+      <div v-if="error" class="login-error">{{ error }}</div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { useRouter } from "vue-router";
-import { useAuthStore } from '@/stores/auth';
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth.store'
 
-const router = useRouter();
-const email = ref("");
-const password = ref("");
-const loading = ref(false);
-const error = ref("");
-const auth = useAuthStore();
+const router = useRouter()
+const authStore = useAuthStore()
 
-const handleSubmit = async () => {
+const email = ref('')
+const password = ref('')
+const error = ref('')
+
+async function onLogin() {
+  error.value = ''
   try {
-    loading.value = true;
-    error.value = "";
-    await auth.login({
-      email: email.value,
-      password: password.value,
-    });
-    router.push("/recipes");
-  } catch (err: any) {
-    error.value = err.message || "Failed to sign in. Please try again.";
-    loading.value = false;
-  }
-};
-</script>
-
-<style lang="scss" scoped>
-.login {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  background-color: var(--background-color);
-
-  &__container {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
-  }
-
-  h1 {
-    text-align: center;
-    color: var(--primary-color);
-    margin-bottom: 2rem;
-  }
-
-  &__form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-
-    label {
-      font-weight: 500;
-      color: var(--text-color);
-    }
-
-    input {
-      padding: 0.75rem;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 1rem;
-
-      &:focus {
-        outline: none;
-        border-color: var(--primary-color);
-      }
-
-      &:disabled {
-        background-color: #f5f5f5;
-        cursor: not-allowed;
-      }
-    }
-  }
-
-  &__register {
-    text-align: center;
-    margin-top: 1.5rem;
-    color: var(--text-color);
-
-    a {
-      color: var(--primary-color);
-      text-decoration: none;
-      font-weight: 500;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
-
-  .alert {
-    padding: 0.75rem;
-    border-radius: 4px;
-    margin-bottom: 1rem;
-
-    &-danger {
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-  }
-
-  .btn {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.2s;
-
-    &:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-
-    &-primary {
-      background-color: var(--primary-color);
-      color: white;
-
-      &:hover:not(:disabled) {
-        background-color: var(--primary-color-dark);
-      }
-    }
+    await authStore.login({ email: email.value, password: password.value })
+    router.push('/recipes')
+  } catch (e) {
+    error.value = authStore.error || 'Login failed.'
   }
 }
-</style>   
+</script>
+
+<style scoped>
+.login-bg {
+  background: #2d221a;
+  min-height: 100vh;
+  width: 100vw;
+  padding: 48px 0 0 0;
+}
+.login-header {
+  font-family: 'Merriweather', serif;
+  font-size: 2.6rem;
+  color: #f5e6c8;
+  text-align: center;
+  margin-bottom: 38px;
+  margin-top: 32px;
+}
+.login-card {
+  background: #3a2a1a;
+  border-radius: 22px;
+  box-shadow: 0 2px 18px rgba(0,0,0,0.18);
+  padding: 48px 38px 38px 38px;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.login-input :deep(.v-field) {
+  background: #2d221a;
+  color: #f5e6c8;
+  border-radius: 10px;
+}
+.login-input :deep(.v-label) {
+  color: #e0c9a6 !important;
+}
+.login-input :deep(.v-input__control) {
+  color: #f5e6c8;
+}
+.login-btn {
+  background: #a86c3a;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.18rem;
+  border-radius: 10px;
+  box-shadow: none;
+  margin-top: 18px;
+  padding: 0 0;
+  height: 54px;
+  width: 100%;
+}
+.login-error {
+  color: #ff6b6b;
+  font-size: 1.1rem;
+  margin-top: 12px;
+  text-align: center;
+}
+</style> 

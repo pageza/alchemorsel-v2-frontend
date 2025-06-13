@@ -1,76 +1,30 @@
-import { createRouter, createWebHistory, type RouteLocationNormalized, type NavigationGuardNext } from 'vue-router'
-import type { RouteRecordRaw } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import UserProfileView from '../views/UserProfileView.vue'
-import LoginView from '../views/LoginView.vue'
-import RegisterView from '../views/RegisterView.vue'
-import RecipeView from '../views/RecipeView.vue'
-import RecipeCreateView from '../views/RecipeCreateView.vue'
-import RecipeDetailView from '../views/RecipeDetailView.vue'
-
-const routes: RouteRecordRaw[] = [
-  {
-    path: '/',
-    name: 'home',
-    component: HomeView
-  },
-  {
-    path: '/profile',
-    name: 'profile',
-    component: UserProfileView,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/login',
-    name: 'Login',
-    component: LoginView
-  },
-  {
-    path: '/register',
-    name: 'Register',
-    component: RegisterView
-  },
-  {
-    path: '/recipes',
-    name: 'recipes',
-    component: RecipeView,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/recipes/create',
-    name: 'recipe-create',
-    component: RecipeCreateView,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/recipes/:id',
-    name: 'RecipeDetail',
-    component: RecipeDetailView,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/about',
-    name: 'about',
-    component: () => import('../views/AboutView.vue')
-  }
-]
+import { createRouter, createWebHistory } from 'vue-router'
+import DefaultLayout from '../layouts/DefaultLayout.vue'
+import AuthLayout from '../layouts/AuthLayout.vue'
 
 const router = createRouter({
-  history: createWebHistory(),
-  routes
-})
-
-router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
-  const token = localStorage.getItem('token')
-  if (to.meta.requiresAuth && !token) {
-    if (from.path !== '/login') {
-      next('/login')
-    } else {
-      next(false)
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: [
+    {
+      path: '/',
+      component: DefaultLayout,
+      children: [
+        { path: '', name: 'home', component: () => import('../views/LandingView.vue') },
+        { path: 'recipes', name: 'recipes', component: () => import('../views/RecipeListView.vue') },
+        { path: 'recipes/:id', name: 'recipe-detail', component: () => import('../views/RecipeDetailView.vue') },
+        { path: 'recipes/:id/edit', name: 'recipe-edit', component: () => import('../views/RecipeCreateView.vue') },
+        { path: 'profile/edit', name: 'profile-edit', component: () => import('../views/EditProfileView.vue') }
+      ]
+    },
+    {
+      path: '/',
+      component: AuthLayout,
+      children: [
+        { path: 'login', name: 'login', component: () => import('../views/LoginView.vue') },
+        { path: 'register', name: 'register', component: () => import('../views/RegisterView.vue') }
+      ]
     }
-  } else {
-    next()
-  }
+  ]
 })
 
-export default router  
+export default router

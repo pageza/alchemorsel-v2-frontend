@@ -1,313 +1,161 @@
 <template>
-  <div class="recipe-create">
-    <h1>Create Recipe</h1>
-    <form @submit.prevent="handleSubmit" class="recipe-form">
-      <div class="form-group">
-        <label for="query">What would you like to cook?</label>
-        <textarea
-          id="query"
-          v-model="query"
-          placeholder="Describe the recipe you want to create..."
-          required
-        ></textarea>
-      </div>
-      <button type="submit" :disabled="loading">
-        {{ loading ? 'Generating...' : 'Generate Recipe' }}
-      </button>
-    </form>
-
-    <!-- Recipe Display -->
-    <div v-if="recipe" class="recipe-display">
-      <h2>{{ recipe.name }}</h2>
-      <p class="description">{{ recipe.description }}</p>
-      
-      <div class="recipe-meta">
-        <span>Prep Time: {{ recipe.prep_time }}</span>
-        <span>Cook Time: {{ recipe.cook_time }}</span>
-        <span>Servings: {{ recipe.servings }}</span>
-        <span>Difficulty: {{ recipe.difficulty }}</span>
-      </div>
-
-      <div class="recipe-macros">
-        <div class="macro">
-          <span class="value">{{ recipe.calories }}</span>
-          <span class="label">Calories</span>
-        </div>
-        <div class="macro">
-          <span class="value">{{ recipe.protein }}g</span>
-          <span class="label">Protein</span>
-        </div>
-        <div class="macro">
-          <span class="value">{{ recipe.carbs }}g</span>
-          <span class="label">Carbs</span>
-        </div>
-        <div class="macro">
-          <span class="value">{{ recipe.fat }}g</span>
-          <span class="label">Fat</span>
+  <div class="create-bg">
+    <div class="create-header">Create Recipe</div>
+    <div class="create-content">
+      <div class="input-card">
+        <div class="input-label">Describe the recipe you'd like to create:</div>
+        <textarea v-model="description" class="input-textarea" rows="7" />
+        <div class="input-actions">
+          <v-btn class="adjust-btn">Adjust</v-btn>
+          <v-btn class="save-btn">Save</v-btn>
         </div>
       </div>
-
-      <div class="recipe-section">
-        <h3>Ingredients</h3>
-        <ul>
-          <li v-for="(ingredient, index) in recipe.ingredients" :key="index">
-            {{ ingredient }}
-          </li>
+      <div class="preview-card">
+        <div class="preview-label">Preview</div>
+        <div class="preview-title">{{ preview.title }}</div>
+        <div class="preview-section">Ingredients</div>
+        <ul class="preview-list">
+          <li v-for="item in preview.ingredients" :key="item">{{ item }}</li>
         </ul>
-      </div>
-
-      <div class="recipe-section">
-        <h3>Instructions</h3>
-        <ol>
-          <li v-for="(instruction, index) in recipe.instructions" :key="index">
-            {{ instruction }}
-          </li>
+        <div class="preview-section">Instructions</div>
+        <ol class="preview-list">
+          <li v-for="step in preview.instructions" :key="step">{{ step }}</li>
         </ol>
-      </div>
-
-      <div class="recipe-actions">
-        <button @click="openModifyModal" class="modify-btn">Modify Recipe</button>
-        <button @click="saveRecipe" class="save-btn" :disabled="saving">
-          {{ saving ? 'Saving...' : 'Save Recipe' }}
-        </button>
-      </div>
-    </div>
-
-    <!-- Modify Recipe Modal -->
-    <div v-if="showModifyModal" class="modal">
-      <div class="modal-content">
-        <h2>Modify Recipe</h2>
-        <p>Describe how you'd like to modify the recipe:</p>
-        <textarea
-          v-model="modifyQuery"
-          placeholder="e.g., Make it spicier, add more protein, reduce cooking time..."
-          rows="4"
-        ></textarea>
-        <div class="modal-actions">
-          <button @click="handleModify" :disabled="modifying">
-            {{ modifying ? 'Modifying...' : 'Apply Changes' }}
-          </button>
-          <button @click="closeModifyModal" class="cancel-btn">Cancel</button>
-        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { recipeService, llmService } from "@/services/api";
-import { useAuthStore } from '@/stores/auth';
+import { ref, computed } from 'vue'
 
-const router = useRouter()
-const authStore = useAuthStore();
-const query = ref('')
-const recipe = ref(null)
-const loading = ref(false)
-const saving = ref(false)
-const showModifyModal = ref(false)
-const modifyQuery = ref('')
-const modifying = ref(false)
-const draftId = ref(null)
+const description = ref('A vegetarian pasta dish featuring seasonal vegetables')
 
-const handleSubmit = async () => {
-  loading.value = true
-  try {
-    const response = await llmService.generateRecipe(query.value)
-    recipe.value = response.recipe
-    draftId.value = response.draft_id
-  } catch (error) {
-    console.error('Error generating recipe:', error)
-    if (error instanceof Error) {
-      alert(error.message)
-    } else {
-      alert('Failed to generate recipe. Please try again.')
+const preview = computed(() => {
+  // Simulate preview generation from description
+  // In real app, this would call an API or use a smarter parser
+  if (!description.value.trim()) {
+    return {
+      title: 'Recipe Preview',
+      ingredients: [],
+      instructions: []
     }
-  } finally {
-    loading.value = false
   }
-}
-
-const openModifyModal = () => {
-  showModifyModal.value = true
-  modifyQuery.value = ''
-}
-
-const closeModifyModal = () => {
-  showModifyModal.value = false
-  modifyQuery.value = ''
-}
-
-const handleModify = async () => {
-  if (!modifyQuery.value.trim()) {
-    alert('Please describe how you want to modify the recipe.')
-    return
+  return {
+    title: 'Vegetable Pasta',
+    ingredients: [
+      '8 oz pasta (es, penne or fusilli)',
+      '2 cups chopped seasonal vegetables (e.g., bell pepper, zucchini, cherry tomatoes)',
+      '2 tbsp olive oil',
+      '2 cloves garlic, minced',
+      'Salt and pepper',
+      '¼ cup grated Parmesan cheese'
+    ],
+    instructions: [
+      'Cook pasta according to package instructions.',
+      'Sauté garlic and vegetables. Season and combine with pasta.',
+      'Serve with grated Parmesan cheese.'
+    ]
   }
-
-  modifying.value = true
-  try {
-    const response = await llmService.modifyRecipe(modifyQuery.value, draftId.value)
-    recipe.value = response.recipe
-    closeModifyModal()
-  } catch (error) {
-    console.error('Error modifying recipe:', error)
-    alert('Failed to modify recipe. Please try again.')
-  } finally {
-    modifying.value = false
-  }
-}
-
-const saveRecipe = async () => {
-  if (!recipe.value) return
-
-  saving.value = true
-  try {
-    await recipeService.createRecipe(recipe.value)
-    router.push('/recipes')
-  } catch (error) {
-    console.error('Error saving recipe:', error)
-    alert('Failed to save recipe. Please try again.')
-  } finally {
-    saving.value = false
-  }
-}
+})
 </script>
 
-<style lang="scss" scoped>
-.recipe-create {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
+<style scoped>
+.create-bg {
+  background: #2d221a;
+  min-height: 100vh;
+  width: 100vw;
+  padding: 48px 0 0 0;
 }
-
-.recipe-form {
-  margin-bottom: 2rem;
+.create-header {
+  font-family: 'Merriweather', serif;
+  font-size: 2.2rem;
+  color: #f5e6c8;
+  margin-left: 64px;
+  margin-bottom: 28px;
 }
-
-.form-group {
-  margin-bottom: 1rem;
-}
-
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
-}
-
-textarea {
-  width: 100%;
-  min-height: 100px;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-button {
-  background-color: #4CAF50;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-.recipe-display {
-  background-color: #f9f9f9;
-  padding: 2rem;
-  border-radius: 8px;
-  margin-top: 2rem;
-}
-
-.recipe-meta {
+.create-content {
   display: flex;
-  gap: 1rem;
-  margin: 1rem 0;
-  flex-wrap: wrap;
-}
-
-.recipe-macros {
-  display: flex;
-  gap: 2rem;
-  margin: 1rem 0;
-  padding: 1rem;
-  background-color: #fff;
-  border-radius: 4px;
-}
-
-.macro {
-  text-align: center;
-}
-
-.macro .value {
-  display: block;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #4CAF50;
-}
-
-.macro .label {
-  font-size: 0.875rem;
-  color: #666;
-}
-
-.recipe-section {
-  margin: 1.5rem 0;
-}
-
-.recipe-section h3 {
-  margin-bottom: 1rem;
-  color: #333;
-}
-
-.recipe-actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 2rem;
-}
-
-.modify-btn {
-  background-color: #2196F3;
-}
-
-.save-btn {
-  background-color: #4CAF50;
-}
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
+  flex-direction: row;
+  gap: 48px;
   justify-content: center;
 }
-
-.modal-content {
-  background-color: white;
-  padding: 2rem;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 600px;
-}
-
-.modal-actions {
+.input-card, .preview-card {
+  background: #3a2a1a;
+  border-radius: 18px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  padding: 32px 32px 28px 32px;
+  min-width: 340px;
+  max-width: 400px;
   display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
+  flex-direction: column;
+  align-items: flex-start;
 }
-
-.cancel-btn {
-  background-color: #f44336;
+.input-label, .preview-label {
+  color: #f5e6c8;
+  font-size: 1.18rem;
+  font-weight: 600;
+  margin-bottom: 16px;
 }
-</style>     
+.input-textarea {
+  width: 100%;
+  min-height: 120px;
+  background: #2d221a;
+  color: #f5e6c8;
+  border: 2px solid #a67c52;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  padding: 14px;
+  margin-bottom: 32px;
+  font-family: inherit;
+  resize: vertical;
+}
+.input-actions {
+  display: flex;
+  gap: 18px;
+  width: 100%;
+  justify-content: flex-start;
+}
+.adjust-btn {
+  background: #e6d3b3;
+  color: #3a2a1a;
+  font-weight: 600;
+  font-size: 1.08rem;
+  border-radius: 8px;
+  box-shadow: none;
+  padding: 0 28px;
+}
+.save-btn {
+  background: #d2691e;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.08rem;
+  border-radius: 8px;
+  box-shadow: none;
+  padding: 0 28px;
+}
+.preview-card {
+  min-width: 340px;
+  max-width: 400px;
+}
+.preview-title {
+  font-family: 'Merriweather', serif;
+  font-size: 1.5rem;
+  color: #f5e6c8;
+  margin-bottom: 18px;
+  margin-top: 8px;
+}
+.preview-section {
+  color: #e0c9a6;
+  font-size: 1.08rem;
+  font-weight: 600;
+  margin-top: 12px;
+  margin-bottom: 6px;
+}
+.preview-list {
+  color: #fffbe6;
+  font-size: 1.05rem;
+  margin-bottom: 10px;
+  padding-left: 20px;
+}
+</style> 
