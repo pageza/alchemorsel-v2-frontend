@@ -1,120 +1,150 @@
 <template>
-  <div class="recipes-bg">
-    <div class="featured-header">Featured Recipes</div>
-    <div class="featured-carousel">
-      <div class="carousel-row">
-        <RecipeCard v-for="recipe in featuredRecipes" :key="recipe.name" :image="recipe.image" :name="recipe.name" @click="goToRecipe(recipe)" />
-      </div>
-    </div>
-    <div class="search-row">
-      <v-text-field
-        v-model="search"
-        class="search-input"
-        placeholder="Search recipes..."
-        hide-details
-        variant="solo"
-        rounded
-        prepend-inner-icon="mdi-filter"
-        append-inner-icon="mdi-sort"
-      />
-      <v-btn class="search-btn">Search</v-btn>
-    </div>
-    <div class="recipes-grid">
-      <RecipeCard v-for="recipe in recipes" :key="recipe.name" :image="recipe.image" :name="recipe.name" @click="goToRecipe(recipe)" />
-    </div>
+  <div>
+    <!-- Header Section -->
+    <v-container class="py-8">
+      <v-row>
+        <v-col cols="12" class="d-flex align-center justify-space-between">
+          <div>
+            <h1 class="text-h3 font-weight-bold mb-2">Recipes</h1>
+            <p class="text-subtitle-1 text-medium-emphasis">Discover and explore our collection of recipes</p>
+          </div>
+          <v-btn
+            color="primary"
+            prepend-icon="mdi-plus"
+            to="/recipes/create"
+          >
+            Create Recipe
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-container>
+
+    <!-- Filters Section -->
+    <v-container class="py-4">
+      <v-row>
+        <v-col cols="12" md="4">
+          <v-text-field
+            v-model="search"
+            label="Search recipes"
+            prepend-inner-icon="mdi-magnify"
+            variant="outlined"
+            density="comfortable"
+            hide-details
+          ></v-text-field>
+        </v-col>
+        <v-col cols="12" md="4">
+          <v-select
+            v-model="category"
+            :items="categories"
+            label="Category"
+            variant="outlined"
+            density="comfortable"
+            hide-details
+          ></v-select>
+        </v-col>
+        <v-col cols="12" md="4">
+          <v-select
+            v-model="sortBy"
+            :items="sortOptions"
+            label="Sort by"
+            variant="outlined"
+            density="comfortable"
+            hide-details
+          ></v-select>
+        </v-col>
+      </v-row>
+    </v-container>
+
+    <!-- Recipe Grid -->
+    <v-container class="py-4">
+      <v-row>
+        <v-col
+          v-for="recipe in recipes"
+          :key="recipe.id"
+          cols="12"
+          sm="6"
+          md="4"
+          lg="3"
+        >
+          <v-card
+            :to="`/recipes/${recipe.id}`"
+            class="h-100"
+            elevation="2"
+            hover
+          >
+            <v-img
+              :src="recipe.imageUrl || recipe.image"
+              height="200"
+              cover
+              class="align-end"
+            >
+              <v-chip
+                class="ma-2"
+                color="primary"
+                size="small"
+              >
+                {{ recipe.category }}
+              </v-chip>
+            </v-img>
+
+            <v-card-title class="text-h6">
+              {{ recipe.name }}
+            </v-card-title>
+
+            <v-card-text>
+              <p class="text-body-2 text-medium-emphasis">
+                {{ recipe.description }}
+              </p>
+            </v-card-text>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn
+                variant="text"
+                color="primary"
+                :to="`/recipes/${recipe.id}`"
+              >
+                View Recipe
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import RecipeCard from '@/components/RecipeCard.vue'
+import { ref, onMounted } from 'vue'
+import { useRecipes } from '@/composables/useRecipes'
 
-const router = useRouter()
+const { recipes, fetchRecipes } = useRecipes()
 const search = ref('')
+const category = ref(null)
+const sortBy = ref('newest')
 
-const allRecipes = [
-  { name: 'Lasagna', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80' },
-  { name: 'Avocaado Toast', image: 'https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80' },
-  { name: 'Chickpea Salad', image: 'https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=crop&w=400&q=80' },
-  { name: 'Spaghetti Carbonara', image: 'https://images.unsplash.com/photo-1523987355523-c7b5b0723c6a?auto=format&fit=crop&w=400&q=80' },
-  { name: 'Margherita Pizza', image: 'https://images.unsplash.com/photo-1547592180-8717c3c36c5b?auto=format&fit=crop&w=400&q=80' },
-  { name: 'Caesar Salad', image: 'https://images.unsplash.com/photo-1464306076886-debca5e8a6b0?auto=format&fit=crop&w=400&q=80' },
-  { name: 'Pancakes', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80' },
-  { name: 'Caprese Salad', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80' },
-  { name: 'Beef Stroganoff', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80' },
-  { name: 'Vegetable Stir Fry', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80' },
+const categories = [
+  'All', 'Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Snacks', 'Drinks',
 ]
 
-function getRandomRecipes(count: number) {
-  const shuffled = [...allRecipes].sort(() => 0.5 - Math.random())
-  return shuffled.slice(0, count)
-}
+const sortOptions = [
+  { title: 'Newest', value: 'newest' },
+  { title: 'Most Popular', value: 'popular' },
+  { title: 'Highest Rated', value: 'rating' },
+  { title: 'A-Z', value: 'name' },
+]
 
-const featuredRecipes = getRandomRecipes(6)
-const recipes = allRecipes
-
-function slugify(name) {
-  return name.toLowerCase().replace(/\s+/g, '-')
-}
-
-function goToRecipe(recipe) {
-  router.push({ name: 'recipe-detail', params: { id: slugify(recipe.name) } })
-}
+onMounted(() => {
+  fetchRecipes()
+})
 </script>
 
 <style scoped>
-.recipes-bg {
-  background: #2d221a;
-  min-height: 100vh;
-  width: 100vw;
-  padding: 48px 0 0 0;
+.v-card {
+  transition: transform 0.2s ease-in-out;
 }
-.featured-header {
-  font-family: 'Merriweather', serif;
-  font-size: 2.2rem;
-  color: #f5e6c8;
-  margin-left: 48px;
-  margin-bottom: 18px;
-}
-.featured-carousel {
-  overflow-x: auto;
-  padding-left: 40px;
-  margin-bottom: 32px;
-}
-.carousel-row {
-  display: flex;
-  flex-direction: row;
-  gap: 18px;
-  min-width: 720px;
-}
-.search-row {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  margin: 0 48px 32px 48px;
-}
-.search-input {
-  background: #e6d3b3;
-  border-radius: 12px;
-  font-size: 1.1rem;
-  flex: 1;
-  min-width: 0;
-}
-.search-btn {
-  background: #a86c3a;
-  color: #fff;
-  font-weight: 600;
-  font-size: 1.1rem;
-  border-radius: 10px;
-  padding: 0 32px;
-  height: 48px;
-  box-shadow: none;
-}
-.recipes-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 32px;
-  margin: 0 48px 48px 48px;
+
+.v-card:hover {
+  transform: translateY(-4px);
 }
 </style> 

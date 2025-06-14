@@ -1,102 +1,162 @@
 <template>
-  <div class="landing-bg">
-    <div class="hero-card">
-      <div class="hero-content">
-        <div class="hero-headline">Discover<br />Culinary<br />Magic</div>
-        <div class="hero-subheadline">Your ultimate destination<br />for delicious recipes</div>
-        <div class="hero-actions">
-          <v-btn class="landing-btn" variant="outlined" color="#a86c3a" to="/login">Sign In</v-btn>
-          <v-btn class="landing-btn" color="#a86c3a" to="/register">Register</v-btn>
+  <div class="landing-root">
+    <!-- Hero Section -->
+    <el-row class="landing-hero" justify="center" align="middle">
+      <el-col :span="12" class="hero-left">
+        <h1 class="hero-title">Transform Your Cooking Experience</h1>
+        <p class="hero-subtitle">
+          Discover, create, and share your culinary masterpieces with Alchemorsel
+        </p>
+        <div class="hero-buttons">
+          <el-button type="primary" size="large" class="mr-4">Get Started</el-button>
+          <el-button type="primary" plain size="large">Browse Recipes</el-button>
         </div>
-      </div>
-      <div class="hero-image">
-        <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80" alt="Culinary Dish" />
-      </div>
-    </div>
+      </el-col>
+      <el-col :span="12" class="hero-right">
+        <!-- Placeholder for hero image/illustration -->
+        <div class="hero-image-placeholder">Image</div>
+      </el-col>
+    </el-row>
+
+    <!-- Features Section -->
+    <el-row class="landing-features" justify="center">
+      <el-col :span="24" class="text-center mb-8">
+        <h2 class="section-title">Why Choose Alchemorsel?</h2>
+        <p class="section-subtitle">Everything you need to elevate your cooking game</p>
+      </el-col>
+      <el-col :span="8" class="feature-col text-center">
+        <el-icon size="48" color="var(--el-color-primary)" class="mb-2">
+          <Document />
+        </el-icon>
+        <h3 class="feature-title">Curated Recipes</h3>
+        <p>Access a vast collection of carefully curated recipes from professional chefs and home cooks</p>
+      </el-col>
+      <el-col :span="8" class="feature-col text-center">
+        <el-icon size="48" color="var(--el-color-primary)" class="mb-2">
+          <UserFilled />
+        </el-icon>
+        <h3 class="feature-title">Community Driven</h3>
+        <p>Join a vibrant community of food enthusiasts and share your culinary journey</p>
+      </el-col>
+      <el-col :span="8" class="feature-col text-center">
+        <el-icon size="48" color="var(--el-color-primary)" class="mb-2">
+          <Light />
+        </el-icon>
+        <h3 class="feature-title">Smart Features</h3>
+        <p>Get personalized recommendations and smart cooking tips based on your preferences</p>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
-<script setup lang="ts">
-import { useRouter } from 'vue-router'
-const router = useRouter()
-
-function goToSignIn() {
-  router.push('/login')
-}
-function goToRegister() {
-  router.push('/register')
-}
+<script setup>
+import { Document, UserFilled, Light } from '@element-plus/icons-vue'
 </script>
 
 <style scoped>
-.landing-bg {
-  background: #2d221a;
+.landing-root {
+  background: #fff;
   min-height: 100vh;
-  width: 100vw;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding-top: 96px;
-}
-.hero-card {
-  background: #23190f;
-  border-radius: 24px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-  display: flex;
-  flex-direction: row;
-  padding: 48px 48px 32px 64px;
-  min-width: 900px;
-  max-width: 1200px;
-  min-height: 480px;
-  position: relative;
-}
-.hero-content {
+  padding-top: 32px;
+  padding-bottom: 64px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  z-index: 2;
+  align-items: center;
 }
-.hero-headline {
-  font-family: 'Merriweather', serif;
-  font-size: 3.5rem;
-  font-weight: 700;
-  color: #f5e6c8;
-  line-height: 1.1;
-  margin-bottom: 24px;
+
+.landing-hero {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto 64px auto;
 }
-.hero-subheadline {
-  font-size: 1.25rem;
-  color: #e0c9a6;
-  margin-bottom: 48px;
+
+.hero-left {
+  padding-left: 48px;
+  padding-right: 24px;
 }
-.hero-actions {
+
+.hero-right {
   display: flex;
-  gap: 20px;
-  position: absolute;
-  right: 48px;
-  bottom: 32px;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
 }
-.landing-btn {
-  background: #3a2a1a;
-  color: #f5e6c8;
-  border: 1.5px solid #a67c52;
-  font-weight: 500;
+
+.hero-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
 }
-.hero-image {
-  margin-left: 48px;
-  align-self: flex-end;
-  z-index: 1;
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
 }
-.hero-image img {
-  width: 340px;
-  height: 340px;
-  object-fit: cover;
-  border-radius: 50%;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
-  border: 6px solid #3a2a1a;
+
+.hero-buttons {
+  margin-bottom: 1rem;
 }
-@media (max-width: 1200px) {
-  .hero-card { min-width: 700px; }
-  .hero-image img { width: 260px; height: 260px; }
+
+.hero-image-placeholder {
+  width: 320px;
+  height: 320px;
+  background: #f2f2f2;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #bbb;
+}
+
+.landing-features {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.section-subtitle {
+  font-size: 1.1rem;
+  color: var(--el-text-color-secondary);
+}
+
+.feature-col {
+  padding: 32px 24px;
+}
+
+.feature-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin: 0.5rem 0;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.mb-8 {
+  margin-bottom: 2rem;
+}
+
+.mr-4 {
+  margin-right: 1rem;
 }
 </style> 
