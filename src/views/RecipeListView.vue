@@ -8,7 +8,9 @@
             <h1 class="text-h3 font-weight-bold mb-2">Recipes</h1>
             <p class="text-subtitle-1 text-medium-emphasis">Discover and explore our collection of recipes</p>
           </div>
+          <!-- Only show generate button when there are no recipes or no search results -->
           <v-btn
+            v-if="shouldShowGenerateButton"
             color="primary"
             prepend-icon="mdi-robot"
             to="/generate"
@@ -85,15 +87,26 @@
         <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-chef-hat</v-icon>
         <h2 class="text-h5 mb-2">No recipes found</h2>
         <p class="text-body-1 text-medium-emphasis mb-4">
-          Get started by creating your first recipe!
+          {{ search ? 'No recipes match your search. Try generating one with AI!' : 'Get started by creating your first recipe!' }}
         </p>
-        <v-btn
-          color="primary"
-          prepend-icon="mdi-plus"
-          to="/recipes/create"
-        >
-          Create Recipe
-        </v-btn>
+        <div class="d-flex justify-center gap-3">
+          <v-btn
+            color="primary"
+            prepend-icon="mdi-robot"
+            to="/generate"
+            data-testid="generate-recipe-empty-btn"
+          >
+            Generate Recipe with AI
+          </v-btn>
+          <v-btn
+            color="secondary"
+            prepend-icon="mdi-plus"
+            to="/recipes/create"
+            variant="outlined"
+          >
+            Create Recipe
+          </v-btn>
+        </div>
       </div>
 
       <!-- Recipe Grid -->
@@ -155,13 +168,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRecipes } from '@/composables/useRecipes'
 
 const { recipes, fetchRecipes, isLoading, error } = useRecipes()
 const search = ref('')
 const category = ref(null)
 const sortBy = ref('newest')
+
+// Show generate button only when there are no recipes found or no search results
+const shouldShowGenerateButton = computed(() => {
+  // Don't show during loading
+  if (isLoading.value) return false
+  
+  // Show if there are no recipes at all, or if search returns no results
+  return !recipes.value || recipes.value.length === 0
+})
 
 const categories = [
   'All', 'Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Snacks', 'Drinks',

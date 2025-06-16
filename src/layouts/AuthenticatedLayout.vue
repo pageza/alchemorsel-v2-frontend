@@ -47,6 +47,46 @@
     <main class="main-content">
       <router-view></router-view>
     </main>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3 class="footer-title">🧪 Alchemorsel</h3>
+          <p class="footer-description">AI-powered recipe generation tailored to your dietary preferences</p>
+        </div>
+        
+        <div class="footer-section">
+          <h4>My Account</h4>
+          <ul class="footer-links">
+            <li><a href="#" @click.prevent="$router.push('/dashboard')">Dashboard</a></li>
+            <li><a href="#" @click.prevent="$router.push('/favorites')">My Favorites</a></li>
+            <li><a href="#" @click.prevent="$router.push('/profile/edit')">Profile Settings</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-section">
+          <h4>Recipes</h4>
+          <ul class="footer-links">
+            <li><a href="#" @click.prevent="$router.push('/recipes')">Browse Recipes</a></li>
+            <li><a href="#" @click.prevent="$router.push('/generate')">Generate Recipe</a></li>
+            <li><a href="#" @click.prevent="$router.push('/recipes/create')">Create Recipe</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-section">
+          <h4>Support</h4>
+          <ul class="footer-links">
+            <li><a href="mailto:support@alchemorsel.com">Contact Us</a></li>
+            <li><a href="/privacy">Privacy Policy</a></li>
+            <li><a href="/terms">Terms of Service</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2025 Alchemorsel. All rights reserved.</p>
+      </div>
+    </footer>
   </div>
 </template>
 
@@ -203,6 +243,68 @@ const handleLogout = async () => {
   background: #f5f5f5;
 }
 
+.footer {
+  background: #2c3e50;
+  color: white;
+  padding: 40px 20px 20px;
+  margin-top: auto;
+}
+
+.footer-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+}
+
+.footer-section h3.footer-title {
+  color: #3498db;
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+}
+
+.footer-section h4 {
+  color: #ecf0f1;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+}
+
+.footer-description {
+  color: #bdc3c7;
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin-bottom: 8px;
+}
+
+.footer-links a {
+  color: #bdc3c7;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-links a:hover {
+  color: #3498db;
+}
+
+.footer-bottom {
+  max-width: 1400px;
+  margin: 30px auto 0;
+  padding-top: 20px;
+  border-top: 1px solid #34495e;
+  text-align: center;
+  color: #95a5a6;
+}
+
 @media (max-width: 768px) {
   .navbar {
     padding: 0 15px;
@@ -229,11 +331,29 @@ const handleLogout = async () => {
   .welcome-text {
     display: none;
   }
+  
+  .footer {
+    padding: 30px 15px 15px;
+  }
+  
+  .footer-content {
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
 }
 
 @media (max-width: 480px) {
   .nav-links {
     display: none;
+  }
+  
+  .footer-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  
+  .footer-section {
+    margin-bottom: 20px;
   }
 }
 </style>
