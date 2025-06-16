@@ -47,13 +47,8 @@
 
     <!-- Quick Actions -->
     <div class="quick-actions">
-      <el-button 
-        type="primary" 
-        size="large"
-        @click="$router.push('/generate')"
-      >
-        Generate New Recipe
-      </el-button>
+      <!-- Generate button hidden per TODO.md UI/UX improvement -->
+      <!-- Users can access recipe generation via navigation menu -->
     </div>
   </div>
 </template>
