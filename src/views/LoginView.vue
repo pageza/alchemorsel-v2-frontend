@@ -1,3 +1,20 @@
+<!--
+TODO: INTERMITTENT LOGIN CONNECTION ISSUE
+There appears to be an intermittent connection issue where the first login attempt fails with 
+ERR_CONNECTION_REFUSED but the second attempt succeeds. This suggests a potential race condition 
+or timing issue with:
+1. Docker container networking/startup timing
+2. Backend service readiness
+3. API service initialization in frontend
+4. CORS preflight request handling
+
+This needs investigation to identify the root cause and implement a proper fix, potentially:
+- Adding retry logic with exponential backoff
+- Implementing proper service health checks
+- Adding connection pooling or keep-alive
+- Investigating Docker networking timing issues
+-->
+
 <template>
   <div class="login-container">
     <el-card class="login-card">
@@ -13,6 +30,7 @@
         :model="formData"
         :rules="rules"
         @submit.prevent="handleSubmit"
+        data-testid="login-form"
       >
         <el-form-item prop="email">
           <el-input
@@ -20,6 +38,7 @@
             type="email"
             placeholder="Email"
             :prefix-icon="Message"
+            data-testid="email-input"
           />
         </el-form-item>
 
@@ -31,15 +50,17 @@
             :prefix-icon="Lock"
             :suffix-icon="showPassword ? View : Hide"
             @click:suffix-icon="showPassword = !showPassword"
+            data-testid="password-input"
           />
         </el-form-item>
 
         <div class="form-options">
-          <el-checkbox v-model="formData.rememberMe">Remember me</el-checkbox>
+          <el-checkbox v-model="formData.rememberMe" data-testid="remember-me">Remember me</el-checkbox>
           <el-button
             type="primary"
             link
             @click="handleForgotPassword"
+            data-testid="forgot-password"
           >
             Forgot Password?
           </el-button>
@@ -50,6 +71,7 @@
           native-type="submit"
           :loading="isLoading"
           class="submit-button"
+          data-testid="login-submit"
         >
           Sign In
         </el-button>
@@ -62,6 +84,7 @@
           <el-button
             class="social-button"
             @click="handleSocialLogin('google')"
+            data-testid="google-login"
           >
             <el-icon><ChromeFilled /></el-icon>
             Google
@@ -69,6 +92,7 @@
           <el-button
             class="social-button"
             @click="handleSocialLogin('github')"
+            data-testid="github-login"
           >
             <el-icon><Platform /></el-icon>
             GitHub
@@ -80,7 +104,8 @@
           <el-button
             type="primary"
             link
-            @click="$router.push('/auth/register')"
+            @click="$router.push('/register')"
+            data-testid="register-link"
           >
             Sign Up
           </el-button>
@@ -90,7 +115,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { Message, Lock, View, Hide, ChromeFilled, Platform } from '@element-plus/icons-vue'
@@ -122,18 +147,48 @@ const rules = {
 }
 
 const handleSubmit = async () => {
-  if (!form.value) return
+  console.log('handleSubmit called!')
+  console.log('Form data:', formData)
+  console.log('Form ref:', form.value)
+  console.trace('handleSubmit call stack')
+  
+  if (!form.value) {
+    console.log('No form ref, returning')
+    return
+  }
+  
+  // Check if form has actual data
+  if (!formData.email || !formData.password) {
+    console.log('Form data is empty, not submitting')
+    console.log('Email:', formData.email, 'Password:', formData.password ? '***' : 'empty')
+    return
+  }
+  
   try {
+    console.log('Validating form...')
     await form.value.validate()
+    console.log('Form validated, starting login...')
     isLoading.value = true
     await login({
       email: formData.email,
       password: formData.password,
     })
     success('Logged in successfully')
-    router.push('/recipes')
-  } catch (error) {
-    errorNotification((error as Error).message || 'Failed to login')
+    router.push('/dashboard')
+  } catch (error: any) {
+    console.error('Login error:', error)
+    
+    let errorMessage = 'Failed to login. Please try again.'
+    
+    if (error.code === 'ERR_NETWORK' || error.code === 'ERR_CONNECTION_REFUSED') {
+      errorMessage = 'Backend server is not running. Please start the backend service.'
+    } else if (error.response?.data?.message) {
+      errorMessage = error.response.data.message
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+    
+    errorNotification(errorMessage)
   } finally {
     isLoading.value = false
   }

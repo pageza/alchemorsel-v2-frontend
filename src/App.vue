@@ -1,7 +1,7 @@
 <template>
-  <el-container>
+  <div id="app">
     <router-view></router-view>
-  </el-container>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -9,14 +9,32 @@
 </script>
 
 <style>
-body, #app {
-  background: #2d221a !important;
-  min-height: 100vh;
-  width: 100vw;
+* {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
-/* Global styles can go here */
+body, #app {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+}
+
+#app {
+  width: 100vw;
+  min-height: 100vh;
+}
+
+/* Global styles */
+.el-container {
+  width: 100% !important;
+}
+
+.el-main {
+  width: 100% !important;
+  padding: 0 !important;
+}
 </style>
 

@@ -1,7 +1,43 @@
 <template>
   <div>
-    <!-- Recipe Header -->
-    <v-container class="py-8">
+    <!-- Loading State -->
+    <div v-if="isLoading" class="text-center py-8">
+      <v-progress-circular
+        indeterminate
+        color="primary"
+        size="64"
+      ></v-progress-circular>
+      <p class="text-h6 mt-4">Loading recipe...</p>
+    </div>
+
+    <!-- Error State -->
+    <v-alert
+      v-else-if="error"
+      type="error"
+      class="ma-4"
+    >
+      {{ error }}
+    </v-alert>
+
+    <!-- Recipe not found -->
+    <div v-else-if="!recipe" class="text-center py-8">
+      <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-chef-hat</v-icon>
+      <h2 class="text-h5 mb-2">Recipe not found</h2>
+      <p class="text-body-1 text-medium-emphasis mb-4">
+        The recipe you're looking for doesn't exist.
+      </p>
+      <v-btn
+        color="primary"
+        @click="$router.back()"
+      >
+        Go Back
+      </v-btn>
+    </div>
+
+    <!-- Recipe Content -->
+    <div v-else>
+      <!-- Recipe Header -->
+      <v-container class="py-8">
       <v-row>
         <v-col cols="12" md="8">
           <div class="d-flex align-center mb-4">
@@ -18,7 +54,7 @@
               color="secondary"
               variant="outlined"
             >
-              {{ recipe.cookingTime }} mins
+              30 mins
             </v-chip>
           </div>
           <h1 class="text-h3 font-weight-bold mb-4">{{ recipe.name }}</h1>
@@ -27,23 +63,25 @@
           </p>
           <div class="d-flex align-center mb-6">
             <v-avatar
-              :image="recipe.author.avatar"
+              image=""
               size="40"
               class="mr-3"
             ></v-avatar>
             <div>
               <div class="text-subtitle-1 font-weight-medium">
-                {{ recipe.author.name }}
+                Recipe Author
               </div>
               <div class="text-caption text-medium-emphasis">
-                Posted {{ recipe.createdAt }}
+                Posted {{ formatDate(recipe.created_at) }}
               </div>
             </div>
             <v-spacer></v-spacer>
             <v-btn
-              icon="mdi-heart-outline"
+              :icon="recipe.isFavorite ? 'mdi-heart' : 'mdi-heart-outline'"
+              :color="recipe.isFavorite ? 'red' : 'default'"
               variant="text"
               class="mr-2"
+              @click="handleToggleFavorite"
             ></v-btn>
             <v-btn
               icon="mdi-share-variant"
@@ -53,7 +91,7 @@
         </v-col>
         <v-col cols="12" md="4">
           <v-img
-            :src="recipe.imageUrl"
+            :src="recipe.image_url"
             height="400"
             cover
             class="rounded-lg"
@@ -76,8 +114,7 @@
                 <v-list-item
                   v-for="(ingredient, index) in recipe.ingredients"
                   :key="index"
-                  :title="ingredient.name"
-                  :subtitle="ingredient.amount"
+                  :title="ingredient"
                 >
                   <template v-slot:prepend>
                     <v-checkbox-btn></v-checkbox-btn>
@@ -94,10 +131,20 @@
             <v-card-text>
               <v-list>
                 <v-list-item
-                  v-for="(nutrition, key) in recipe.nutrition"
-                  :key="key"
-                  :title="key"
-                  :subtitle="nutrition"
+                  title="Calories"
+                  :subtitle="`${recipe.calories} kcal`"
+                ></v-list-item>
+                <v-list-item
+                  title="Protein"
+                  :subtitle="`${recipe.protein}g`"
+                ></v-list-item>
+                <v-list-item
+                  title="Carbs"
+                  :subtitle="`${recipe.carbs}g`"
+                ></v-list-item>
+                <v-list-item
+                  title="Fat"
+                  :subtitle="`${recipe.fat}g`"
                 ></v-list-item>
               </v-list>
             </v-card-text>
@@ -139,7 +186,7 @@
             <v-card-text>
               <v-list>
                 <v-list-item
-                  v-for="comment in recipe.comments"
+                  v-for="comment in []"
                   :key="comment.id"
                 >
                   <template v-slot:prepend>
@@ -161,54 +208,52 @@
         </v-col>
       </v-row>
     </v-container>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRecipes } from '@/composables/useRecipes'
+import type { Recipe } from '@/types/recipe.types'
 
 const route = useRoute()
 const router = useRouter()
-const { fetchRecipeById, getRecipeById } = useRecipes()
+const { fetchRecipeById, toggleFavorite, isLoading, error } = useRecipes()
+
+const recipe = ref<Recipe | null>(null)
 
 // Load recipe by ID
-onMounted(() => {
-  fetchRecipeById(route.params.id as string)
+onMounted(async () => {
+  const id = route.params.id as string
+  const fetchedRecipe = await fetchRecipeById(id)
+  recipe.value = fetchedRecipe
 })
 
-const recipe = getRecipeById(route.params.id as string)
-    'Tear the mozzarella into pieces and distribute them over the sauce.',
-    'Bake for 12-15 minutes until the crust is golden and the cheese is bubbly.',
-    'Remove from oven, top with fresh basil leaves, and drizzle with olive oil.',
-    'Slice and serve immediately.'
-  ],
-  nutrition: {
-    'Calories': '266 kcal',
-    'Protein': '11g',
-    'Carbohydrates': '33g',
-    'Fat': '10g',
-    'Fiber': '2g'
-  },
-  comments: [
-    {
-      id: 1,
-      author: {
-        name: 'Sarah M.',
-        avatar: 'https://picsum.photos/100/100?random=3'
-      },
-      text: 'This recipe is amazing! I added some garlic to the sauce and it was perfect.'
-    },
-    {
-      id: 2,
-      author: {
-        name: 'Mike R.',
-        avatar: 'https://picsum.photos/100/100?random=4'
-      },
-      text: 'I tried this with gluten-free dough and it worked great. Thanks for the recipe!'
-    }
-  ]
+// Handle favorite toggle
+const handleToggleFavorite = async () => {
+  if (!recipe.value) return
+  
+  try {
+    await toggleFavorite(recipe.value.id)
+    // Update local state
+    recipe.value.isFavorite = !recipe.value.isFavorite
+  } catch (err) {
+    console.error('Failed to toggle favorite:', err)
+  }
+}
+
+// Format date helper
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
 </script>
 
 <style scoped>

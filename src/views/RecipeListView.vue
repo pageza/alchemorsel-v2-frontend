@@ -10,10 +10,11 @@
           </div>
           <v-btn
             color="primary"
-            prepend-icon="mdi-plus"
-            to="/recipes/create"
+            prepend-icon="mdi-robot"
+            to="/generate"
+            data-testid="generate-recipe-btn"
           >
-            Create Recipe
+            Generate Recipe with AI
           </v-btn>
         </v-col>
       </v-row>
@@ -30,6 +31,7 @@
             variant="outlined"
             density="comfortable"
             hide-details
+            data-testid="recipe-search"
           ></v-text-field>
         </v-col>
         <v-col cols="12" md="4">
@@ -40,6 +42,7 @@
             variant="outlined"
             density="comfortable"
             hide-details
+            data-testid="category-filter"
           ></v-select>
         </v-col>
         <v-col cols="12" md="4">
@@ -48,6 +51,7 @@
             :items="sortOptions"
             label="Sort by"
             variant="outlined"
+            data-testid="sort-filter"
             density="comfortable"
             hide-details
           ></v-select>
@@ -57,7 +61,43 @@
 
     <!-- Recipe Grid -->
     <v-container class="py-4">
-      <v-row>
+      <!-- Loading State -->
+      <div v-if="isLoading" class="text-center py-8">
+        <v-progress-circular
+          indeterminate
+          color="primary"
+          size="64"
+        ></v-progress-circular>
+        <p class="text-h6 mt-4">Loading recipes...</p>
+      </div>
+
+      <!-- Error State -->
+      <v-alert
+        v-else-if="error"
+        type="error"
+        class="mb-4"
+      >
+        {{ error }}
+      </v-alert>
+
+      <!-- Empty State -->
+      <div v-else-if="!recipes || recipes.length === 0" class="text-center py-8">
+        <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-chef-hat</v-icon>
+        <h2 class="text-h5 mb-2">No recipes found</h2>
+        <p class="text-body-1 text-medium-emphasis mb-4">
+          Get started by creating your first recipe!
+        </p>
+        <v-btn
+          color="primary"
+          prepend-icon="mdi-plus"
+          to="/recipes/create"
+        >
+          Create Recipe
+        </v-btn>
+      </div>
+
+      <!-- Recipe Grid -->
+      <v-row v-else>
         <v-col
           v-for="recipe in recipes"
           :key="recipe.id"
@@ -73,7 +113,7 @@
             hover
           >
             <v-img
-              :src="recipe.imageUrl || recipe.image"
+              :src="recipe.image_url"
               height="200"
               cover
               class="align-end"
@@ -118,7 +158,7 @@
 import { ref, onMounted } from 'vue'
 import { useRecipes } from '@/composables/useRecipes'
 
-const { recipes, fetchRecipes } = useRecipes()
+const { recipes, fetchRecipes, isLoading, error } = useRecipes()
 const search = ref('')
 const category = ref(null)
 const sortBy = ref('newest')

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Browser Cache</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h1>Clearing Browser Cache...</h1>
+    <p>This page will help clear your browser cache and redirect to the app.</p>
+    
+    <script>
+        // Clear localStorage and sessionStorage
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Force reload with cache busting
+        const timestamp = Date.now();
+        console.log('🧹 Cache cleared at:', new Date().toISOString());
+        
+        // Redirect to main app with cache-busting parameter
+        setTimeout(() => {
+            window.location.href = `http://localhost:5173/?cache=${timestamp}`;
+        }, 2000);
+    </script>
+    
+    <p>If you're not redirected automatically, <a href="http://localhost:5173">click here</a></p>
+</body>
+</html>

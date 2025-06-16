@@ -1,162 +1,203 @@
 <template>
   <div class="landing-root">
     <!-- Hero Section -->
-    <el-row class="landing-hero" justify="center" align="middle">
-      <el-col :span="12" class="hero-left">
-        <h1 class="hero-title">Transform Your Cooking Experience</h1>
-        <p class="hero-subtitle">
-          Discover, create, and share your culinary masterpieces with Alchemorsel
-        </p>
-        <div class="hero-buttons">
-          <el-button type="primary" size="large" class="mr-4">Get Started</el-button>
-          <el-button type="primary" plain size="large">Browse Recipes</el-button>
-        </div>
-      </el-col>
-      <el-col :span="12" class="hero-right">
-        <!-- Placeholder for hero image/illustration -->
-        <div class="hero-image-placeholder">Image</div>
-      </el-col>
-    </el-row>
+    <div class="hero">
+      <h1>AI-Powered Recipe Magic</h1>
+      <p>Create personalized recipes tailored to your dietary preferences and allergies</p>
+      <el-button 
+        type="primary" 
+        size="large" 
+        @click="$router.push('/register')"
+        class="hero-btn"
+      >
+        Get Started Free
+      </el-button>
+    </div>
 
-    <!-- Features Section -->
-    <el-row class="landing-features" justify="center">
-      <el-col :span="24" class="text-center mb-8">
-        <h2 class="section-title">Why Choose Alchemorsel?</h2>
-        <p class="section-subtitle">Everything you need to elevate your cooking game</p>
-      </el-col>
-      <el-col :span="8" class="feature-col text-center">
-        <el-icon size="48" color="var(--el-color-primary)" class="mb-2">
-          <Document />
-        </el-icon>
-        <h3 class="feature-title">Curated Recipes</h3>
-        <p>Access a vast collection of carefully curated recipes from professional chefs and home cooks</p>
-      </el-col>
-      <el-col :span="8" class="feature-col text-center">
-        <el-icon size="48" color="var(--el-color-primary)" class="mb-2">
-          <UserFilled />
-        </el-icon>
-        <h3 class="feature-title">Community Driven</h3>
-        <p>Join a vibrant community of food enthusiasts and share your culinary journey</p>
-      </el-col>
-      <el-col :span="8" class="feature-col text-center">
-        <el-icon size="48" color="var(--el-color-primary)" class="mb-2">
-          <Light />
-        </el-icon>
-        <h3 class="feature-title">Smart Features</h3>
-        <p>Get personalized recommendations and smart cooking tips based on your preferences</p>
-      </el-col>
-    </el-row>
+    <!-- Featured Recipes Section -->
+    <div class="content">
+      <h2 class="section-title">Featured Recipes</h2>
+      <div class="recipe-grid">
+        <div class="recipe-card">
+          <div class="recipe-image">[Recipe Image]</div>
+          <div class="recipe-content">
+            <div class="recipe-title">Mediterranean Quinoa Bowl</div>
+            <div class="recipe-meta">
+              <span>⏱ 30 min</span>
+              <span>👥 4 servings</span>
+            </div>
+            <div class="dietary-tags">
+              <span class="tag">Vegan</span>
+              <span class="tag">Gluten-Free</span>
+            </div>
+          </div>
+        </div>
+        <div class="recipe-card">
+          <div class="recipe-image">[Recipe Image]</div>
+          <div class="recipe-content">
+            <div class="recipe-title">Thai Coconut Curry</div>
+            <div class="recipe-meta">
+              <span>⏱ 45 min</span>
+              <span>👥 6 servings</span>
+            </div>
+            <div class="dietary-tags">
+              <span class="tag">Vegetarian</span>
+              <span class="tag">Dairy-Free</span>
+            </div>
+          </div>
+        </div>
+        <div class="recipe-card">
+          <div class="recipe-image">[Recipe Image]</div>
+          <div class="recipe-content">
+            <div class="recipe-title">Zucchini Pasta Primavera</div>
+            <div class="recipe-meta">
+              <span>⏱ 25 min</span>
+              <span>👥 2 servings</span>
+            </div>
+            <div class="dietary-tags">
+              <span class="tag">Keto</span>
+              <span class="tag">Low-Carb</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
-<script setup>
-import { Document, UserFilled, Light } from '@element-plus/icons-vue'
+<script setup lang="ts">
+// No imports needed for this version
 </script>
 
 <style scoped>
 .landing-root {
-  background: #fff;
+  width: 100%;
   min-height: 100vh;
-  padding-top: 32px;
-  padding-bottom: 64px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
-.landing-hero {
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto 64px auto;
+/* Hero section matching wireframe */
+.hero {
+  text-align: center;
+  padding: 80px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
 }
 
-.hero-left {
-  padding-left: 48px;
-  padding-right: 24px;
-}
-
-.hero-right {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 320px;
-}
-
-.hero-title {
-  font-size: 2.5rem;
+.hero h1 {
+  font-size: 3rem;
   font-weight: bold;
-  margin-bottom: 1rem;
+  margin-bottom: 20px;
 }
 
-.hero-subtitle {
+.hero p {
   font-size: 1.25rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 30px;
+  opacity: 0.9;
 }
 
-.hero-buttons {
-  margin-bottom: 1rem;
+.hero-btn {
+  padding: 12px 30px;
+  font-size: 1rem;
 }
 
-.hero-image-placeholder {
-  width: 320px;
-  height: 320px;
-  background: #f2f2f2;
-  border-radius: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
-  color: #bbb;
-}
-
-.landing-features {
-  max-width: 1200px;
+/* Content section */
+.content {
+  padding: 40px 20px;
   width: 100%;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
 .section-title {
+  text-align: center;
   font-size: 2rem;
   font-weight: bold;
-  margin-bottom: 0.5rem;
+  margin-bottom: 30px;
+  color: #2c3e50;
 }
 
-.section-subtitle {
-  font-size: 1.1rem;
-  color: var(--el-text-color-secondary);
+/* Recipe cards matching wireframe */
+.recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+  margin-top: 30px;
 }
 
-.feature-col {
-  padding: 32px 24px;
+.recipe-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  background: white;
 }
 
-.feature-title {
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin: 0.5rem 0;
+.recipe-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-.text-center {
-  text-align: center;
+.recipe-image {
+  width: 100%;
+  height: 200px;
+  background: #ecf0f1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #95a5a6;
+  font-size: 1rem;
 }
 
-.mb-2 {
-  margin-bottom: 0.5rem;
+.recipe-content {
+  padding: 20px;
 }
 
-.mb-4 {
-  margin-bottom: 1rem;
+.recipe-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #2c3e50;
 }
 
-.mb-6 {
-  margin-bottom: 1.5rem;
+.recipe-meta {
+  display: flex;
+  gap: 15px;
+  color: #7f8c8d;
+  font-size: 0.875rem;
+  margin-bottom: 10px;
 }
 
-.mb-8 {
-  margin-bottom: 2rem;
+.dietary-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
 }
 
-.mr-4 {
-  margin-right: 1rem;
+.tag {
+  background: #e8f4f8;
+  color: #2c3e50;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 2rem;
+  }
+  
+  .hero p {
+    font-size: 1rem;
+  }
+  
+  .content {
+    padding: 20px 15px;
+  }
+  
+  .recipe-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
 }
 </style> 

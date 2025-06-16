@@ -2,24 +2,19 @@ export interface Recipe {
   id: string
   name: string
   description: string
-  imageUrl?: string
-  prepTime: number
-  cookTime: number
-  servings: number
+  image_url?: string
   ingredients: string[]
   instructions: string[]
   category: string
   cuisine: string
-  dietaryPreferences: string[]
+  dietary_preferences: string[]
   tags: string[]
-  isFavorite: boolean
-  createdAt: string
-  updatedAt: string
-  userId: string
-  nutritionalInfo: {
-    calories: number
-    protein: number
-    carbs: number
-    fat: number
-  }
+  calories: number
+  protein: number
+  carbs: number
+  fat: number
+  created_at: string
+  updated_at: string
+  user_id: string
+  isFavorite?: boolean
 } 

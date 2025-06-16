@@ -1,4 +1,4 @@
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useRecipeStore } from '@/stores/recipe.store'
 
 /**
@@ -21,10 +21,6 @@ export function useRecipes() {
   function toggleFavorite(id: string) {
     return store.toggleFavorite(id)
   }
-
-  onMounted(() => {
-    fetchRecipes()
-  })
 
   return {
     recipes,

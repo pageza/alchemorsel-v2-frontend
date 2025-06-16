@@ -7,11 +7,20 @@ class ApiService {
   private instance: AxiosInstance
   
   constructor() {
+    const baseURL = '/api/v1'  // Always use relative path to leverage Vite proxy
+    console.log('🔧 Creating API instance with baseURL:', baseURL)
+    console.log('🔧 Environment:', import.meta.env.MODE)
+    console.log('🔧 Using proxy-based API calls (relative URLs)')
+    console.log('🔧 VITE_BACKEND_URL for proxy:', import.meta.env.VITE_BACKEND_URL)
+    
     this.instance = axios.create({
-      baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1',
+      baseURL,
       timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'X-API-Version': Date.now().toString(),
       },
     })
     
@@ -22,6 +31,9 @@ class ApiService {
     // Request interceptor
     this.instance.interceptors.request.use(
       (config) => {
+        console.log('🌐 API Request:', config.method?.toUpperCase(), config.baseURL + config.url)
+        console.log('🌐 Full URL being used:', config.baseURL + config.url)
+        
         const authStore = useAuthStore()
         if (authStore.token) {
           config.headers.Authorization = `Bearer ${authStore.token}`

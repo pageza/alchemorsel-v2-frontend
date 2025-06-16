@@ -1,3 +1,28 @@
+<!--
+TODO: MANUAL RECIPE CREATION FORM - KEPT AS FALLBACK
+
+This component provides a manual form-based approach for creating recipes and is intentionally 
+maintained alongside the AI-powered recipe generation system (/generate route) for the following reasons:
+
+1. **Fallback Option**: If the AI service is unavailable or experiencing issues, users can still 
+   create recipes manually through this traditional form interface.
+
+2. **User Preference**: Some users prefer manual control over every aspect of recipe creation 
+   rather than AI generation, especially professional chefs or users with very specific requirements.
+
+3. **Edge Cases**: For highly specialized, traditional, or culturally specific recipes that the AI 
+   might not handle well, manual creation ensures accuracy and authenticity.
+
+4. **Recipe Editing**: When editing existing recipes (/recipes/:id/edit), users expect a form-based 
+   interface where they can modify specific fields directly rather than using natural language.
+
+5. **Migration Path**: Provides a smooth transition for existing users who are familiar with 
+   form-based recipe creation and may be hesitant to adopt AI-generated recipes immediately.
+
+The primary workflow is now: User clicks "Create Recipe" → Goes to /generate (AI-powered) 
+But this form remains accessible via direct URL (/recipes/create) for the scenarios above.
+-->
+
 <template>
   <div>
     <v-container class="py-8">
@@ -120,7 +145,7 @@
                   class="d-flex align-center mb-4"
                 >
                   <v-textarea
-                    v-model="instruction"
+                    v-model="recipe.instructions[index]"
                     :label="`Step ${index + 1}`"
                     class="mr-4"
                     :rules="[v => !!v || 'Step is required']"

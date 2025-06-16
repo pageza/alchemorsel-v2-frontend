@@ -1,207 +1,312 @@
 <template>
-  <div class="register-container">
-    <v-card class="register-card" max-width="500">
-      <v-card-title class="text-h4 font-weight-bold text-center pt-6">
-        Create Account
-      </v-card-title>
-      <v-card-subtitle class="text-center pb-4">
-        Join Alchemorsel to start sharing your recipes
-      </v-card-subtitle>
-
-      <v-card-text>
-        <v-form
-          ref="form"
-          v-model="isFormValid"
-          @submit.prevent="handleSubmit"
-        >
-          <v-row>
-            <v-col cols="12" md="6">
-              <v-text-field
-                v-model="firstName"
-                label="First Name"
-                :rules="[v => !!v || 'First name is required']"
-                required
-                variant="outlined"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="6">
-              <v-text-field
-                v-model="lastName"
-                label="Last Name"
-                :rules="[v => !!v || 'Last name is required']"
-                required
-                variant="outlined"
-              ></v-text-field>
-            </v-col>
-          </v-row>
-
-          <v-text-field
-            v-model="email"
-            label="Email"
+  <div class="register-page">
+    <div class="register-container">
+      <h2>Create Your Account</h2>
+      
+      <el-form
+        ref="form"
+        :model="formData"
+        :rules="rules"
+        label-position="top"
+        @submit.prevent="handleSubmit"
+        class="register-form"
+        data-testid="register-form"
+      >
+        <!-- Basic Information -->
+        <el-form-item label="Email" prop="email">
+          <el-input
+            v-model="formData.email"
             type="email"
-            :rules="[
-              v => !!v || 'Email is required',
-              v => /.+@.+\..+/.test(v) || 'Email must be valid'
-            ]"
-            required
-            variant="outlined"
-            class="mb-4"
-          ></v-text-field>
+            placeholder="your@email.com"
+            size="large"
+            data-testid="email-input"
+          />
+        </el-form-item>
 
-          <v-text-field
-            v-model="password"
-            label="Password"
-            :type="showPassword ? 'text' : 'password'"
-            :rules="[
-              v => !!v || 'Password is required',
-              v => v.length >= 8 || 'Password must be at least 8 characters'
-            ]"
-            required
-            variant="outlined"
-            :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-            @click:append-inner="showPassword = !showPassword"
-            class="mb-4"
-          ></v-text-field>
+        <el-form-item label="Username" prop="username">
+          <el-input
+            v-model="formData.username"
+            placeholder="johndoe"
+            size="large"
+            data-testid="username-input"
+          />
+        </el-form-item>
 
-          <v-text-field
-            v-model="confirmPassword"
-            label="Confirm Password"
-            :type="showPassword ? 'text' : 'password'"
-            :rules="[
-              v => !!v || 'Please confirm your password',
-              v => v === password || 'Passwords must match'
-            ]"
-            required
-            variant="outlined"
-            class="mb-4"
-          ></v-text-field>
+        <el-form-item label="Full Name" prop="full_name">
+          <el-input
+            v-model="formData.full_name"
+            placeholder="John Doe"
+            size="large"
+            data-testid="fullname-input"
+          />
+        </el-form-item>
 
-          <v-checkbox
-            v-model="acceptTerms"
-            :rules="[v => !!v || 'You must accept the terms to continue']"
-            label="I agree to the Terms of Service and Privacy Policy"
-            required
-            class="mb-4"
-          ></v-checkbox>
+        <el-form-item label="Password" prop="password">
+          <el-input
+            v-model="formData.password"
+            type="password"
+            placeholder="••••••••"
+            size="large"
+            show-password
+            data-testid="password-input"
+          />
+          <div class="password-hint">
+            Min 8 chars, 1 uppercase, 1 number, 1 special char
+          </div>
+        </el-form-item>
 
-          <v-btn
-            type="submit"
-            color="primary"
-            block
+        <!-- Dietary Preferences -->
+        <el-form-item label="Dietary Preferences">
+          <div class="checkbox-group" data-testid="dietary-preferences">
+            <el-checkbox
+              v-for="preference in dietaryOptions"
+              :key="preference"
+              v-model="formData.dietary_preferences"
+              :value="preference"
+              :label="preference"
+              :data-testid="`dietary-${preference.toLowerCase()}`"
+            />
+          </div>
+        </el-form-item>
+
+        <!-- Allergies -->
+        <el-form-item label="Allergies">
+          <div class="checkbox-group" data-testid="allergies">
+            <el-checkbox
+              v-for="allergy in allergyOptions"
+              :key="allergy"
+              v-model="formData.allergies"
+              :value="allergy"
+              :label="allergy"
+              :data-testid="`allergy-${allergy.toLowerCase().replace(/\s+/g, '-')}`"
+            />
+          </div>
+        </el-form-item>
+
+        <el-form-item>
+          <el-button
+            type="primary"
             size="large"
             :loading="isLoading"
-            :disabled="!isFormValid"
-            class="mb-4"
+            @click="handleSubmit"
+            style="width: 100%"
+            data-testid="register-submit"
           >
-            Create Account
-          </v-btn>
+            Sign Up
+          </el-button>
+        </el-form-item>
 
-          <v-divider class="mb-4">
-            <span class="text-caption text-medium-emphasis px-4">or sign up with</span>
-          </v-divider>
-
-          <div class="d-flex justify-space-between mb-6">
-            <v-btn
-              variant="outlined"
-              block
-              class="me-2"
-              @click="handleSocialSignup('google')"
-            >
-              <v-icon start icon="mdi-google"></v-icon>
-              Google
-            </v-btn>
-            <v-btn
-              variant="outlined"
-              block
-              class="ms-2"
-              @click="handleSocialSignup('github')"
-            >
-              <v-icon start icon="mdi-github"></v-icon>
-              GitHub
-            </v-btn>
-          </div>
-
-          <div class="text-center">
-            <span class="text-body-2 text-medium-emphasis">Already have an account?</span>
-            <v-btn
-              variant="text"
-              color="primary"
-              class="text-none ms-2"
-              @click="$router.push('/auth/login')"
-            >
-              Sign In
-            </v-btn>
-          </div>
-        </v-form>
-      </v-card-text>
-    </v-card>
+        <div class="login-link">
+          Already have an account? 
+          <el-button 
+            type="primary" 
+            link 
+            @click="$router.push('/login')"
+            data-testid="login-link"
+          >
+            Login
+          </el-button>
+        </div>
+      </el-form>
+    </div>
   </div>
 </template>
 
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuth } from '@/composables/useAuth'
-import { useNotification } from '@/composables/useNotification'
+import { useAuthStore } from '@/stores/auth.store'
+import { useNotificationStore } from '@/stores/notification.store'
+import type { ElForm } from 'element-plus'
 
 const router = useRouter()
-const form = ref()
-const isFormValid = ref(false)
+const authStore = useAuthStore()
+const notificationStore = useNotificationStore()
+
+const form = ref<InstanceType<typeof ElForm>>()
 const isLoading = ref(false)
-const showPassword = ref(false)
 
-const firstName = ref('')
-const lastName = ref('')
-const email = ref('')
-const password = ref('')
-const confirmPassword = ref('')
-const acceptTerms = ref(false)
+const formData = reactive({
+  email: '',
+  username: '',
+  full_name: '',
+  password: '',
+  dietary_preferences: [] as string[],
+  allergies: [] as string[]
+})
 
-const { register } = useAuth()
-const { success, error: errorNotification } = useNotification()
+const dietaryOptions = [
+  'Vegan',
+  'Vegetarian', 
+  'Gluten-Free',
+  'Dairy-Free',
+  'Keto',
+  'Paleo'
+]
+
+const allergyOptions = [
+  'Peanuts',
+  'Tree Nuts',
+  'Shellfish',
+  'Soy',
+  'Eggs',
+  'Dairy'
+]
+
+const rules = {
+  email: [
+    { required: true, message: 'Email is required', trigger: 'blur' },
+    { type: 'email', message: 'Please enter a valid email', trigger: 'blur' }
+  ],
+  username: [
+    { required: true, message: 'Username is required', trigger: 'blur' },
+    { min: 3, message: 'Username must be at least 3 characters', trigger: 'blur' }
+  ],
+  full_name: [
+    { required: true, message: 'Full name is required', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: 'Password is required', trigger: 'blur' },
+    { min: 8, message: 'Password must be at least 8 characters', trigger: 'blur' }
+  ]
+}
 
 const handleSubmit = async () => {
-  if (!form.value?.validate()) return
-  isLoading.value = true
+  if (!form.value) return
+  
   try {
-    await register({
-      name: `${firstName.value} ${lastName.value}`,
-      email: email.value,
-      password: password.value,
-      username: email.value,
-      dietary_preferences: [],
-      allergies: [],
+    const valid = await form.value.validate()
+    if (!valid) return
+    
+    isLoading.value = true
+    
+    await authStore.register({
+      email: formData.email,
+      username: formData.username,
+      name: formData.full_name,
+      password: formData.password,
+      dietary_preferences: formData.dietary_preferences,
+      allergies: formData.allergies
     })
-    success('Registration successful')
-    router.push('/recipes')
-  } catch (err) {
-    errorNotification((err as Error).message || 'Failed to register')
+    
+    notificationStore.success('Registration successful! Welcome to Alchemorsel!')
+    router.push('/dashboard')
+    
+  } catch (error: any) {
+    console.error('Registration error:', error)
+    
+    let errorMessage = 'Registration failed. Please try again.'
+    
+    if (error.code === 'ERR_NETWORK' || error.code === 'ERR_CONNECTION_REFUSED') {
+      errorMessage = 'Backend server is not running. Please start the backend service.'
+    } else if (error.response?.data?.error === 'user already exists') {
+      errorMessage = 'An account with this email already exists. Please use a different email or try logging in.'
+    } else if (error.response?.data?.message) {
+      errorMessage = error.response.data.message
+    } else if (error.response?.data?.error) {
+      errorMessage = error.response.data.error
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+    
+    notificationStore.error(errorMessage)
   } finally {
     isLoading.value = false
   }
 }
-
-const handleSocialSignup = (provider: string) => {
-  // TODO: Implement social signup
-}
 </script>
 
 <style scoped>
-.register-container {
+.register-page {
+  width: 100%;
   min-height: 100vh;
+  background: #f5f5f5;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 40px 20px;
 }
 
-.register-card {
+.register-container {
+  max-width: 500px;
   width: 100%;
-  border-radius: 12px;
+  background: white;
+  border-radius: 8px;
+  padding: 40px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
-:deep(.v-field__outline) {
-  --v-field-border-opacity: 0.12;
+.register-container h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #2c3e50;
+  font-size: 1.75rem;
+}
+
+.register-form {
+  width: 100%;
+}
+
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 8px;
+}
+
+.checkbox-group .el-checkbox {
+  margin-right: 0;
+  margin-bottom: 8px;
+}
+
+.password-hint {
+  font-size: 0.875rem;
+  color: #7f8c8d;
+  margin-top: 5px;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 20px;
+  color: #7f8c8d;
+}
+
+.el-form-item {
+  margin-bottom: 20px;
+}
+
+.el-form-item__label {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+@media (max-width: 768px) {
+  .register-page {
+    padding: 20px 15px;
+  }
+  
+  .register-container {
+    padding: 30px 20px;
+  }
+  
+  .register-container h2 {
+    font-size: 1.5rem;
+  }
+  
+  .checkbox-group {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-container {
+    padding: 20px 15px;
+  }
+  
+  .checkbox-group {
+    gap: 8px;
+  }
 }
 </style> 
