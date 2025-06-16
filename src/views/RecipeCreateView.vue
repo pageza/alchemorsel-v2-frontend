@@ -248,7 +248,7 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 

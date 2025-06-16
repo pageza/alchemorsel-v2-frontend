@@ -66,7 +66,7 @@ import RecipeCard from '@/components/RecipeCard.vue'
 import type { Recipe } from '@/types/recipe.types'
 
 const authStore = useAuthStore()
-const recipeStore = useRecipeStore()
+// const recipeStore = useRecipeStore() // TODO: Use this when implementing recipe functionality
 
 const user = ref(authStore.user)
 const recentFavorites = ref<Recipe[]>([])

@@ -193,7 +193,7 @@ const handleSubmit = async () => {
     notificationStore.success('Registration successful! Welcome to Alchemorsel!')
     router.push('/dashboard')
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Registration error:', error)
     
     let errorMessage = 'Registration failed. Please try again.'

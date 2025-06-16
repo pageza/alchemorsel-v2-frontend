@@ -303,14 +303,19 @@ const saveRecipe = async () => {
     } else {
       throw new Error('Recipe was saved but no ID was returned')
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     // Stay on the page and show error - don't lose the generated recipe
-    if (err.response?.status === 401) {
-      error.value = 'Your session has expired. Please log in again.'
-    } else if (err.response?.status >= 500) {
-      error.value = 'Server error occurred while saving. Please try again.'
+    if (err && typeof err === 'object' && 'response' in err) {
+      const response = (err as { response?: { status?: number } }).response
+      if (response?.status === 401) {
+        error.value = 'Your session has expired. Please log in again.'
+      } else if (response?.status && response.status >= 500) {
+        error.value = 'Server error occurred while saving. Please try again.'
+      }
+    } else if (err && typeof err === 'object' && 'message' in err) {
+      error.value = (err as { message: string }).message || 'Failed to save recipe. Please try again.'
     } else {
-      error.value = err.message || 'Failed to save recipe. Please try again.'
+      error.value = 'Failed to save recipe. Please try again.'
     }
     console.error('Recipe saving error:', err)
     isSaving.value = false

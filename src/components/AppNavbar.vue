@@ -15,10 +15,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const route = useRoute()
 
 // Placeholder for auth state; replace with real store logic later
 const isLoggedIn = ref(false)

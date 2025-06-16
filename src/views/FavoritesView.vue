@@ -57,21 +57,22 @@ const notificationStore = useNotificationStore()
 const favorites = ref<Recipe[]>([])
 const loading = ref(true)
 
-const handleFavoriteToggle = async (recipeId: string) => {
-  try {
-    // Remove from favorites locally immediately for better UX
-    favorites.value = favorites.value.filter(recipe => recipe.id !== recipeId)
-    
-    // Call the store method to update backend
-    await recipeStore.toggleFavorite(recipeId)
-    
-    notificationStore.success('Recipe removed from favorites')
-  } catch (error) {
-    // Re-add the recipe if the API call failed
-    notificationStore.error('Failed to update favorites')
-    loadFavorites() // Reload to get correct state
-  }
-}
+// TODO: Implement favorite toggle functionality when component supports it
+// const handleFavoriteToggle = async (recipeId: string) => {
+//   try {
+//     // Remove from favorites locally immediately for better UX
+//     favorites.value = favorites.value.filter(recipe => recipe.id !== recipeId)
+//     
+//     // Call the store method to update backend
+//     await recipeStore.toggleFavorite(recipeId)
+//     
+//     notificationStore.success('Recipe removed from favorites')
+//   } catch {
+//     // Re-add the recipe if the API call failed
+//     notificationStore.error('Failed to update favorites')
+//     loadFavorites() // Reload to get correct state
+//   }
+// }
 
 const loadFavorites = async () => {
   try {

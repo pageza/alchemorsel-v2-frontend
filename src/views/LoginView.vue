@@ -175,17 +175,25 @@ const handleSubmit = async () => {
     })
     success('Logged in successfully')
     router.push('/dashboard')
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Login error:', error)
     
     let errorMessage = 'Failed to login. Please try again.'
     
-    if (error.code === 'ERR_NETWORK' || error.code === 'ERR_CONNECTION_REFUSED') {
-      errorMessage = 'Backend server is not running. Please start the backend service.'
-    } else if (error.response?.data?.message) {
-      errorMessage = error.response.data.message
-    } else if (error.message) {
-      errorMessage = error.message
+    if (error && typeof error === 'object') {
+      if ('code' in error) {
+        const errorCode = (error as { code?: string }).code
+        if (errorCode === 'ERR_NETWORK' || errorCode === 'ERR_CONNECTION_REFUSED') {
+          errorMessage = 'Backend server is not running. Please start the backend service.'
+        }
+      } else if ('response' in error && error.response && typeof error.response === 'object' && 'data' in error.response) {
+        const responseData = error.response.data as { message?: string }
+        if (responseData.message) {
+          errorMessage = responseData.message
+        }
+      } else if ('message' in error && typeof (error as { message?: string }).message === 'string') {
+        errorMessage = (error as { message: string }).message
+      }
     }
     
     errorNotification(errorMessage)
@@ -198,7 +206,7 @@ const handleForgotPassword = () => {
   // TODO: Implement forgot password flow
 }
 
-const handleSocialLogin = (provider: string) => {
+const handleSocialLogin = (_provider: string) => {
   // TODO: Implement social login
 }
 </script>
