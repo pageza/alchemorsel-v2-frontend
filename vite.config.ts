@@ -55,14 +55,15 @@ export default defineConfig(({ mode }) => {
           // Add error handling for proxy failures
           proxy.on('error', (err, req, res) => {
             console.error('🚨 Proxy error:', err.message)
-            console.error('🚨 Target URL:', options.target)
+            console.error('🚨 Target URL:', options.target || 'undefined')
             console.error('🚨 Request URL:', req.url)
           })
           proxy.on('proxyReq', (proxyReq, req, res) => {
-            console.log('🔄 Proxying request:', req.method, req.url, '→', options.target + req.url)
+            console.log('🔄 Proxying request:', req.method, req.url, '→', (options.target || '') + (req.url || ''))
           })
         }
       }
     }
+  }
   }
 })

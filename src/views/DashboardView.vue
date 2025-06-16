@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard">
     <div class="dashboard-header">
-      <h1>Welcome back, {{ user?.full_name || 'User' }}!</h1>
+      <h1>Welcome back, {{ user?.name || 'User' }}!</h1>
     </div>
 
     <!-- Dashboard Stats -->
@@ -31,7 +31,8 @@
         <RecipeCard 
           v-for="recipe in recentFavorites" 
           :key="recipe.id"
-          :recipe="recipe"
+          :image="recipe.image_url || '/placeholder-recipe.jpg'"
+          :name="recipe.name"
           @click="$router.push(`/recipes/${recipe.id}`)"
         />
       </div>

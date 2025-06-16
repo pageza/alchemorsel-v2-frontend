@@ -186,7 +186,7 @@
             <v-card-text>
               <v-list>
                 <v-list-item
-                  v-for="comment in []"
+                  v-for="comment in ([] as Array<{ id: string; author: { name: string; avatar: string }; text: string }>)"
                   :key="comment.id"
                 >
                   <template v-slot:prepend>

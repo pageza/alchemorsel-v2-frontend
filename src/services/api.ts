@@ -31,8 +31,8 @@ class ApiService {
     // Request interceptor
     this.instance.interceptors.request.use(
       (config) => {
-        console.log('🌐 API Request:', config.method?.toUpperCase(), config.baseURL + config.url)
-        console.log('🌐 Full URL being used:', config.baseURL + config.url)
+        console.log('🌐 API Request:', config.method?.toUpperCase(), (config.baseURL || '') + (config.url || ''))
+        console.log('🌐 Full URL being used:', (config.baseURL || '') + (config.url || ''))
         
         const authStore = useAuthStore()
         if (authStore.token) {

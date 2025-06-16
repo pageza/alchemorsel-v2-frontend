@@ -21,10 +21,9 @@
         <RecipeCard 
           v-for="recipe in favorites" 
           :key="recipe.id"
-          :recipe="recipe"
-          :show-favorite="true"
+          :image="recipe.image_url || '/placeholder-recipe.jpg'"
+          :name="recipe.name"
           @click="$router.push(`/recipes/${recipe.id}`)"
-          @favorite-toggled="handleFavoriteToggle(recipe.id)"
         />
       </div>
     </div>

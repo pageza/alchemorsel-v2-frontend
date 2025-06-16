@@ -67,7 +67,7 @@ const router = createRouter({
 
 // Navigation guards
 router.beforeEach((to, from, next) => {
-  console.log(`🛡️ Router guard: ${from.name || from.path || 'unknown'} → ${to.name || to.path || 'unknown'}`)
+  console.log(`🛡️ Router guard: ${String(from.name) || from.path || 'unknown'} → ${String(to.name) || to.path || 'unknown'}`)
   console.log(`🛡️ From path: ${from.path}, To path: ${to.path}`)
   
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)

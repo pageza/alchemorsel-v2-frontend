@@ -61,7 +61,7 @@ export const useAuthStore = defineStore('auth', () => {
         console.warn('Failed to fetch profile after registration:', profileError)
         // Set a minimal user object so registration can continue
         user.value = {
-          id: response.user_id || '',
+          id: '',
           email: data.email,
           username: data.username || data.email,
           name: data.name || data.email,

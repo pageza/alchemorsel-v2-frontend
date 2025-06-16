@@ -126,7 +126,7 @@ const { login } = useAuth()
 const { success, error: errorNotification } = useNotification()
 
 const router = useRouter()
-const form = ref(null)
+const form = ref<{ validate: () => Promise<boolean> } | null>(null)
 const isLoading = ref(false)
 const showPassword = ref(false)
 
@@ -166,7 +166,7 @@ const handleSubmit = async () => {
   
   try {
     console.log('Validating form...')
-    await form.value.validate()
+    await form.value?.validate()
     console.log('Form validated, starting login...')
     isLoading.value = true
     await login({
