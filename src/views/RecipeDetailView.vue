@@ -214,12 +214,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useRecipes } from '@/composables/useRecipes'
 import type { Recipe } from '@/types/recipe.types'
 
 const route = useRoute()
-const router = useRouter()
+// const router = useRouter()
 const { fetchRecipeById, toggleFavorite, isLoading, error } = useRecipes()
 
 const recipe = ref<Recipe | null>(null)

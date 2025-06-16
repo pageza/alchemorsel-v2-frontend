@@ -185,7 +185,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const form = ref(null)
+const form = ref<HTMLFormElement | null>(null)
 const isFormValid = ref(false)
 const isSubmitting = ref(false)
 const avatarFile = ref(null)
@@ -232,7 +232,7 @@ const password = ref({
 })
 
 // Handle avatar upload
-const handleAvatarUpload = (file) => {
+const handleAvatarUpload = (file: File) => {
   if (file) {
     // TODO: Implement actual image upload to your backend
     // For now, we'll just create a local URL
@@ -242,7 +242,7 @@ const handleAvatarUpload = (file) => {
 
 // Handle form submission
 const handleSubmit = async () => {
-  if (!form.value.validate()) return
+  if (!isFormValid.value) return
 
   isSubmitting.value = true
   try {

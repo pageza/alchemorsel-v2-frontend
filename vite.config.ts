@@ -53,12 +53,12 @@ export default defineConfig(({ mode }) => {
         configure: (proxy, options) => {
           console.log('🔧 Vite proxy configured for:', options.target)
           // Add error handling for proxy failures
-          proxy.on('error', (err, req, _res) => {
+          proxy.on('error', (err, req) => {
             console.error('🚨 Proxy error:', err.message)
             console.error('🚨 Target URL:', options.target || 'undefined')
             console.error('🚨 Request URL:', req.url)
           })
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
             console.log('🔄 Proxying request:', req.method, req.url, '→', (options.target || '') + (req.url || ''))
           })
         }

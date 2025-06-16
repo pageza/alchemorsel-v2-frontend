@@ -46,12 +46,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRecipeStore } from '@/stores/recipe.store'
+// import { useRecipeStore } from '@/stores/recipe.store'
 import { useNotificationStore } from '@/stores/notification.store'
 import RecipeCard from '@/components/RecipeCard.vue'
 import type { Recipe } from '@/types/recipe.types'
 
-const recipeStore = useRecipeStore()
+// const recipeStore = useRecipeStore()
 const notificationStore = useNotificationStore()
 
 const favorites = ref<Recipe[]>([])

@@ -61,7 +61,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth.store'
-import { useRecipeStore } from '@/stores/recipe.store'
+// import { useRecipeStore } from '@/stores/recipe.store'
 import RecipeCard from '@/components/RecipeCard.vue'
 import type { Recipe } from '@/types/recipe.types'
 

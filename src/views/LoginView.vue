@@ -83,7 +83,7 @@ This needs investigation to identify the root cause and implement a proper fix, 
         <div class="social-buttons">
           <el-button
             class="social-button"
-            @click="handleSocialLogin('google')"
+            @click="handleSocialLogin"
             data-testid="google-login"
           >
             <el-icon><ChromeFilled /></el-icon>
@@ -91,7 +91,7 @@ This needs investigation to identify the root cause and implement a proper fix, 
           </el-button>
           <el-button
             class="social-button"
-            @click="handleSocialLogin('github')"
+            @click="handleSocialLogin"
             data-testid="github-login"
           >
             <el-icon><Platform /></el-icon>
@@ -206,7 +206,7 @@ const handleForgotPassword = () => {
   // TODO: Implement forgot password flow
 }
 
-const handleSocialLogin = (_provider: string) => {
+const handleSocialLogin = () => {
   // TODO: Implement social login
 }
 </script>

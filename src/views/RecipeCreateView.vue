@@ -254,7 +254,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
-const form = ref(null)
+const form = ref<HTMLFormElement | null>(null)
 const isFormValid = ref(false)
 const isSubmitting = ref(false)
 const imageFile = ref(null)
@@ -293,7 +293,7 @@ const addIngredient = () => {
   recipe.value.ingredients.push({ name: '', amount: '' })
 }
 
-const removeIngredient = (index) => {
+const removeIngredient = (index: number) => {
   recipe.value.ingredients.splice(index, 1)
 }
 
@@ -301,12 +301,12 @@ const addInstruction = () => {
   recipe.value.instructions.push('')
 }
 
-const removeInstruction = (index) => {
+const removeInstruction = (index: number) => {
   recipe.value.instructions.splice(index, 1)
 }
 
 // Handle image upload
-const handleImageUpload = (file) => {
+const handleImageUpload = (file: File) => {
   if (file) {
     // TODO: Implement actual image upload to your backend
     // For now, we'll just create a local URL
@@ -316,7 +316,7 @@ const handleImageUpload = (file) => {
 
 // Handle form submission
 const handleSubmit = async () => {
-  if (!form.value.validate()) return
+  if (!isFormValid.value) return
 
   isSubmitting.value = true
   try {
