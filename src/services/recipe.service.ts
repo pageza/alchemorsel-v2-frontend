@@ -72,13 +72,14 @@ export class RecipeService {
         const response = await api.post(`/recipes/${id}/favorite`)
         return response.data
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handle conflict (already favorited) or not found (not favorited) errors gracefully
-      if (error.response?.status === 409) {
+      const axiosError = error as { response?: { status?: number } }
+      if (axiosError.response?.status === 409) {
         // Already favorited - try to unfavorite
         const response = await api.delete(`/recipes/${id}/favorite`)
         return response.data
-      } else if (error.response?.status === 404) {
+      } else if (axiosError.response?.status === 404) {
         // Not in favorites - try to favorite
         const response = await api.post(`/recipes/${id}/favorite`)
         return response.data
