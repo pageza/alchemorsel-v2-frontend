@@ -5,7 +5,7 @@
     </div>
 
     <!-- Dashboard Stats -->
-    <div class="dashboard-stats">
+    <div class="dashboard-stats" v-if="!isLoading">
       <div class="stat-card">
         <h3>{{ stats.recipesGenerated }}</h3>
         <p>Recipes Generated</p>
@@ -21,6 +21,13 @@
       <div class="stat-card">
         <h3>{{ stats.primaryDiet }}</h3>
         <p>Primary Diet</p>
+      </div>
+    </div>
+    
+    <!-- Loading state for stats -->
+    <div class="dashboard-stats" v-else>
+      <div class="stat-card loading" v-for="i in 4" :key="i">
+        <div class="skeleton-loader"></div>
       </div>
     </div>
 
@@ -56,31 +63,42 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth.store'
-// import { useRecipeStore } from '@/stores/recipe.store'
+import { DashboardService } from '@/services/dashboard.service'
+import type { DashboardStats } from '@/services/dashboard.service'
 import RecipeCard from '@/components/RecipeCard.vue'
 import type { Recipe } from '@/types/recipe.types'
+import { useNotificationStore } from '@/stores/notification.store'
 
 const authStore = useAuthStore()
-// const recipeStore = useRecipeStore() // TODO: Use this when implementing recipe functionality
+const notificationStore = useNotificationStore()
 
 const user = ref(authStore.user)
 const recentFavorites = ref<Recipe[]>([])
+const isLoading = ref(true)
 
-const stats = ref({
-  recipesGenerated: 12,
-  favorites: 24,
-  thisWeek: 3,
-  primaryDiet: 'Vegan'
+const stats = ref<DashboardStats>({
+  recipesGenerated: 0,
+  favorites: 0,
+  thisWeek: 0,
+  primaryDiet: 'None'
 })
 
 onMounted(async () => {
-  // Load user's favorite recipes
+  isLoading.value = true
   try {
-    // This would typically fetch from the backend
-    // For now, we'll use empty array until backend integration
-    recentFavorites.value = []
+    // Load dashboard statistics
+    const [statsData, favoritesData] = await Promise.all([
+      DashboardService.getStats(),
+      DashboardService.getRecentFavorites()
+    ])
+    
+    stats.value = statsData
+    recentFavorites.value = favoritesData
   } catch (error) {
-    console.error('Failed to load favorites:', error)
+    console.error('Failed to load dashboard data:', error)
+    notificationStore.error('Failed to load dashboard data')
+  } finally {
+    isLoading.value = false
   }
 })
 </script>
@@ -182,6 +200,29 @@ onMounted(async () => {
 @media (max-width: 480px) {
   .dashboard-stats {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Loading states */
+.stat-card.loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-loader {
+  width: 100%;
+  height: 80px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
   }
 }
 </style>
