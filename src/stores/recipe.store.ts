@@ -28,6 +28,19 @@ export const useRecipeStore = defineStore('recipe', () => {
     }
   }
   
+  async function searchRecipes(query?: string, category?: string, sortBy?: string): Promise<void> {
+    isLoading.value = true
+    error.value = null
+    try {
+      const response = await RecipeService.searchRecipes(query, category, sortBy)
+      recipes.value = response
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : 'Failed to search recipes'
+    } finally {
+      isLoading.value = false
+    }
+  }
+  
   async function fetchRecipeById(id: string): Promise<Recipe | null> {
     isLoading.value = true
     error.value = null
@@ -49,14 +62,19 @@ export const useRecipeStore = defineStore('recipe', () => {
   
   async function toggleFavorite(recipeId: string): Promise<void> {
     try {
-      await RecipeService.toggleFavorite(recipeId)
-      // Update the recipe in the list
+      // Find the current recipe to get its favorite status
       const index = recipes.value.findIndex(r => r.id === recipeId)
+      const currentStatus = index !== -1 ? recipes.value[index].isFavorite : false
+      
+      const result = await RecipeService.toggleFavorite(recipeId, currentStatus)
+      
+      // Update the recipe in the list with the new status
       if (index !== -1) {
-        recipes.value[index].isFavorite = !recipes.value[index].isFavorite
+        recipes.value[index].isFavorite = result.is_favorite
       }
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Failed to toggle favorite'
+      throw e
     }
   }
   
@@ -69,6 +87,7 @@ export const useRecipeStore = defineStore('recipe', () => {
     getRecipeById,
     // Actions
     fetchRecipes,
+    searchRecipes,
     fetchRecipeById,
     toggleFavorite
   }

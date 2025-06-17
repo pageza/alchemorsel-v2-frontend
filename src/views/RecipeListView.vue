@@ -138,6 +138,15 @@
               >
                 {{ recipe.category }}
               </v-chip>
+              <v-btn
+                v-if="!isLoading"
+                :icon="recipe.isFavorite ? 'mdi-heart' : 'mdi-heart-outline'"
+                :color="recipe.isFavorite ? 'red' : 'white'"
+                class="favorite-btn"
+                size="small"
+                variant="elevated"
+                @click.prevent="handleToggleFavorite(recipe)"
+              ></v-btn>
             </v-img>
 
             <v-card-title class="text-h6">
@@ -168,10 +177,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRecipes } from '@/composables/useRecipes'
+import type { Recipe } from '@/types/recipe.types'
 
-const { recipes, fetchRecipes, isLoading, error } = useRecipes()
+const { recipes, fetchRecipes, searchRecipes, toggleFavorite, isLoading, error } = useRecipes()
 const search = ref('')
 const category = ref(null)
 const sortBy = ref('newest')
@@ -196,6 +206,44 @@ const sortOptions = [
   { title: 'A-Z', value: 'name' },
 ]
 
+// Handle favorite toggle
+const handleToggleFavorite = async (recipe: Recipe) => {
+  try {
+    await toggleFavorite(recipe.id)
+    // Update the local recipe state
+    recipe.isFavorite = !recipe.isFavorite
+  } catch (err) {
+    console.error('Failed to toggle favorite:', err)
+  }
+}
+
+// Debounced search function
+let searchTimeout: number | null = null
+const performSearch = () => {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+  }
+  
+  searchTimeout = setTimeout(async () => {
+    try {
+      const searchQuery = search.value.trim()
+      const categoryValue = category.value
+      const sortValue = sortBy.value
+      
+      if (searchQuery || categoryValue || sortValue !== 'newest') {
+        await searchRecipes(searchQuery || undefined, categoryValue || undefined, sortValue)
+      } else {
+        await fetchRecipes()
+      }
+    } catch (err) {
+      console.error('Search failed:', err)
+    }
+  }, 300) // 300ms debounce
+}
+
+// Watch for changes in search parameters
+watch([search, category, sortBy], performSearch)
+
 onMounted(() => {
   fetchRecipes()
 })
@@ -208,5 +256,12 @@ onMounted(() => {
 
 .v-card:hover {
   transform: translateY(-4px);
+}
+
+.favorite-btn {
+  position: absolute !important;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
 }
 </style> 

@@ -9,6 +9,16 @@ export class RecipeService {
     return response.data.recipes || response.data
   }
 
+  static async searchRecipes(query?: string, category?: string, sortBy?: string): Promise<Recipe[]> {
+    const params = new URLSearchParams()
+    if (query) params.append('q', query)
+    if (category && category !== 'All') params.append('category', category)
+    if (sortBy) params.append('sort', sortBy)
+    
+    const response = await api.get(`/recipes/search?${params.toString()}`)
+    return response.data.recipes || response.data
+  }
+
   static async getRecipeById(id: string): Promise<Recipe> {
     const response = await api.get(`/recipes/${id}`)
     // Backend returns { recipe: {...} }, so extract the recipe object
@@ -51,7 +61,29 @@ export class RecipeService {
     await api.delete(`/recipes/${id}`)
   }
 
-  static async toggleFavorite(id: string): Promise<void> {
-    await api.post(`/recipes/${id}/favorite`)
+  static async toggleFavorite(id: string, currentStatus?: boolean): Promise<{ is_favorite: boolean; message: string }> {
+    try {
+      if (currentStatus) {
+        // If currently favorite, unfavorite it
+        const response = await api.delete(`/recipes/${id}/favorite`)
+        return response.data
+      } else {
+        // If not currently favorite, favorite it
+        const response = await api.post(`/recipes/${id}/favorite`)
+        return response.data
+      }
+    } catch (error: any) {
+      // Handle conflict (already favorited) or not found (not favorited) errors gracefully
+      if (error.response?.status === 409) {
+        // Already favorited - try to unfavorite
+        const response = await api.delete(`/recipes/${id}/favorite`)
+        return response.data
+      } else if (error.response?.status === 404) {
+        // Not in favorites - try to favorite
+        const response = await api.post(`/recipes/${id}/favorite`)
+        return response.data
+      }
+      throw error
+    }
   }
 } 

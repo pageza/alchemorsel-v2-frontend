@@ -14,6 +14,10 @@ export function useRecipes() {
     return store.fetchRecipes()
   }
 
+  function searchRecipes(query?: string, category?: string, sortBy?: string) {
+    return store.searchRecipes(query, category, sortBy)
+  }
+
   function fetchRecipeById(id: string) {
     return store.fetchRecipeById(id)
   }
@@ -27,6 +31,7 @@ export function useRecipes() {
     isLoading,
     error,
     fetchRecipes,
+    searchRecipes,
     fetchRecipeById,
     toggleFavorite,
     /**
