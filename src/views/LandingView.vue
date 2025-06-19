@@ -1,124 +1,265 @@
 <template>
-  <div class="landing-root">
+  <div class="landing-page">
     <!-- Hero Section -->
-    <div class="hero">
-      <h1>AI-Powered Recipe Magic</h1>
-      <p>Create personalized recipes tailored to your dietary preferences and allergies</p>
-      <el-button 
-        type="primary" 
-        size="large" 
-        @click="$router.push('/register')"
-        class="hero-btn"
-      >
-        Get Started Free
-      </el-button>
-    </div>
+    <v-container fluid class="hero-section">
+      <v-row justify="center" align="center" class="hero-content">
+        <v-col cols="12" md="8" lg="6" class="text-center">
+          <h1 class="display-1 font-weight-bold mb-6">
+            AI-Powered Recipe Magic
+          </h1>
+          <p class="headline mb-8">
+            Create personalized recipes tailored to your dietary preferences and allergies
+          </p>
+          <div class="hero-buttons">
+            <v-btn
+              color="primary"
+              size="large"
+              @click="$router.push('/register')"
+              class="mr-4 mb-4"
+            >
+              Get Started Free
+            </v-btn>
+            <v-btn
+              color="secondary"
+              variant="outlined"
+              size="large"
+              @click="$router.push('/login')"
+              class="mb-4"
+            >
+              Sign In
+            </v-btn>
+          </div>
+        </v-col>
+      </v-row>
+    </v-container>
+
+    <!-- Features Section -->
+    <v-container class="features-section">
+      <v-row>
+        <v-col cols="12" class="text-center mb-8">
+          <h2 class="text-h4 mb-4">Why Choose Alchemorsel?</h2>
+        </v-col>
+        <v-col cols="12" md="4" class="text-center">
+          <v-icon size="64" color="primary" class="mb-4">mdi-brain</v-icon>
+          <h3 class="text-h6 mb-3">AI-Generated Recipes</h3>
+          <p>Get unique, personalized recipes created by advanced AI technology</p>
+        </v-col>
+        <v-col cols="12" md="4" class="text-center">
+          <v-icon size="64" color="primary" class="mb-4">mdi-shield-check</v-icon>
+          <h3 class="text-h6 mb-3">Dietary Restrictions</h3>
+          <p>Safe recipes that respect your allergies and dietary preferences</p>
+        </v-col>
+        <v-col cols="12" md="4" class="text-center">
+          <v-icon size="64" color="primary" class="mb-4">mdi-heart</v-icon>
+          <h3 class="text-h6 mb-3">Save Favorites</h3>
+          <p>Build your personal collection of tried and tested recipes</p>
+        </v-col>
+      </v-row>
+    </v-container>
 
     <!-- Featured Recipes Section -->
-    <div class="content">
-      <h2 class="section-title">Featured Recipes</h2>
-      
+    <v-container class="featured-section">
+      <v-row>
+        <v-col cols="12" class="text-center mb-6">
+          <h2 class="text-h4 mb-4">Featured Recipes</h2>
+          <p class="text-body-1 text-medium-emphasis">
+            Get a taste of what's possible with Alchemorsel
+          </p>
+        </v-col>
+      </v-row>
+
       <!-- Loading State -->
-      <div v-if="isLoading" class="loading-container">
-        <el-skeleton :rows="6" animated />
+      <div v-if="isLoading" class="text-center">
+        <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
       </div>
-      
+
       <!-- Recipe Grid -->
-      <div v-else-if="featuredRecipes && featuredRecipes.length > 0" class="recipe-grid">
-        <div 
+      <v-row v-else-if="featuredRecipes && featuredRecipes.length > 0">
+        <v-col 
           v-for="recipe in featuredRecipes" 
           :key="recipe.id"
-          class="recipe-card"
-          @click="viewRecipe(recipe.id)"
+          cols="12" 
+          sm="6" 
+          md="4"
         >
-          <div class="recipe-image">
-            <img 
-              v-if="recipe.image_url" 
-              :src="recipe.image_url" 
+          <v-card
+            class="recipe-preview-card"
+            hover
+            @click="handleRecipeClick(recipe.id)"
+          >
+            <!-- Recipe Image -->
+            <v-img
+              v-if="recipe.image_url"
+              :src="recipe.image_url"
               :alt="recipe.name"
-              @error="(e: Event) => (e.target as HTMLImageElement).style.display = 'none'"
+              height="200"
+              cover
             >
-            <div v-else class="image-placeholder">
-              <i class="el-icon-dish"></i>
+              <template v-slot:error>
+                <div class="d-flex align-center justify-center fill-height">
+                  <v-icon size="64" color="grey-lighten-2">mdi-silverware-fork-knife</v-icon>
+                </div>
+              </template>
+            </v-img>
+            <div v-else class="recipe-image-placeholder">
+              <v-icon size="64" color="grey-lighten-2">mdi-silverware-fork-knife</v-icon>
             </div>
-          </div>
-          <div class="recipe-content">
-            <div class="recipe-title">{{ recipe.name }}</div>
-            <div class="recipe-meta">
-              <span>⏱ {{ formatTime(recipe.prep_time, recipe.cook_time) }}</span>
-              <span v-if="recipe.servings">👥 {{ recipe.servings }} servings</span>
+
+            <!-- Login Overlay for Unauthenticated Users -->
+            <div v-if="!isAuthenticated" class="login-overlay">
+              <div class="overlay-content">
+                <v-icon size="32" color="white" class="mb-2">mdi-lock</v-icon>
+                <p class="text-white text-center mb-2">Sign up to view full recipe</p>
+                <v-btn
+                  color="primary"
+                  size="small"
+                  @click.stop="$router.push('/register')"
+                >
+                  Join Now
+                </v-btn>
+              </div>
             </div>
-            <div v-if="recipe.dietary_preferences && recipe.dietary_preferences.length > 0" class="dietary-tags">
-              <span 
-                v-for="diet in recipe.dietary_preferences.slice(0, 3)" 
-                :key="diet"
-                class="tag"
-              >
-                {{ diet }}
-              </span>
+
+            <v-card-title class="text-h6">{{ recipe.name }}</v-card-title>
+            
+            <v-card-text>
+              <div class="recipe-meta d-flex align-center mb-2">
+                <v-icon size="16" class="mr-1">mdi-clock-outline</v-icon>
+                <span class="text-body-2 mr-4">{{ formatTime(recipe.prep_time, recipe.cook_time) }}</span>
+                <v-icon size="16" class="mr-1" v-if="recipe.servings">mdi-account-multiple</v-icon>
+                <span class="text-body-2" v-if="recipe.servings">{{ recipe.servings }} servings</span>
+              </div>
+              
+              <!-- Dietary Tags -->
+              <div class="dietary-tags" v-if="recipe.dietary_tags && recipe.dietary_tags.length > 0">
+                <v-chip
+                  v-for="tag in recipe.dietary_tags.slice(0, 3)"
+                  :key="tag"
+                  size="small"
+                  color="secondary"
+                  class="mr-1 mb-1"
+                >
+                  {{ tag }}
+                </v-chip>
+              </div>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+
+      <!-- Fallback Static Recipes -->
+      <v-row v-else>
+        <v-col cols="12" sm="6" md="4" v-for="recipe in staticRecipes" :key="recipe.id">
+          <v-card
+            class="recipe-preview-card"
+            hover
+            @click="handleRecipeClick(recipe.id)"
+          >
+            <div class="recipe-image-placeholder">
+              <v-icon size="64" color="grey-lighten-2">mdi-silverware-fork-knife</v-icon>
             </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Fallback to Placeholder -->
-      <div v-else class="recipe-grid">
-        <div class="recipe-card">
-          <div class="recipe-image">[Recipe Image]</div>
-          <div class="recipe-content">
-            <div class="recipe-title">Mediterranean Quinoa Bowl</div>
-            <div class="recipe-meta">
-              <span>⏱ 30 min</span>
-              <span>👥 4 servings</span>
+
+            <!-- Login Overlay for Unauthenticated Users -->
+            <div v-if="!isAuthenticated" class="login-overlay">
+              <div class="overlay-content">
+                <v-icon size="32" color="white" class="mb-2">mdi-lock</v-icon>
+                <p class="text-white text-center mb-2">Sign up to view full recipe</p>
+                <v-btn
+                  color="primary"
+                  size="small"
+                  @click.stop="$router.push('/register')"
+                >
+                  Join Now
+                </v-btn>
+              </div>
             </div>
-            <div class="dietary-tags">
-              <span class="tag">Vegan</span>
-              <span class="tag">Gluten-Free</span>
-            </div>
-          </div>
-        </div>
-        <div class="recipe-card">
-          <div class="recipe-image">[Recipe Image]</div>
-          <div class="recipe-content">
-            <div class="recipe-title">Thai Coconut Curry</div>
-            <div class="recipe-meta">
-              <span>⏱ 45 min</span>
-              <span>👥 6 servings</span>
-            </div>
-            <div class="dietary-tags">
-              <span class="tag">Vegetarian</span>
-              <span class="tag">Dairy-Free</span>
-            </div>
-          </div>
-        </div>
-        <div class="recipe-card">
-          <div class="recipe-image">[Recipe Image]</div>
-          <div class="recipe-content">
-            <div class="recipe-title">Zucchini Pasta Primavera</div>
-            <div class="recipe-meta">
-              <span>⏱ 25 min</span>
-              <span>👥 2 servings</span>
-            </div>
-            <div class="dietary-tags">
-              <span class="tag">Keto</span>
-              <span class="tag">Low-Carb</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+
+            <v-card-title class="text-h6">{{ recipe.name }}</v-card-title>
+            
+            <v-card-text>
+              <div class="recipe-meta d-flex align-center mb-2">
+                <v-icon size="16" class="mr-1">mdi-clock-outline</v-icon>
+                <span class="text-body-2 mr-4">{{ recipe.time }}</span>
+                <v-icon size="16" class="mr-1">mdi-account-multiple</v-icon>
+                <span class="text-body-2">{{ recipe.servings }} servings</span>
+              </div>
+              
+              <div class="dietary-tags">
+                <v-chip
+                  v-for="tag in recipe.tags"
+                  :key="tag"
+                  size="small"
+                  color="secondary"
+                  class="mr-1 mb-1"
+                >
+                  {{ tag }}
+                </v-chip>
+              </div>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+
+    <!-- Call to Action -->
+    <v-container class="cta-section" v-if="!isAuthenticated">
+      <v-row justify="center">
+        <v-col cols="12" md="8" lg="6" class="text-center">
+          <h2 class="text-h4 mb-4">Ready to Start Cooking?</h2>
+          <p class="text-body-1 mb-6">
+            Join thousands of home cooks creating amazing meals with AI assistance
+          </p>
+          <v-btn
+            color="primary"
+            size="large"
+            @click="$router.push('/register')"
+          >
+            Get Started Free Today
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-container>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth.store'
 import { FeaturedService } from '@/services/featured.service'
 import type { Recipe } from '@/services/recipe.service'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const featuredRecipes = ref<Recipe[]>([])
 const isLoading = ref(true)
+
+const isAuthenticated = computed(() => authStore.isAuthenticated)
+
+// Static fallback recipes for demo purposes
+const staticRecipes = [
+  {
+    id: 'demo-1',
+    name: 'Mediterranean Quinoa Bowl',
+    time: '25 min',
+    servings: '2',
+    tags: ['Vegetarian', 'Gluten-Free', 'Mediterranean']
+  },
+  {
+    id: 'demo-2', 
+    name: 'Spicy Thai Basil Chicken',
+    time: '20 min',
+    servings: '4',
+    tags: ['Thai', 'Spicy', 'High-Protein']
+  },
+  {
+    id: 'demo-3',
+    name: 'Vegan Chocolate Avocado Mousse',
+    time: '15 min',
+    servings: '6',
+    tags: ['Vegan', 'Dessert', 'No-Bake']
+  }
+]
 
 // Format time for display
 const formatTime = (prepTime?: number | string, cookTime?: number | string) => {
@@ -126,7 +267,7 @@ const formatTime = (prepTime?: number | string, cookTime?: number | string) => {
   
   const parseTime = (time: number | string) => {
     if (typeof time === 'number') return time
-    const match = time.match(/(\d+)/)
+    const match = String(time).match(/(\d+)/)
     return match ? parseInt(match[1]) : 0
   }
   
@@ -141,24 +282,27 @@ const formatTime = (prepTime?: number | string, cookTime?: number | string) => {
   return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`
 }
 
-// Load featured recipes
-const loadFeaturedRecipes = async () => {
-  try {
-    isLoading.value = true
-    const response = await FeaturedService.getFeaturedRecipes(6)
-    featuredRecipes.value = response?.recipes || []
-  } catch (error) {
-    console.error('Failed to load featured recipes:', error)
-    // Set empty array if loading fails
-    featuredRecipes.value = []
-  } finally {
-    isLoading.value = false
+const handleRecipeClick = (recipeId: string | number) => {
+  if (!isAuthenticated.value) {
+    // Show sign up prompt for unauthenticated users
+    router.push('/register')
+  } else {
+    // Navigate to recipe details for authenticated users
+    router.push(`/recipes/${recipeId}`)
   }
 }
 
-// Navigate to recipe detail
-const viewRecipe = (recipeId: string) => {
-  router.push(`/recipes/${recipeId}`)
+const loadFeaturedRecipes = async () => {
+  try {
+    isLoading.value = true
+    const recipes = await FeaturedService.getFeaturedRecipes()
+    featuredRecipes.value = recipes.slice(0, 6) // Show max 6 recipes
+  } catch (error) {
+    console.error('Failed to load featured recipes:', error)
+    // Will fall back to static recipes
+  } finally {
+    isLoading.value = false
+  }
 }
 
 onMounted(() => {
@@ -167,159 +311,83 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.landing-root {
-  width: 100%;
+.landing-page {
   min-height: 100vh;
 }
 
-/* Hero section matching wireframe */
-.hero {
-  text-align: center;
-  padding: 80px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.hero-section {
+  background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, rgb(var(--v-theme-secondary)) 100%);
   color: white;
-}
-
-.hero h1 {
-  font-size: 3rem;
-  font-weight: bold;
-  margin-bottom: 20px;
-}
-
-.hero p {
-  font-size: 1.25rem;
-  margin-bottom: 30px;
-  opacity: 0.9;
-}
-
-.hero-btn {
-  padding: 12px 30px;
-  font-size: 1rem;
-}
-
-/* Content section */
-.content {
-  padding: 40px 20px;
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.section-title {
-  text-align: center;
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 30px;
-  color: #2c3e50;
-}
-
-/* Recipe cards matching wireframe */
-.recipe-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 25px;
-  margin-top: 30px;
-}
-
-.recipe-card {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
-  background: white;
-}
-
-.recipe-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  cursor: pointer;
-}
-
-.recipe-image {
-  width: 100%;
-  height: 200px;
-  background: #ecf0f1;
+  min-height: 60vh;
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: #95a5a6;
-  font-size: 1rem;
-  overflow: hidden;
+}
+
+.hero-content {
+  min-height: 60vh;
+}
+
+.hero-buttons {
+  margin-top: 2rem;
+}
+
+.features-section {
+  padding: 4rem 0;
+  background-color: rgb(var(--v-theme-surface));
+}
+
+.featured-section {
+  padding: 4rem 0;
+}
+
+.cta-section {
+  padding: 4rem 0;
+  background-color: rgb(var(--v-theme-surface));
+}
+
+.recipe-preview-card {
   position: relative;
-}
-
-.recipe-image img {
-  width: 100%;
   height: 100%;
-  object-fit: cover;
+  transition: transform 0.2s ease-in-out;
 }
 
-.image-placeholder {
+.recipe-preview-card:hover {
+  transform: translateY(-4px);
+}
+
+.recipe-image-placeholder {
+  height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
-  font-size: 3rem;
-  color: #bdc3c7;
+  background-color: rgb(var(--v-theme-surface-variant));
 }
 
-.loading-container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 20px;
+.login-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
 }
 
-.recipe-content {
-  padding: 20px;
-}
-
-.recipe-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-bottom: 10px;
-  color: #2c3e50;
+.overlay-content {
+  text-align: center;
+  padding: 1rem;
 }
 
 .recipe-meta {
-  display: flex;
-  gap: 15px;
-  color: #7f8c8d;
-  font-size: 0.875rem;
-  margin-bottom: 10px;
+  color: rgb(var(--v-theme-on-surface-variant));
 }
 
 .dietary-tags {
   display: flex;
-  gap: 8px;
   flex-wrap: wrap;
-  margin-top: 10px;
+  gap: 0.25rem;
 }
-
-.tag {
-  background: #e8f4f8;
-  color: #2c3e50;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-}
-
-@media (max-width: 768px) {
-  .hero h1 {
-    font-size: 2rem;
-  }
-  
-  .hero p {
-    font-size: 1rem;
-  }
-  
-  .content {
-    padding: 20px 15px;
-  }
-  
-  .recipe-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-}
-</style> 
+</style>
