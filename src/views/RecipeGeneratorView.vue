@@ -61,8 +61,70 @@
             closable
             @click:close="error = null"
           >
-            {{ error }}
+            <div class="d-flex align-center justify-space-between">
+              <div>{{ error }}</div>
+              <v-btn
+                v-if="error.includes('verify your email') || error.includes('email verification')"
+                color="primary"
+                variant="outlined"
+                size="small"
+                @click="resendVerificationEmail"
+                :loading="resendingEmail"
+                class="ml-3"
+              >
+                Resend Email
+              </v-btn>
+            </div>
           </v-alert>
+
+          <!-- Similar Recipes Found -->
+          <div v-if="similarRecipes.length > 0" class="mb-6">
+            <v-alert type="info" class="mb-4">
+              <v-alert-title>Found Similar Recipes!</v-alert-title>
+              We found existing recipes that match your request. You can use one of these or generate a new variation.
+            </v-alert>
+            
+            <v-row>
+              <v-col 
+                v-for="recipe in similarRecipes" 
+                :key="recipe.id"
+                cols="12"
+                sm="6"
+                md="4"
+              >
+                <v-card 
+                  class="h-100"
+                  hover
+                  @click="router.push(`/recipes/${recipe.id}`)"
+                >
+                  <v-card-title>{{ recipe.name }}</v-card-title>
+                  <v-card-text>
+                    <p class="text-body-2">{{ recipe.description }}</p>
+                    <div class="mt-2">
+                      <v-chip size="x-small" class="ma-1">
+                        <v-icon start size="x-small">mdi-clock-outline</v-icon>
+                        {{ recipe.total_time || '30 min' }}
+                      </v-chip>
+                      <v-chip size="x-small" class="ma-1">
+                        <v-icon start size="x-small">mdi-fire</v-icon>
+                        {{ recipe.calories || 'N/A' }} cal
+                      </v-chip>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
+            
+            <div class="text-center mt-4">
+              <v-btn
+                color="primary"
+                variant="outlined"
+                @click="generateNewVariation"
+              >
+                Generate New Variation Anyway
+              </v-btn>
+            </div>
+          </div>
 
           <!-- Generated Recipe Display -->
           <v-card v-if="currentDraft" class="mb-6">
@@ -233,19 +295,26 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { LLMService, type RecipeDraft } from '@/services/llm.service'
 import { RecipeService } from '@/services/recipe.service'
+import { useAuthStore } from '@/stores/auth.store'
+import { useNotificationStore } from '@/stores/notification.store'
+import { AuthService } from '@/services/auth.service'
 
 const router = useRouter()
+const authStore = useAuthStore()
+const notificationStore = useNotificationStore()
 
 // State
 const query = ref('')
 const modifyQuery = ref('')
 const currentDraft = ref<RecipeDraft | null>(null)
 const currentDraftId = ref<string>('')
+const similarRecipes = ref<any[]>([])
 const isLoading = ref(false)
 const isModifying = ref(false)
 const isSaving = ref(false)
 const error = ref<string | null>(null)
 const showModifyDialog = ref(false)
+const resendingEmail = ref(false)
 
 // Generate recipe from natural language
 const generateRecipe = async () => {
@@ -253,14 +322,80 @@ const generateRecipe = async () => {
 
   isLoading.value = true
   error.value = null
+  similarRecipes.value = []
+  currentDraft.value = null
 
   try {
     const response = await LLMService.generateRecipe(query.value)
-    currentDraft.value = response.recipe
-    currentDraftId.value = response.draft_id
-  } catch (err) {
-    error.value = 'Failed to generate recipe. Please try again.'
+    
+    // Check if we got similar recipes instead of a new generation
+    if (response.similar_recipes && response.similar_recipes.length > 0) {
+      similarRecipes.value = response.similar_recipes
+      currentDraft.value = null
+      currentDraftId.value = ''
+    } else if (response.recipe) {
+      currentDraft.value = response.recipe
+      currentDraftId.value = response.draft_id || ''
+      similarRecipes.value = []
+    }
+  } catch (err: any) {
     console.error('Recipe generation error:', err)
+    
+    // Handle email verification required error
+    if (err.response?.status === 403) {
+      const errorData = err.response?.data
+      if (errorData?.error === 'email verification required') {
+        error.value = errorData.message || 'Please verify your email address to generate recipes.'
+        // Show notification with action to resend verification email
+        notificationStore.info('Email verification required to generate recipes')
+      } else {
+        error.value = 'Access denied. Please check your account status.'
+      }
+    } else if (err.response?.status === 401) {
+      error.value = 'Your session has expired. Please log in again.'
+    } else if (err.response?.status && err.response.status >= 500) {
+      error.value = 'Server error occurred. Please try again.'
+    } else {
+      error.value = 'Failed to generate recipe. Please try again.'
+    }
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Generate new variation even when similar recipes exist
+const generateNewVariation = async () => {
+  if (!query.value.trim()) return
+
+  isLoading.value = true
+  error.value = null
+  similarRecipes.value = []
+
+  try {
+    const response = await LLMService.generateRecipe(query.value, true) // Skip similar check
+    if (response.recipe) {
+      currentDraft.value = response.recipe
+      currentDraftId.value = response.draft_id || ''
+    }
+  } catch (err: any) {
+    console.error('Recipe generation error:', err)
+    
+    // Handle email verification required error
+    if (err.response?.status === 403) {
+      const errorData = err.response?.data
+      if (errorData?.error === 'email verification required') {
+        error.value = errorData.message || 'Please verify your email address to generate recipes.'
+        notificationStore.info('Email verification required to generate recipes')
+      } else {
+        error.value = 'Access denied. Please check your account status.'
+      }
+    } else if (err.response?.status === 401) {
+      error.value = 'Your session has expired. Please log in again.'
+    } else if (err.response?.status && err.response.status >= 500) {
+      error.value = 'Server error occurred. Please try again.'
+    } else {
+      error.value = 'Failed to generate recipe. Please try again.'
+    }
   } finally {
     isLoading.value = false
   }
@@ -275,7 +410,7 @@ const modifyRecipe = async () => {
 
   try {
     const response = await LLMService.modifyRecipe(modifyQuery.value, currentDraftId.value)
-    currentDraft.value = response.recipe
+    currentDraft.value = response.recipe || null
     showModifyDialog.value = false
     modifyQuery.value = ''
   } catch (err) {
@@ -326,10 +461,27 @@ const saveRecipe = async () => {
 const startOver = () => {
   currentDraft.value = null
   currentDraftId.value = ''
+  similarRecipes.value = []
   query.value = ''
   modifyQuery.value = ''
   error.value = null
   showModifyDialog.value = false
+}
+
+// Resend verification email
+const resendVerificationEmail = async () => {
+  if (!authStore.user?.email) return
+  
+  resendingEmail.value = true
+  try {
+    const response = await AuthService.resendVerificationEmail(authStore.user.email)
+    notificationStore.success(response.message || 'Verification email sent')
+    error.value = null // Clear the error after successfully sending email
+  } catch (error: any) {
+    notificationStore.error(error.response?.data?.error || 'Failed to send verification email')
+  } finally {
+    resendingEmail.value = false
+  }
 }
 </script>
 

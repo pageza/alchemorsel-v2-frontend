@@ -26,10 +26,12 @@
               <v-card-text>
                 <div class="d-flex align-center">
                   <v-avatar
-                    :image="profile.avatar"
+                    :image="profile.profile_picture_url || undefined"
                     size="100"
                     class="mr-4"
-                  ></v-avatar>
+                  >
+                    <v-icon v-if="!profile.profile_picture_url" size="50">mdi-account</v-icon>
+                  </v-avatar>
                   <v-file-input
                     v-model="avatarFile"
                     accept="image/*"
@@ -48,19 +50,11 @@
               </v-card-title>
               <v-card-text>
                 <v-row>
-                  <v-col cols="12" md="6">
+                  <v-col cols="12">
                     <v-text-field
-                      v-model="profile.firstName"
-                      label="First Name"
-                      :rules="[v => !!v || 'First name is required']"
-                      required
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" md="6">
-                    <v-text-field
-                      v-model="profile.lastName"
-                      label="Last Name"
-                      :rules="[v => !!v || 'Last name is required']"
+                      v-model="profile.username"
+                      label="Username"
+                      :rules="[v => !!v || 'Username is required']"
                       required
                     ></v-text-field>
                   </v-col>
@@ -74,6 +68,8 @@
                         v => /.+@.+\..+/.test(v) || 'Email must be valid'
                       ]"
                       required
+                      readonly
+                      hint="Email cannot be changed"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="12">
@@ -88,76 +84,69 @@
               </v-card-text>
             </v-card>
 
-            <!-- Preferences -->
+            <!-- Dietary Lifestyles -->
             <v-card class="mb-6">
               <v-card-title class="text-h5 font-weight-bold">
-                Preferences
+                Dietary Lifestyles
               </v-card-title>
               <v-card-text>
-                <v-row>
-                  <v-col cols="12" md="6">
-                    <v-select
-                      v-model="profile.cuisinePreferences"
-                      :items="cuisineTypes"
-                      label="Preferred Cuisines"
-                      multiple
-                      chips
-                    ></v-select>
-                  </v-col>
-                  <v-col cols="12" md="6">
-                    <v-select
-                      v-model="profile.dietaryRestrictions"
-                      :items="dietaryTypes"
-                      label="Dietary Restrictions"
-                      multiple
-                      chips
-                    ></v-select>
-                  </v-col>
-                  <v-col cols="12">
-                    <v-switch
-                      v-model="profile.emailNotifications"
-                      label="Email Notifications"
-                      color="primary"
-                    ></v-switch>
-                  </v-col>
-                </v-row>
+                <v-select
+                  v-model="selectedDietaryLifestyles"
+                  :items="dietaryLifestyleTypes"
+                  label="Dietary Lifestyles"
+                  multiple
+                  chips
+                  hint="Select your dietary lifestyle choices (e.g., vegetarian, keto, paleo)"
+                ></v-select>
               </v-card-text>
             </v-card>
 
-            <!-- Password Change -->
+            <!-- Cuisine Preferences -->
             <v-card class="mb-6">
               <v-card-title class="text-h5 font-weight-bold">
-                Change Password
+                Cuisine Preferences
               </v-card-title>
               <v-card-text>
-                <v-row>
-                  <v-col cols="12">
-                    <v-text-field
-                      v-model="password.current"
-                      label="Current Password"
-                      type="password"
-                      :rules="[v => !v || v.length >= 8 || 'Password must be at least 8 characters']"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" md="6">
-                    <v-text-field
-                      v-model="password.new"
-                      label="New Password"
-                      type="password"
-                      :rules="[v => !v || v.length >= 8 || 'Password must be at least 8 characters']"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" md="6">
-                    <v-text-field
-                      v-model="password.confirm"
-                      label="Confirm New Password"
-                      type="password"
-                      :rules="[
-                        v => !v || v === password.new || 'Passwords must match'
-                      ]"
-                    ></v-text-field>
-                  </v-col>
-                </v-row>
+                <v-select
+                  v-model="selectedCuisinePrefs"
+                  :items="cuisineTypes"
+                  label="Favorite Cuisines"
+                  multiple
+                  chips
+                  hint="Select your favorite types of cuisine for recipe recommendations"
+                ></v-select>
+              </v-card-text>
+            </v-card>
+
+            <!-- Food Allergies -->
+            <v-card class="mb-6">
+              <v-card-title class="text-h5 font-weight-bold">
+                Food Allergies
+              </v-card-title>
+              <v-card-text>
+                <v-select
+                  v-model="selectedAllergens"
+                  :items="allergenTypes"
+                  label="Allergens to Avoid"
+                  multiple
+                  chips
+                  hint="Select specific food allergens you need to avoid"
+                ></v-select>
+              </v-card-text>
+            </v-card>
+
+            <!-- Privacy Settings -->
+            <v-card class="mb-6">
+              <v-card-title class="text-h5 font-weight-bold">
+                Privacy Settings
+              </v-card-title>
+              <v-card-text>
+                <v-select
+                  v-model="profile.privacy_level"
+                  :items="privacyLevels"
+                  label="Profile Privacy"
+                  hint="Control who can see your profile information"
+                ></v-select>
               </v-card-text>
             </v-card>
 
@@ -181,62 +170,127 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth.store'
+import { useNotificationStore } from '@/stores/notification.store'
+import { UserService } from '@/services/user.service'
+import type { User } from '@/types/auth.types'
 
 const router = useRouter()
+const authStore = useAuthStore()
+const notificationStore = useNotificationStore()
+
 const form = ref<HTMLFormElement | null>(null)
 const isFormValid = ref(false)
 const isSubmitting = ref(false)
-const avatarFile = ref(null)
+const isLoading = ref(true)
+const avatarFile = ref<File[]>([])
 
-// Mock data - replace with actual data from your backend
-const cuisineTypes = [
-  'Italian',
-  'Mexican',
-  'Chinese',
-  'Japanese',
-  'Indian',
-  'Thai',
-  'Mediterranean',
-  'American'
-]
-
-const dietaryTypes = [
-  'Vegetarian',
-  'Vegan',
-  'Gluten-Free',
-  'Dairy-Free',
-  'Kosher',
-  'Halal',
-  'Keto',
-  'Paleo'
-]
-
-// Initialize profile data
-const profile = ref({
-  firstName: 'John',
-  lastName: 'Doe',
-  email: 'john.doe@example.com',
-  bio: 'Food enthusiast and amateur chef',
-  avatar: 'https://picsum.photos/200/200?random=1',
-  cuisinePreferences: ['Italian', 'Mediterranean'],
-  dietaryRestrictions: ['Vegetarian'],
-  emailNotifications: true
+// Profile data
+const profile = ref<User>({
+  id: '',
+  email: '',
+  username: '',
+  name: '',
+  role: 'user',
+  profile_picture_url: '',
+  bio: '',
+  privacy_level: 'public',
+  dietary_preferences: [],
+  allergens: [],
+  email_verified: false,
+  created_at: '',
+  updated_at: ''
 })
 
-const password = ref({
-  current: '',
-  new: '',
-  confirm: ''
+// Form selections
+const selectedDietaryLifestyles = ref<string[]>([])
+const selectedCuisinePrefs = ref<string[]>([])
+const selectedAllergens = ref<string[]>([])
+
+// Options (must match database enum values)
+const dietaryLifestyleTypes = [
+  'vegetarian',
+  'vegan',
+  'pescatarian',
+  'paleo',
+  'keto',
+  'mediterranean',
+  'whole30',
+  'raw',
+  'low_carb',
+  'low_fat',
+  'high_protein',
+  'custom'
+]
+
+const cuisineTypes = [
+  'mediterranean',
+  'mexican',
+  'italian',
+  'chinese',
+  'japanese',
+  'indian',
+  'thai',
+  'french',
+  'greek',
+  'korean',
+  'middle_eastern',
+  'american',
+  'british',
+  'spanish',
+  'german',
+  'custom'
+]
+
+const allergenTypes = [
+  'peanuts',
+  'tree nuts',
+  'dairy',
+  'eggs',
+  'fish',
+  'shellfish',
+  'soy',
+  'gluten',
+  'sesame',
+  'mustard',
+  'celery',
+  'lupin',
+  'sulphites'
+]
+
+const privacyLevels = [
+  { title: 'Public', value: 'public' },
+  { title: 'Friends Only', value: 'friends' },
+  { title: 'Private', value: 'private' }
+]
+
+// Load profile data on mount
+onMounted(async () => {
+  try {
+    isLoading.value = true
+    const userProfile = await UserService.getProfile()
+    
+    profile.value = userProfile
+    selectedDietaryLifestyles.value = userProfile.dietary_lifestyles || []
+    selectedCuisinePrefs.value = userProfile.cuisine_preferences || []
+    selectedAllergens.value = userProfile.allergens?.map(a => a.allergen_name) || []
+    
+  } catch (error) {
+    console.error('Failed to load profile:', error)
+    notificationStore.error('Failed to load profile data')
+  } finally {
+    isLoading.value = false
+  }
 })
 
 // Handle avatar upload
-const handleAvatarUpload = (file: File) => {
-  if (file) {
-    // TODO: Implement actual image upload to your backend
-    // For now, we'll just create a local URL
-    profile.value.avatar = URL.createObjectURL(file)
+const handleAvatarUpload = (files: File[]) => {
+  if (files && files.length > 0) {
+    // TODO: Implement actual image upload to backend
+    // For now, create a local URL for preview
+    profile.value.profile_picture_url = URL.createObjectURL(files[0])
   }
 }
 
@@ -246,17 +300,28 @@ const handleSubmit = async () => {
 
   isSubmitting.value = true
   try {
-    // TODO: Implement actual API call to your backend
-    console.log('Updating profile:', profile.value)
-    if (password.value.new) {
-      console.log('Updating password')
+    const updateData = {
+      username: profile.value.username,
+      bio: profile.value.bio || '',
+      privacy_level: profile.value.privacy_level || 'public',
+      preferences: {
+        dietary_lifestyles: selectedDietaryLifestyles.value,
+        cuisine_preferences: selectedCuisinePrefs.value,
+        allergies: selectedAllergens.value
+      }
     }
+
+    await UserService.updateProfile(updateData)
     
-    // Navigate back to profile page on success
+    // Update auth store with new user data
+    await authStore.fetchProfile()
+    
+    notificationStore.success('Profile updated successfully!')
     router.push('/profile')
+    
   } catch (error) {
     console.error('Error updating profile:', error)
-    // TODO: Show error message to user
+    notificationStore.error('Failed to update profile. Please try again.')
   } finally {
     isSubmitting.value = false
   }
@@ -265,6 +330,6 @@ const handleSubmit = async () => {
 
 <style scoped>
 .v-card {
-  border-radius: 8px;
+  border-radius: 12px;
 }
-</style> 
+</style>

@@ -51,10 +51,28 @@
               {{ recipe.category }}
             </v-chip>
             <v-chip
+              v-if="totalTime"
               color="secondary"
               variant="outlined"
             >
-              30 mins
+              <v-icon start size="small">mdi-clock-outline</v-icon>
+              {{ totalTime }}
+            </v-chip>
+            <v-chip
+              v-if="recipe.servings"
+              color="secondary"
+              variant="outlined"
+            >
+              <v-icon start size="small">mdi-account-multiple</v-icon>
+              {{ recipe.servings }} servings
+            </v-chip>
+            <v-chip
+              v-if="recipe.difficulty"
+              :color="difficultyColor"
+              variant="outlined"
+            >
+              <v-icon start size="small">mdi-chef-hat</v-icon>
+              {{ recipe.difficulty }}
             </v-chip>
           </div>
           <h1 class="text-h3 font-weight-bold mb-4">{{ recipe.name }}</h1>
@@ -63,13 +81,15 @@
           </p>
           <div class="d-flex align-center mb-6">
             <v-avatar
-              image=""
+              :image="recipe.author?.profile_picture_url || ''"
               size="40"
               class="mr-3"
-            ></v-avatar>
+            >
+              <v-icon v-if="!recipe.author?.profile_picture_url">mdi-account</v-icon>
+            </v-avatar>
             <div>
               <div class="text-subtitle-1 font-weight-medium">
-                Recipe Author
+                {{ recipe.author?.name || 'Anonymous Chef' }}
               </div>
               <div class="text-caption text-medium-emphasis">
                 Posted {{ formatDate(recipe.created_at) }}
@@ -129,24 +149,48 @@
               Nutrition
             </v-card-title>
             <v-card-text>
-              <v-list>
+              <v-list v-if="hasNutritionalInfo">
                 <v-list-item
+                  v-if="recipe.calories > 0"
                   title="Calories"
-                  :subtitle="`${recipe.calories} kcal`"
-                ></v-list-item>
+                  :subtitle="`${Math.round(recipe.calories)} kcal`"
+                >
+                  <template v-slot:prepend>
+                    <v-icon color="orange">mdi-fire</v-icon>
+                  </template>
+                </v-list-item>
                 <v-list-item
+                  v-if="recipe.protein > 0"
                   title="Protein"
-                  :subtitle="`${recipe.protein}g`"
-                ></v-list-item>
+                  :subtitle="`${Math.round(recipe.protein)}g`"
+                >
+                  <template v-slot:prepend>
+                    <v-icon color="red">mdi-arm-flex</v-icon>
+                  </template>
+                </v-list-item>
                 <v-list-item
-                  title="Carbs"
-                  :subtitle="`${recipe.carbs}g`"
-                ></v-list-item>
+                  v-if="recipe.carbs > 0"
+                  title="Carbohydrates"
+                  :subtitle="`${Math.round(recipe.carbs)}g`"
+                >
+                  <template v-slot:prepend>
+                    <v-icon color="brown">mdi-barley</v-icon>
+                  </template>
+                </v-list-item>
                 <v-list-item
+                  v-if="recipe.fat > 0"
                   title="Fat"
-                  :subtitle="`${recipe.fat}g`"
-                ></v-list-item>
+                  :subtitle="`${Math.round(recipe.fat)}g`"
+                >
+                  <template v-slot:prepend>
+                    <v-icon color="green">mdi-water</v-icon>
+                  </template>
+                </v-list-item>
               </v-list>
+              <v-card-text v-else class="text-center text-medium-emphasis">
+                <v-icon size="48" color="grey-lighten-1">mdi-nutrition</v-icon>
+                <p class="mt-2">Nutritional information not available</p>
+              </v-card-text>
             </v-card-text>
           </v-card>
         </v-col>
@@ -213,7 +257,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useRecipes } from '@/composables/useRecipes'
 import type { Recipe } from '@/types/recipe.types'
@@ -223,6 +267,43 @@ const route = useRoute()
 const { fetchRecipeById, toggleFavorite, isLoading, error } = useRecipes()
 
 const recipe = ref<Recipe | null>(null)
+
+// Computed property to check if nutritional info is available
+const hasNutritionalInfo = computed(() => {
+  if (!recipe.value) return false
+  return recipe.value.calories > 0 || 
+         recipe.value.protein > 0 || 
+         recipe.value.carbs > 0 || 
+         recipe.value.fat > 0
+})
+
+// Computed property for total cooking time
+const totalTime = computed(() => {
+  if (!recipe.value) return ''
+  const prep = recipe.value.prep_time || 0
+  const cook = recipe.value.cook_time || 0
+  const total = prep + cook
+  
+  if (total === 0) return ''
+  if (total < 60) return `${total} mins`
+  
+  const hours = Math.floor(total / 60)
+  const mins = total % 60
+  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
+})
+
+// Computed property for difficulty color
+const difficultyColor = computed(() => {
+  if (!recipe.value?.difficulty) return 'secondary'
+  
+  const difficulty = recipe.value.difficulty.toLowerCase()
+  switch (difficulty) {
+    case 'easy': return 'success'
+    case 'medium': return 'warning'
+    case 'hard': return 'error'
+    default: return 'secondary'
+  }
+})
 
 // Load recipe by ID
 onMounted(async () => {
@@ -236,9 +317,12 @@ const handleToggleFavorite = async () => {
   if (!recipe.value) return
   
   try {
-    await toggleFavorite(recipe.value.id)
-    // Update local state
-    recipe.value.isFavorite = !recipe.value.isFavorite
+    console.log(`🔄 [Detail] Toggling favorite for ${recipe.value.name}, current status: ${recipe.value.isFavorite}`)
+    // Pass the current favorite status to the toggle function
+    const result = await toggleFavorite(recipe.value.id, recipe.value.isFavorite)
+    console.log(`✅ [Detail] Toggle result: ${result.is_favorite}`)
+    // Update local state with the API response
+    recipe.value.isFavorite = result.is_favorite
   } catch (err) {
     console.error('Failed to toggle favorite:', err)
   }

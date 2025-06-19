@@ -7,9 +7,6 @@
         </div>
 
         <nav class="nav-links">
-          <a href="#" @click.prevent="$router.push('/dashboard')" :class="{ active: currentRoute === 'dashboard' }" data-testid="nav-dashboard">
-            Dashboard
-          </a>
           <a href="#" @click.prevent="$router.push('/recipes')" :class="{ active: currentRoute === 'recipes' }" data-testid="nav-recipes">
             Browse Recipes
           </a>
@@ -22,15 +19,27 @@
         </nav>
 
         <div class="user-menu">
-          <span class="welcome-text">Welcome, {{ userName }}</span>
+          <span class="welcome-text">Welcome, {{ userFirstName }}</span>
           <el-dropdown trigger="click">
             <div class="avatar" data-testid="user-avatar">
               {{ userInitials }}
             </div>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item @click="$router.push('/profile/edit')" data-testid="profile-settings">
+                <el-dropdown-item @click="$router.push('/dashboard')" data-testid="nav-dashboard">
+                  <el-icon><Grid /></el-icon>
+                  Dashboard
+                </el-dropdown-item>
+                <el-dropdown-item v-if="isAdmin" @click="$router.push('/admin')" data-testid="nav-admin">
+                  <el-icon><Setting /></el-icon>
+                  Admin Dashboard
+                </el-dropdown-item>
+                <el-dropdown-item divided @click="$router.push('/profile')" data-testid="view-profile">
                   <el-icon><User /></el-icon>
+                  View Profile
+                </el-dropdown-item>
+                <el-dropdown-item @click="$router.push('/profile/edit')" data-testid="profile-settings">
+                  <el-icon><Setting /></el-icon>
                   Profile Settings
                 </el-dropdown-item>
                 <el-dropdown-item divided @click="handleLogout" data-testid="logout-button">
@@ -45,6 +54,7 @@
     </header>
 
     <main class="main-content">
+      <email-verification-banner />
       <router-view></router-view>
     </main>
 
@@ -94,7 +104,8 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
-import { User, SwitchButton } from '@element-plus/icons-vue'
+import { User, SwitchButton, Grid, Setting } from '@element-plus/icons-vue'
+import EmailVerificationBanner from '@/components/EmailVerificationBanner.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -110,9 +121,28 @@ const userName = computed(() => {
   return authStore.user?.name || authStore.user?.username || 'User'
 })
 
+const userFirstName = computed(() => {
+  const fullName = authStore.user?.name || authStore.user?.username || 'User'
+  
+  // If it's an email, extract the part before @
+  if (fullName.includes('@')) {
+    const emailPart = fullName.split('@')[0]
+    // Capitalize first letter
+    return emailPart.charAt(0).toUpperCase() + emailPart.slice(1)
+  }
+  
+  // If it's a full name, get the first word and capitalize
+  const firstName = fullName.split(' ')[0]
+  return firstName.charAt(0).toUpperCase() + firstName.slice(1)
+})
+
 const userInitials = computed(() => {
   const name = userName.value
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+})
+
+const isAdmin = computed(() => {
+  return authStore.user?.role === 'admin'
 })
 
 const handleLogout = async () => {
@@ -206,6 +236,20 @@ const handleLogout = async () => {
   opacity: 1;
   background: rgba(255, 255, 255, 0.1);
   border-bottom-color: #3498db;
+}
+
+.nav-links a.admin-link {
+  background: rgba(231, 76, 60, 0.2);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.nav-links a.admin-link:hover {
+  background: rgba(231, 76, 60, 0.3);
+}
+
+.nav-links a.admin-link.active {
+  background: rgba(231, 76, 60, 0.4);
+  border-bottom-color: #e74c3c;
 }
 
 .user-menu {

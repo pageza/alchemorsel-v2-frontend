@@ -45,7 +45,10 @@ const router = createRouter({
       component: AuthLayout,
       children: [
         { path: 'login', name: 'login', component: () => import('../views/LoginView.vue') },
-        { path: 'register', name: 'register', component: () => import('../views/RegisterView.vue') }
+        { path: 'register', name: 'register', component: () => import('../views/RegisterView.vue') },
+        { path: 'forgot-password', name: 'forgot-password', component: () => import('../views/ForgotPasswordView.vue') },
+        { path: 'reset-password', name: 'reset-password', component: () => import('../views/ResetPasswordView.vue') },
+        { path: 'verify-email', name: 'verify-email', component: () => import('../views/VerifyEmailView.vue') }
       ]
     },
     // Authenticated user routes
@@ -57,9 +60,23 @@ const router = createRouter({
         { path: 'dashboard', name: 'dashboard', component: () => import('../views/DashboardView.vue') },
         { path: 'generate', name: 'generate', component: () => import('../views/RecipeGeneratorView.vue') },
         { path: 'favorites', name: 'favorites', component: () => import('../views/FavoritesView.vue') },
+        { path: 'profile', name: 'profile', component: () => import('../views/ProfileView.vue') },
         { path: 'profile/edit', name: 'profile-edit', component: () => import('../views/EditProfileView.vue') },
         { path: 'recipes/create', name: 'recipe-create', component: () => import('../views/RecipeCreateView.vue') },
         { path: 'recipes/:id/edit', name: 'recipe-edit', component: () => import('../views/RecipeCreateView.vue') }
+      ]
+    },
+    // Admin routes
+    {
+      path: '/admin',
+      component: AuthenticatedLayout,
+      meta: { requiresAuth: true, requiresAdmin: true },
+      children: [
+        { path: '', name: 'admin-dashboard', component: () => import('../views/admin/AdminDashboard.vue') },
+        { path: 'users', name: 'admin-users', component: () => import('../views/admin/UserManagement.vue') },
+        { path: 'users/:id', name: 'admin-user-detail', component: () => import('../views/admin/UserManagement.vue') },
+        { path: 'recipes', name: 'admin-recipes', component: () => import('../views/admin/RecipeModeration.vue') },
+        { path: 'analytics', name: 'admin-analytics', component: () => import('../views/admin/AdminAnalytics.vue') }
       ]
     }
   ]
@@ -71,7 +88,8 @@ router.beforeEach((to, from, next) => {
   console.log(`🛡️ From path: ${from.path}, To path: ${to.path}`)
   
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
-  console.log(`🛡️ Route requires auth: ${requiresAuth}`)
+  const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin)
+  console.log(`🛡️ Route requires auth: ${requiresAuth}, requires admin: ${requiresAdmin}`)
   
   if (requiresAuth) {
     // Check localStorage directly to avoid circular dependencies
@@ -83,6 +101,29 @@ router.beforeEach((to, from, next) => {
       if (to.name !== 'login') {
         console.log('🛡️ No token, redirecting to login')
         next({ name: 'login' })
+        return
+      }
+    }
+    
+    // Check admin requirement
+    if (requiresAdmin) {
+      try {
+        const userStr = localStorage.getItem('auth_user')
+        if (userStr) {
+          const user = JSON.parse(userStr)
+          if (user.role !== 'admin') {
+            console.log('🛡️ User is not admin, redirecting to dashboard')
+            next({ name: 'dashboard' })
+            return
+          }
+        } else {
+          console.log('🛡️ No user data, redirecting to dashboard')
+          next({ name: 'dashboard' })
+          return
+        }
+      } catch (e) {
+        console.error('🛡️ Error checking admin role:', e)
+        next({ name: 'dashboard' })
         return
       }
     }

@@ -203,7 +203,7 @@ const handleSubmit = async () => {
 }
 
 const handleForgotPassword = () => {
-  // TODO: Implement forgot password flow
+  router.push('/forgot-password')
 }
 
 const handleSocialLogin = () => {

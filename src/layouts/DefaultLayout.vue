@@ -27,20 +27,37 @@
           </el-button>
         </div>
         
-        <div v-else class="user-section">
-          <span class="welcome-text">Welcome, {{ userName }}</span>
-          <el-button
-            class="dashboard-btn"
-            @click="$router.push('/dashboard')"
-          >
-            Dashboard
-          </el-button>
-          <el-button
-            class="logout-btn"
-            @click="handleLogout"
-          >
-            Logout
-          </el-button>
+        <div v-else class="user-menu">
+          <span class="welcome-text">Welcome, {{ userFirstName }}</span>
+          <el-dropdown trigger="click">
+            <div class="avatar" data-testid="user-avatar">
+              {{ userInitials }}
+            </div>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="$router.push('/dashboard')" data-testid="nav-dashboard">
+                  <el-icon><Grid /></el-icon>
+                  Dashboard
+                </el-dropdown-item>
+                <el-dropdown-item v-if="isAdmin" @click="$router.push('/admin')" data-testid="nav-admin">
+                  <el-icon><Setting /></el-icon>
+                  Admin Dashboard
+                </el-dropdown-item>
+                <el-dropdown-item divided @click="$router.push('/profile')" data-testid="view-profile">
+                  <el-icon><User /></el-icon>
+                  View Profile
+                </el-dropdown-item>
+                <el-dropdown-item @click="$router.push('/profile/edit')" data-testid="profile-settings">
+                  <el-icon><Setting /></el-icon>
+                  Profile Settings
+                </el-dropdown-item>
+                <el-dropdown-item divided @click="handleLogout" data-testid="logout-button">
+                  <el-icon><SwitchButton /></el-icon>
+                  Logout
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </div>
       </div>
     </header>
@@ -96,6 +113,7 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
+import { User, SwitchButton, Grid, Setting } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -103,6 +121,30 @@ const authStore = useAuthStore()
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 const userName = computed(() => {
   return authStore.user?.name || authStore.user?.username || 'User'
+})
+
+const userFirstName = computed(() => {
+  const fullName = authStore.user?.name || authStore.user?.username || 'User'
+  
+  // If it's an email, extract the part before @
+  if (fullName.includes('@')) {
+    const emailPart = fullName.split('@')[0]
+    // Capitalize first letter
+    return emailPart.charAt(0).toUpperCase() + emailPart.slice(1)
+  }
+  
+  // If it's a full name, get the first word and capitalize
+  const firstName = fullName.split(' ')[0]
+  return firstName.charAt(0).toUpperCase() + firstName.slice(1)
+})
+
+const userInitials = computed(() => {
+  const name = userName.value
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+})
+
+const isAdmin = computed(() => {
+  return authStore.user?.role === 'admin'
 })
 
 const isLoggingOut = ref(false)
@@ -220,6 +262,30 @@ const handleLogout = async () => {
   gap: 15px;
 }
 
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #95a5a6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.avatar:hover {
+  background: #7f8c8d;
+}
+
 .welcome-text {
   color: white;
   font-size: 0.9rem;
@@ -335,7 +401,8 @@ const handleLogout = async () => {
   }
   
   .auth-buttons,
-  .user-section {
+  .user-section,
+  .user-menu {
     gap: 8px;
   }
   
@@ -362,7 +429,8 @@ const handleLogout = async () => {
     font-size: 1.25rem;
   }
   
-  .user-section {
+  .user-section,
+  .user-menu {
     flex-direction: column;
     gap: 5px;
   }

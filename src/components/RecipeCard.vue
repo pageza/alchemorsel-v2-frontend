@@ -19,11 +19,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-defineProps<{ 
+const props = defineProps<{ 
   image: string
   name: string
   isFavorite?: boolean
   showFavoriteButton?: boolean
+  id?: string
 }>()
 
 const emit = defineEmits<{
@@ -36,7 +37,7 @@ const isLoading = ref(false)
 const handleFavoriteClick = async () => {
   isLoading.value = true
   try {
-    emit('favoriteToggle', '')  // Parent component will handle this with actual recipe ID
+    emit('favoriteToggle', props.id || '')  // Use the recipe ID from props
   } finally {
     isLoading.value = false
   }

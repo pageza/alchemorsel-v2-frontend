@@ -22,4 +22,32 @@ export class AuthService {
     )
     return response.data.profile
   }
+
+  static async requestPasswordReset(email: string): Promise<{ message: string }> {
+    const response = await api.post<{ message: string }>('/auth/password-reset/request', { email })
+    return response.data
+  }
+
+  static async verifyResetToken(token: string): Promise<{ message: string }> {
+    const response = await api.post<{ message: string }>('/auth/password-reset/verify', { token })
+    return response.data
+  }
+
+  static async completePasswordReset(token: string, newPassword: string): Promise<{ message: string }> {
+    const response = await api.post<{ message: string }>('/auth/password-reset/complete', { 
+      token, 
+      new_password: newPassword 
+    })
+    return response.data
+  }
+
+  static async verifyEmail(token: string): Promise<{ message: string }> {
+    const response = await api.post<{ message: string }>('/auth/email-verification/verify', { token })
+    return response.data
+  }
+
+  static async resendVerificationEmail(email: string): Promise<{ message: string }> {
+    const response = await api.post<{ message: string }>('/auth/email-verification/resend', { email })
+    return response.data
+  }
 } 

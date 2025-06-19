@@ -55,30 +55,44 @@
           </div>
         </el-form-item>
 
-        <!-- Dietary Preferences -->
-        <el-form-item label="Dietary Preferences">
-          <div class="checkbox-group" data-testid="dietary-preferences">
+        <!-- Dietary Lifestyles -->
+        <el-form-item label="Dietary Lifestyles">
+          <div class="checkbox-group" data-testid="dietary-lifestyles">
             <el-checkbox
-              v-for="preference in dietaryOptions"
-              :key="preference"
-              v-model="formData.dietary_preferences"
-              :value="preference"
-              :label="preference"
-              :data-testid="`dietary-${preference.toLowerCase()}`"
+              v-for="lifestyle in dietaryLifestyleOptions"
+              :key="lifestyle"
+              v-model="formData.dietary_lifestyles"
+              :value="lifestyle"
+              :label="lifestyle.charAt(0).toUpperCase() + lifestyle.slice(1)"
+              :data-testid="`dietary-${lifestyle}`"
             />
           </div>
         </el-form-item>
 
-        <!-- Allergies -->
-        <el-form-item label="Allergies">
+        <!-- Cuisine Preferences -->
+        <el-form-item label="Cuisine Preferences">
+          <div class="checkbox-group" data-testid="cuisine-preferences">
+            <el-checkbox
+              v-for="cuisine in cuisineOptions"
+              :key="cuisine"
+              v-model="formData.cuisine_preferences"
+              :value="cuisine"
+              :label="cuisine.charAt(0).toUpperCase() + cuisine.slice(1)"
+              :data-testid="`cuisine-${cuisine}`"
+            />
+          </div>
+        </el-form-item>
+
+        <!-- Food Allergies -->
+        <el-form-item label="Food Allergies">
           <div class="checkbox-group" data-testid="allergies">
             <el-checkbox
               v-for="allergy in allergyOptions"
               :key="allergy"
               v-model="formData.allergies"
               :value="allergy"
-              :label="allergy"
-              :data-testid="`allergy-${allergy.toLowerCase().replace(/\s+/g, '-')}`"
+              :label="allergy.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')"
+              :data-testid="`allergy-${allergy.replace(/\s+/g, '-')}`"
             />
           </div>
         </el-form-item>
@@ -132,26 +146,38 @@ const formData = reactive({
   username: '',
   full_name: '',
   password: '',
-  dietary_preferences: [] as string[],
+  dietary_lifestyles: [] as string[],
+  cuisine_preferences: [] as string[],
   allergies: [] as string[]
 })
 
-const dietaryOptions = [
-  'Vegan',
-  'Vegetarian', 
-  'Gluten-Free',
-  'Dairy-Free',
-  'Keto',
-  'Paleo'
+const dietaryLifestyleOptions = [
+  'vegetarian',
+  'vegan',
+  'pescatarian',
+  'paleo',
+  'keto',
+  'mediterranean'
+]
+
+const cuisineOptions = [
+  'italian',
+  'mexican',
+  'chinese',
+  'japanese',
+  'indian',
+  'mediterranean'
 ]
 
 const allergyOptions = [
-  'Peanuts',
-  'Tree Nuts',
-  'Shellfish',
-  'Soy',
-  'Eggs',
-  'Dairy'
+  'peanuts',
+  'tree nuts',
+  'dairy',
+  'eggs',
+  'fish',
+  'shellfish',
+  'soy',
+  'gluten'
 ]
 
 const rules = {
@@ -186,7 +212,8 @@ const handleSubmit = async () => {
       username: formData.username,
       name: formData.full_name,
       password: formData.password,
-      dietary_preferences: formData.dietary_preferences,
+      dietary_lifestyles: formData.dietary_lifestyles,
+      cuisine_preferences: formData.cuisine_preferences,
       allergies: formData.allergies
     })
     

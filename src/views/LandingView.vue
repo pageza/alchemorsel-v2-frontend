@@ -17,7 +17,52 @@
     <!-- Featured Recipes Section -->
     <div class="content">
       <h2 class="section-title">Featured Recipes</h2>
-      <div class="recipe-grid">
+      
+      <!-- Loading State -->
+      <div v-if="isLoading" class="loading-container">
+        <el-skeleton :rows="6" animated />
+      </div>
+      
+      <!-- Recipe Grid -->
+      <div v-else-if="featuredRecipes && featuredRecipes.length > 0" class="recipe-grid">
+        <div 
+          v-for="recipe in featuredRecipes" 
+          :key="recipe.id"
+          class="recipe-card"
+          @click="viewRecipe(recipe.id)"
+        >
+          <div class="recipe-image">
+            <img 
+              v-if="recipe.image_url" 
+              :src="recipe.image_url" 
+              :alt="recipe.name"
+              @error="(e: Event) => (e.target as HTMLImageElement).style.display = 'none'"
+            >
+            <div v-else class="image-placeholder">
+              <i class="el-icon-dish"></i>
+            </div>
+          </div>
+          <div class="recipe-content">
+            <div class="recipe-title">{{ recipe.name }}</div>
+            <div class="recipe-meta">
+              <span>⏱ {{ formatTime(recipe.prep_time, recipe.cook_time) }}</span>
+              <span v-if="recipe.servings">👥 {{ recipe.servings }} servings</span>
+            </div>
+            <div v-if="recipe.dietary_preferences && recipe.dietary_preferences.length > 0" class="dietary-tags">
+              <span 
+                v-for="diet in recipe.dietary_preferences.slice(0, 3)" 
+                :key="diet"
+                class="tag"
+              >
+                {{ diet }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Fallback to Placeholder -->
+      <div v-else class="recipe-grid">
         <div class="recipe-card">
           <div class="recipe-image">[Recipe Image]</div>
           <div class="recipe-content">
@@ -66,7 +111,59 @@
 </template>
 
 <script setup lang="ts">
-// No imports needed for this version
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { FeaturedService } from '@/services/featured.service'
+import type { Recipe } from '@/services/recipe.service'
+
+const router = useRouter()
+const featuredRecipes = ref<Recipe[]>([])
+const isLoading = ref(true)
+
+// Format time for display
+const formatTime = (prepTime?: number | string, cookTime?: number | string) => {
+  if (!prepTime && !cookTime) return '30 min'
+  
+  const parseTime = (time: number | string) => {
+    if (typeof time === 'number') return time
+    const match = time.match(/(\d+)/)
+    return match ? parseInt(match[1]) : 0
+  }
+  
+  const prep = prepTime ? parseTime(prepTime) : 0
+  const cook = cookTime ? parseTime(cookTime) : 0
+  const total = prep + cook
+  
+  if (total === 0) return '30 min'
+  if (total < 60) return `${total} min`
+  const hours = Math.floor(total / 60)
+  const minutes = total % 60
+  return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`
+}
+
+// Load featured recipes
+const loadFeaturedRecipes = async () => {
+  try {
+    isLoading.value = true
+    const response = await FeaturedService.getFeaturedRecipes(6)
+    featuredRecipes.value = response?.recipes || []
+  } catch (error) {
+    console.error('Failed to load featured recipes:', error)
+    // Set empty array if loading fails
+    featuredRecipes.value = []
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Navigate to recipe detail
+const viewRecipe = (recipeId: string) => {
+  router.push(`/recipes/${recipeId}`)
+}
+
+onMounted(() => {
+  loadFeaturedRecipes()
+})
 </script>
 
 <style scoped>
@@ -135,6 +232,7 @@
 .recipe-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  cursor: pointer;
 }
 
 .recipe-image {
@@ -146,6 +244,30 @@
   justify-content: center;
   color: #95a5a6;
   font-size: 1rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.recipe-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 3rem;
+  color: #bdc3c7;
+}
+
+.loading-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 .recipe-content {

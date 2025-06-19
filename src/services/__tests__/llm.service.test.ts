@@ -62,7 +62,8 @@ describe('LLMService', () => {
 
       expect(mockApi.post).toHaveBeenCalledWith('/llm/query', {
         query: mockQuery,
-        intent: 'generate'
+        intent: 'generate',
+        skip_similar_check: false
       })
       expect(result).toEqual(mockResponse)
     })

@@ -21,9 +21,13 @@
         <RecipeCard 
           v-for="recipe in favorites" 
           :key="recipe.id"
+          :id="recipe.id"
           :image="recipe.image_url || '/placeholder-recipe.jpg'"
           :name="recipe.name"
+          :showFavoriteButton="true"
+          :isFavorite="true"
           @click="$router.push(`/recipes/${recipe.id}`)"
+          @favoriteToggle="handleFavoriteToggle"
         />
       </div>
     </div>
@@ -46,40 +50,38 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-// import { useRecipeStore } from '@/stores/recipe.store'
+import { useRecipeStore } from '@/stores/recipe.store'
 import { useNotificationStore } from '@/stores/notification.store'
+import { RecipeService } from '@/services/recipe.service'
 import RecipeCard from '@/components/RecipeCard.vue'
 import type { Recipe } from '@/types/recipe.types'
 
-// const recipeStore = useRecipeStore()
+const recipeStore = useRecipeStore()
 const notificationStore = useNotificationStore()
 
 const favorites = ref<Recipe[]>([])
 const loading = ref(true)
 
-// TODO: Implement favorite toggle functionality when component supports it
-// const handleFavoriteToggle = async (recipeId: string) => {
-//   try {
-//     // Remove from favorites locally immediately for better UX
-//     favorites.value = favorites.value.filter(recipe => recipe.id !== recipeId)
-//     
-//     // Call the store method to update backend
-//     await recipeStore.toggleFavorite(recipeId)
-//     
-//     notificationStore.success('Recipe removed from favorites')
-//   } catch {
-//     // Re-add the recipe if the API call failed
-//     notificationStore.error('Failed to update favorites')
-//     loadFavorites() // Reload to get correct state
-//   }
-// }
+const handleFavoriteToggle = async (recipeId: string) => {
+  try {
+    // Remove from favorites locally immediately for better UX
+    favorites.value = favorites.value.filter(recipe => recipe.id !== recipeId)
+    
+    // Call the store method to update backend
+    await recipeStore.toggleFavorite(recipeId, true) // true because it's currently favorited
+    
+    notificationStore.success('Recipe removed from favorites')
+  } catch {
+    // Re-add the recipe if the API call failed
+    notificationStore.error('Failed to update favorites')
+    loadFavorites() // Reload to get correct state
+  }
+}
 
 const loadFavorites = async () => {
   try {
     loading.value = true
-    // This would typically fetch from the backend
-    // For now, we'll use empty array until backend integration
-    favorites.value = []
+    favorites.value = await RecipeService.getFavorites()
   } catch (error) {
     console.error('Failed to load favorites:', error)
     notificationStore.error('Failed to load favorites')

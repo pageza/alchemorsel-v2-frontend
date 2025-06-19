@@ -20,9 +20,10 @@ export const useRecipeStore = defineStore('recipe', () => {
     error.value = null
     try {
       const response = await RecipeService.getRecipes()
-      recipes.value = response
+      recipes.value = response || []
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Failed to fetch recipes'
+      recipes.value = [] // Ensure it's always an array
     } finally {
       isLoading.value = false
     }
@@ -33,9 +34,10 @@ export const useRecipeStore = defineStore('recipe', () => {
     error.value = null
     try {
       const response = await RecipeService.searchRecipes(query, category, sortBy)
-      recipes.value = response
+      recipes.value = response || []
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Failed to search recipes'
+      recipes.value = [] // Ensure it's always an array
     } finally {
       isLoading.value = false
     }
@@ -60,18 +62,21 @@ export const useRecipeStore = defineStore('recipe', () => {
     }
   }
   
-  async function toggleFavorite(recipeId: string): Promise<void> {
+  async function toggleFavorite(recipeId: string, currentStatus?: boolean): Promise<{ is_favorite: boolean; message: string }> {
     try {
       // Find the current recipe to get its favorite status
       const index = recipes.value.findIndex(r => r.id === recipeId)
-      const currentStatus = index !== -1 ? recipes.value[index].isFavorite : false
+      const status = currentStatus !== undefined ? currentStatus : (index !== -1 ? recipes.value[index].isFavorite : false)
       
-      const result = await RecipeService.toggleFavorite(recipeId, currentStatus)
+      const result = await RecipeService.toggleFavorite(recipeId, status)
       
       // Update the recipe in the list with the new status
       if (index !== -1) {
         recipes.value[index].isFavorite = result.is_favorite
       }
+      
+      // Return the result so components can use it
+      return result
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Failed to toggle favorite'
       throw e

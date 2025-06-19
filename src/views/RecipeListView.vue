@@ -145,7 +145,7 @@
                 class="favorite-btn"
                 size="small"
                 variant="elevated"
-                @click.prevent="handleToggleFavorite(recipe)"
+                @click.stop.prevent="handleToggleFavorite(recipe)"
               ></v-btn>
             </v-img>
 
@@ -209,16 +209,18 @@ const sortOptions = [
 // Handle favorite toggle
 const handleToggleFavorite = async (recipe: Recipe) => {
   try {
-    await toggleFavorite(recipe.id)
-    // Update the local recipe state
-    recipe.isFavorite = !recipe.isFavorite
+    console.log(`🔄 Toggling favorite for ${recipe.name}, current status: ${recipe.isFavorite}`)
+    // Pass the current favorite status to the toggle function
+    // The store will automatically update the recipe state
+    const result = await toggleFavorite(recipe.id, recipe.isFavorite)
+    console.log(`✅ Toggle result: ${result.is_favorite}`)
   } catch (err) {
     console.error('Failed to toggle favorite:', err)
   }
 }
 
 // Debounced search function
-let searchTimeout: number | null = null
+let searchTimeout: ReturnType<typeof setTimeout> | null = null
 const performSearch = () => {
   if (searchTimeout) {
     clearTimeout(searchTimeout)

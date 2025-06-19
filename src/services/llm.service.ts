@@ -26,18 +26,22 @@ export interface LLMQueryRequest {
   query: string
   intent: 'generate' | 'modify'
   draft_id?: string
+  skip_similar_check?: boolean
 }
 
 export interface LLMQueryResponse {
-  recipe: RecipeDraft
-  draft_id: string
+  recipe?: RecipeDraft
+  draft_id?: string
+  similar_recipes?: any[] // Will use Recipe type from recipe service
+  message?: string
 }
 
 export class LLMService {
-  static async generateRecipe(query: string): Promise<LLMQueryResponse> {
+  static async generateRecipe(query: string, skipSimilarCheck = false): Promise<LLMQueryResponse> {
     const response = await api.post('/llm/query', {
       query,
-      intent: 'generate'
+      intent: 'generate',
+      skip_similar_check: skipSimilarCheck
     })
     return response.data
   }

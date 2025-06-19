@@ -25,6 +25,10 @@ export const useAuthStore = defineStore('auth', () => {
       // Try to fetch profile, but don't fail login if it fails
       try {
         user.value = await AuthService.getProfile()
+        // Store user data in localStorage for router guards
+        if (user.value) {
+          localStorage.setItem('auth_user', JSON.stringify(user.value))
+        }
       } catch (profileError) {
         console.warn('Failed to fetch profile after login:', profileError)
         // Set a minimal user object so login can continue
@@ -33,8 +37,10 @@ export const useAuthStore = defineStore('auth', () => {
           email: credentials.email,
           username: credentials.email,
           name: credentials.email,
+          role: 'user',
           dietaryPreferences: [],
           allergies: [],
+          email_verified: false,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         }
@@ -57,6 +63,10 @@ export const useAuthStore = defineStore('auth', () => {
       // Try to fetch profile, but don't fail registration if it fails
       try {
         user.value = await AuthService.getProfile()
+        // Store user data in localStorage for router guards
+        if (user.value) {
+          localStorage.setItem('auth_user', JSON.stringify(user.value))
+        }
       } catch (profileError) {
         console.warn('Failed to fetch profile after registration:', profileError)
         // Set a minimal user object so registration can continue
@@ -65,8 +75,10 @@ export const useAuthStore = defineStore('auth', () => {
           email: data.email,
           username: data.username || data.email,
           name: data.name || data.email,
+          role: 'user',
           dietaryPreferences: data.dietary_preferences || [],
           allergies: data.allergies || [],
+          email_verified: false,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         }
@@ -85,6 +97,10 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       user.value = await AuthService.getProfile()
       console.log('Profile fetched successfully')
+      // Store user data in localStorage for router guards
+      if (user.value) {
+        localStorage.setItem('auth_user', JSON.stringify(user.value))
+      }
     } catch (error) {
       console.error('fetchProfile failed, calling clearAuth:', error)
       console.trace('fetchProfile failure stack trace')
@@ -144,6 +160,7 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
     token.value = null
     StorageService.clearToken()
+    localStorage.removeItem('auth_user')
   }
   
   // Initialize from storage
