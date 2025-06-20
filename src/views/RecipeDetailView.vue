@@ -96,6 +96,18 @@
               </div>
             </div>
             <v-spacer></v-spacer>
+            <!-- Fork button - create new recipe based on this one -->
+            <v-btn
+              variant="flat"
+              class="mr-2"
+              @click="forkRecipe"
+              color="secondary"
+            >
+              <v-icon color="white">mdi-silverware-fork</v-icon>
+              <v-tooltip activator="parent" location="bottom">
+                {{ authStore.isAuthenticated ? 'Fork Recipe' : 'Login to Fork Recipe' }}
+              </v-tooltip>
+            </v-btn>
             <v-btn
               :icon="recipe.isFavorite ? 'mdi-heart' : 'mdi-heart-outline'"
               :color="recipe.isFavorite ? 'red' : 'default'"
@@ -253,20 +265,34 @@
       </v-row>
     </v-container>
     </div>
+    
+    <!-- Fork Recipe Modal -->
+    <ForkRecipeModal
+      v-model="showForkModal"
+      :recipe-id="recipe?.id"
+      :recipe-name="recipe?.name"
+      @fork-requested="handleForkRequest"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useRecipes } from '@/composables/useRecipes'
+import { useAuthStore } from '@/stores/auth.store'
+import { useNotificationStore } from '@/stores/notification.store'
+import ForkRecipeModal from '@/components/ForkRecipeModal.vue'
 import type { Recipe } from '@/types/recipe.types'
 
 const route = useRoute()
-// const router = useRouter()
-const { fetchRecipeById, toggleFavorite, isLoading, error } = useRecipes()
+const router = useRouter()
+const { fetchRecipeById, toggleFavorite, isLoading, error, getRecipeById } = useRecipes()
+const authStore = useAuthStore()
+const notificationStore = useNotificationStore()
 
 const recipe = ref<Recipe | null>(null)
+const showForkModal = ref(false)
 
 // Computed property to check if nutritional info is available
 const hasNutritionalInfo = computed(() => {
@@ -305,9 +331,18 @@ const difficultyColor = computed(() => {
   }
 })
 
+
 // Load recipe by ID
 onMounted(async () => {
   const id = route.params.id as string
+  
+  // First check if recipe is already in store
+  const storeRecipe = getRecipeById(id)
+  if (storeRecipe) {
+    recipe.value = storeRecipe
+  }
+  
+  // Always fetch fresh data to ensure we have latest favorite status
   const fetchedRecipe = await fetchRecipeById(id)
   recipe.value = fetchedRecipe
 })
@@ -318,14 +353,46 @@ const handleToggleFavorite = async () => {
   
   try {
     console.log(`🔄 [Detail] Toggling favorite for ${recipe.value.name}, current status: ${recipe.value.isFavorite}`)
-    // Pass the current favorite status to the toggle function
+    
+    // Use store's toggle function which handles optimistic updates
     const result = await toggleFavorite(recipe.value.id, recipe.value.isFavorite)
     console.log(`✅ [Detail] Toggle result: ${result.is_favorite}`)
-    // Update local state with the API response
+    
+    // Update local recipe state to match store
     recipe.value.isFavorite = result.is_favorite
+    
+    // Also update the recipe in the store if it exists there
+    const storeRecipe = getRecipeById(recipe.value.id)
+    if (storeRecipe) {
+      storeRecipe.isFavorite = result.is_favorite
+    }
   } catch (err) {
     console.error('Failed to toggle favorite:', err)
   }
+}
+
+// Handle recipe forking (create new recipe based on this one)
+const forkRecipe = () => {
+  if (!recipe.value) return
+  
+  // Check if user is authenticated
+  if (!authStore.isAuthenticated) {
+    // Redirect to login page
+    router.push('/login')
+    return
+  }
+  
+  // Show fork modal
+  showForkModal.value = true
+}
+
+// Handle fork request submission
+const handleForkRequest = async (data: { recipeId: string; modification: string; draftId: string }) => {
+  console.log('Fork request completed:', data)
+  
+  // Always navigate to the generation page with the draft
+  // This allows users to make additional modifications before saving
+  router.push(`/generate?draft=${data.draftId}`)
 }
 
 // Format date helper

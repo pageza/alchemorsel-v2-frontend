@@ -47,10 +47,16 @@
               size="64"
               class="mb-4"
             ></v-progress-circular>
-            <h3 class="text-h5 mb-2">Creating your recipe...</h3>
+            <h3 class="text-h5 mb-2">{{ loadingMessage }}</h3>
             <p class="text-body-1 text-medium-emphasis">
-              Our AI chef is working on something delicious for you
+              {{ loadingSubMessage }}
             </p>
+            <div v-if="retryAttempt > 1" class="mt-4">
+              <v-chip color="warning" size="small">
+                <v-icon start size="small">mdi-refresh</v-icon>
+                Attempt {{ retryAttempt }} of 3
+              </v-chip>
+            </div>
           </v-card>
 
           <!-- Error State -->
@@ -291,15 +297,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { LLMService, type RecipeDraft } from '@/services/llm.service'
 import { RecipeService } from '@/services/recipe.service'
 import { useAuthStore } from '@/stores/auth.store'
 import { useNotificationStore } from '@/stores/notification.store'
 import { AuthService } from '@/services/auth.service'
+import api from '@/services/api'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const notificationStore = useNotificationStore()
 
@@ -315,6 +323,9 @@ const isSaving = ref(false)
 const error = ref<string | null>(null)
 const showModifyDialog = ref(false)
 const resendingEmail = ref(false)
+const retryAttempt = ref(1)
+const loadingMessage = ref('Creating your recipe...')
+const loadingSubMessage = ref('Our AI chef is working on something delicious for you')
 
 // Generate recipe from natural language
 const generateRecipe = async () => {
@@ -324,43 +335,80 @@ const generateRecipe = async () => {
   error.value = null
   similarRecipes.value = []
   currentDraft.value = null
+  retryAttempt.value = 1
+  loadingMessage.value = 'Creating your recipe...'
+  loadingSubMessage.value = 'Our AI chef is working on something delicious for you'
 
-  try {
-    const response = await LLMService.generateRecipe(query.value)
+  const maxRetries = 3
+  let lastError: any = null
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    retryAttempt.value = attempt
     
-    // Check if we got similar recipes instead of a new generation
-    if (response.similar_recipes && response.similar_recipes.length > 0) {
-      similarRecipes.value = response.similar_recipes
-      currentDraft.value = null
-      currentDraftId.value = ''
-    } else if (response.recipe) {
-      currentDraft.value = response.recipe
-      currentDraftId.value = response.draft_id || ''
-      similarRecipes.value = []
+    if (attempt > 1) {
+      loadingMessage.value = `Trying again... (${attempt}/${maxRetries})`
+      loadingSubMessage.value = attempt === 2 
+        ? 'Sometimes the best recipes need a second try!' 
+        : 'Third time\'s the charm - perfecting your recipe...'
     }
-  } catch (err: any) {
-    console.error('Recipe generation error:', err)
-    
-    // Handle email verification required error
-    if (err.response?.status === 403) {
-      const errorData = err.response?.data
-      if (errorData?.error === 'email verification required') {
-        error.value = errorData.message || 'Please verify your email address to generate recipes.'
-        // Show notification with action to resend verification email
-        notificationStore.info('Email verification required to generate recipes')
-      } else {
-        error.value = 'Access denied. Please check your account status.'
+
+    try {
+      const response = await LLMService.generateRecipe(query.value)
+      
+      // Check if we got similar recipes instead of a new generation
+      if (response.similar_recipes && response.similar_recipes.length > 0) {
+        similarRecipes.value = response.similar_recipes
+        currentDraft.value = null
+        currentDraftId.value = ''
+      } else if (response.recipe) {
+        currentDraft.value = response.recipe
+        currentDraftId.value = response.draft_id || ''
+        similarRecipes.value = []
       }
-    } else if (err.response?.status === 401) {
-      error.value = 'Your session has expired. Please log in again.'
-    } else if (err.response?.status && err.response.status >= 500) {
-      error.value = 'Server error occurred. Please try again.'
-    } else {
-      error.value = 'Failed to generate recipe. Please try again.'
+      
+      // Success - break out of retry loop
+      break
+      
+    } catch (err: any) {
+      lastError = err
+      console.error(`Recipe generation attempt ${attempt} failed:`, err)
+      
+      // Handle email verification required error (don't retry)
+      if (err.response?.status === 403) {
+        const errorData = err.response?.data
+        if (errorData?.error === 'email verification required') {
+          error.value = errorData.message || 'Please verify your email address to generate recipes.'
+          notificationStore.info('Email verification required to generate recipes')
+          break
+        } else {
+          error.value = 'Access denied. Please check your account status.'
+          break
+        }
+      } else if (err.response?.status === 401) {
+        error.value = 'Your session has expired. Please log in again.'
+        break
+      } else if (err.response?.status === 429) {
+        error.value = 'Rate limit exceeded. Please wait before trying again.'
+        break
+      }
+      
+      // If this is the last attempt, set the error
+      if (attempt === maxRetries) {
+        if (err.response?.status && err.response.status >= 500) {
+          error.value = `Recipe generation failed after ${maxRetries} attempts. Our AI chef seems to be having trouble - please try again later.`
+        } else {
+          error.value = `Failed to generate recipe after ${maxRetries} attempts. Please try again.`
+        }
+      }
+      
+      // Wait a bit before retrying (except on last attempt)
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      }
     }
-  } finally {
-    isLoading.value = false
   }
+
+  isLoading.value = false
 }
 
 // Generate new variation even when similar recipes exist
@@ -370,35 +418,69 @@ const generateNewVariation = async () => {
   isLoading.value = true
   error.value = null
   similarRecipes.value = []
+  retryAttempt.value = 1
+  loadingMessage.value = 'Creating your recipe variation...'
+  loadingSubMessage.value = 'Our AI chef is creating a unique variation for you'
 
-  try {
-    const response = await LLMService.generateRecipe(query.value, true) // Skip similar check
-    if (response.recipe) {
-      currentDraft.value = response.recipe
-      currentDraftId.value = response.draft_id || ''
-    }
-  } catch (err: any) {
-    console.error('Recipe generation error:', err)
+  const maxRetries = 3
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    retryAttempt.value = attempt
     
-    // Handle email verification required error
-    if (err.response?.status === 403) {
-      const errorData = err.response?.data
-      if (errorData?.error === 'email verification required') {
-        error.value = errorData.message || 'Please verify your email address to generate recipes.'
-        notificationStore.info('Email verification required to generate recipes')
-      } else {
-        error.value = 'Access denied. Please check your account status.'
-      }
-    } else if (err.response?.status === 401) {
-      error.value = 'Your session has expired. Please log in again.'
-    } else if (err.response?.status && err.response.status >= 500) {
-      error.value = 'Server error occurred. Please try again.'
-    } else {
-      error.value = 'Failed to generate recipe. Please try again.'
+    if (attempt > 1) {
+      loadingMessage.value = `Trying again... (${attempt}/${maxRetries})`
+      loadingSubMessage.value = attempt === 2 
+        ? 'Sometimes the best recipes need a second try!' 
+        : 'Third time\'s the charm - perfecting your recipe...'
     }
-  } finally {
-    isLoading.value = false
+
+    try {
+      const response = await LLMService.generateRecipe(query.value, true) // Skip similar check
+      if (response.recipe) {
+        currentDraft.value = response.recipe
+        currentDraftId.value = response.draft_id || ''
+      }
+      break // Success
+      
+    } catch (err: any) {
+      console.error(`Recipe variation attempt ${attempt} failed:`, err)
+      
+      // Handle non-retryable errors
+      if (err.response?.status === 403) {
+        const errorData = err.response?.data
+        if (errorData?.error === 'email verification required') {
+          error.value = errorData.message || 'Please verify your email address to generate recipes.'
+          notificationStore.info('Email verification required to generate recipes')
+          break
+        } else {
+          error.value = 'Access denied. Please check your account status.'
+          break
+        }
+      } else if (err.response?.status === 401) {
+        error.value = 'Your session has expired. Please log in again.'
+        break
+      } else if (err.response?.status === 429) {
+        error.value = 'Rate limit exceeded. Please wait before trying again.'
+        break
+      }
+      
+      // If this is the last attempt, set the error
+      if (attempt === maxRetries) {
+        if (err.response?.status && err.response.status >= 500) {
+          error.value = `Recipe generation failed after ${maxRetries} attempts. Our AI chef seems to be having trouble - please try again later.`
+        } else {
+          error.value = `Failed to generate recipe after ${maxRetries} attempts. Please try again.`
+        }
+      }
+      
+      // Wait before retrying
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      }
+    }
   }
+
+  isLoading.value = false
 }
 
 // Modify existing recipe
@@ -483,6 +565,38 @@ const resendVerificationEmail = async () => {
     resendingEmail.value = false
   }
 }
+
+// Load draft from URL if present
+const loadDraftFromUrl = async () => {
+  const draftId = route.query.draft as string
+  if (!draftId) return
+
+  isLoading.value = true
+  loadingMessage.value = 'Loading your recipe...'
+  loadingSubMessage.value = 'Retrieving your customized recipe'
+
+  try {
+    // Get the draft using the draft_id
+    const response = await api.get(`/llm/drafts/${draftId}`)
+    if (response.data.draft) {
+      currentDraft.value = response.data.draft
+      currentDraftId.value = draftId
+      
+      // Show notification about the loaded draft
+      notificationStore.info('Recipe loaded! You can make additional modifications or save it.')
+    }
+  } catch (err: any) {
+    console.error('Failed to load draft:', err)
+    error.value = 'Failed to load recipe draft. It may have expired or been saved already.'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Load draft on component mount
+onMounted(() => {
+  loadDraftFromUrl()
+})
 </script>
 
 <style scoped>

@@ -24,8 +24,9 @@ export interface RecipeDraft {
 
 export interface LLMQueryRequest {
   query: string
-  intent: 'generate' | 'modify'
+  intent: 'generate' | 'modify' | 'fork'
   draft_id?: string
+  recipe_id?: string
   skip_similar_check?: boolean
 }
 
@@ -42,6 +43,8 @@ export class LLMService {
       query,
       intent: 'generate',
       skip_similar_check: skipSimilarCheck
+    }, {
+      timeout: 120000 // 2 minutes timeout for LLM operations
     })
     return response.data
   }
@@ -51,6 +54,19 @@ export class LLMService {
       query,
       intent: 'modify',
       draft_id: draftId
+    }, {
+      timeout: 120000 // 2 minutes timeout for LLM operations
+    })
+    return response.data
+  }
+
+  static async forkRecipe(query: string, recipeId: string): Promise<LLMQueryResponse> {
+    const response = await api.post('/llm/query', {
+      query,
+      intent: 'fork',
+      recipe_id: recipeId
+    }, {
+      timeout: 120000 // 2 minutes timeout for LLM operations
     })
     return response.data
   }

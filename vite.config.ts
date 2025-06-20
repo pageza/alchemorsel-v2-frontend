@@ -5,7 +5,6 @@ import vue from '@vitejs/plugin-vue'
 import vuetify from 'vite-plugin-vuetify'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
-import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -19,15 +18,14 @@ export default defineConfig(({ mode }) => {
   console.log('🔧 Proxy target will be:', proxyTarget)
   
   return {
+  define: {
+    // Disable Vite's host checking completely
+    __VITE_IS_SECURE_CONTEXT__: 'false',
+    'process.env.DANGEROUSLY_DISABLE_HOST_CHECK': '"true"',
+  },
   plugins: [
     vue(),
     vuetify({ autoImport: true }),
-    AutoImport({
-      resolvers: [ElementPlusResolver()],
-    }),
-    Components({
-      resolvers: [ElementPlusResolver()],
-    }),
   ],
   resolve: {
     alias: {
@@ -38,6 +36,10 @@ export default defineConfig(({ mode }) => {
     host: '0.0.0.0',
     port: 5173,
     strictPort: true,
+    cors: true,
+    // Disable host checking completely  
+    allowedHosts: 'all',
+    disableHostCheck: true,
     hmr: {
       clientPort: 5173,
       host: 'localhost'

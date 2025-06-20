@@ -4,15 +4,15 @@
     <v-container fluid class="hero-section">
       <v-row justify="center" align="center" class="hero-content">
         <v-col cols="12" md="8" lg="6" class="text-center">
-          <h1 class="display-1 font-weight-bold mb-6">
+          <h1 style="font-size: 48px; font-weight: bold; margin-bottom: 20px;">
             AI-Powered Recipe Magic
           </h1>
-          <p class="headline mb-8">
+          <p style="font-size: 20px; margin-bottom: 30px; opacity: 0.95;">
             Create personalized recipes tailored to your dietary preferences and allergies
           </p>
           <div class="hero-buttons">
             <v-btn
-              color="primary"
+              style="background: #c4876b; color: white; padding: 12px 30px;"
               size="large"
               @click="$router.push('/register')"
               class="mr-4 mb-4"
@@ -20,8 +20,7 @@
               Get Started Free
             </v-btn>
             <v-btn
-              color="secondary"
-              variant="outlined"
+              style="background: #b5a082; color: white; padding: 12px 30px;"
               size="large"
               @click="$router.push('/login')"
               class="mb-4"
@@ -316,15 +315,14 @@ onMounted(() => {
 }
 
 .hero-section {
-  background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, rgb(var(--v-theme-secondary)) 100%);
+  background: linear-gradient(135deg, #c4876b 0%, #a8936d 100%);
   color: white;
-  min-height: 60vh;
-  display: flex;
-  align-items: center;
+  padding: 80px 20px;
+  text-align: center;
 }
 
 .hero-content {
-  min-height: 60vh;
+  min-height: auto;
 }
 
 .hero-buttons {

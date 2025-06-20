@@ -42,12 +42,12 @@ export class AuthService {
   }
 
   static async verifyEmail(token: string): Promise<{ message: string }> {
-    const response = await api.post<{ message: string }>('/auth/email-verification/verify', { token })
+    const response = await api.post<{ message: string }>('/auth/verify-email', { token })
     return response.data
   }
 
   static async resendVerificationEmail(email: string): Promise<{ message: string }> {
-    const response = await api.post<{ message: string }>('/auth/email-verification/resend', { email })
+    const response = await api.post<{ message: string }>('/auth/resend-verification', { email })
     return response.data
   }
 } 

@@ -1,11 +1,14 @@
 <template>
   <div id="app">
     <router-view></router-view>
+    
+    <!-- Global feedback button - available on all pages -->
+    <FeedbackButton />
   </div>
 </template>
 
 <script setup lang="ts">
-// No imports needed
+import FeedbackButton from '@/components/FeedbackButton.vue'
 </script>
 
 <style>

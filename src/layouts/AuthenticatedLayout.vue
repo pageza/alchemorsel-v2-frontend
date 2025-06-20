@@ -20,35 +20,52 @@
 
         <div class="user-menu">
           <span class="welcome-text">Welcome, {{ userFirstName }}</span>
-          <el-dropdown trigger="click">
-            <div class="avatar" data-testid="user-avatar">
-              {{ userInitials }}
-            </div>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item @click="$router.push('/dashboard')" data-testid="nav-dashboard">
-                  <el-icon><Grid /></el-icon>
-                  Dashboard
-                </el-dropdown-item>
-                <el-dropdown-item v-if="isAdmin" @click="$router.push('/admin')" data-testid="nav-admin">
-                  <el-icon><Setting /></el-icon>
-                  Admin Dashboard
-                </el-dropdown-item>
-                <el-dropdown-item divided @click="$router.push('/profile')" data-testid="view-profile">
-                  <el-icon><User /></el-icon>
-                  View Profile
-                </el-dropdown-item>
-                <el-dropdown-item @click="$router.push('/profile/edit')" data-testid="profile-settings">
-                  <el-icon><Setting /></el-icon>
-                  Profile Settings
-                </el-dropdown-item>
-                <el-dropdown-item divided @click="handleLogout" data-testid="logout-button">
-                  <el-icon><SwitchButton /></el-icon>
-                  Logout
-                </el-dropdown-item>
-              </el-dropdown-menu>
+          <v-menu>
+            <template v-slot:activator="{ props }">
+              <v-avatar
+                v-bind="props"
+                color="secondary"
+                class="cursor-pointer"
+                data-testid="user-avatar"
+              >
+                {{ userInitials }}
+              </v-avatar>
             </template>
-          </el-dropdown>
+            <v-list>
+              <v-list-item @click="$router.push('/dashboard')" data-testid="nav-dashboard">
+                <template v-slot:prepend>
+                  <v-icon>mdi-view-dashboard</v-icon>
+                </template>
+                <v-list-item-title>Dashboard</v-list-item-title>
+              </v-list-item>
+              <v-list-item v-if="isAdmin" @click="$router.push('/admin')" data-testid="nav-admin">
+                <template v-slot:prepend>
+                  <v-icon>mdi-cog</v-icon>
+                </template>
+                <v-list-item-title>Admin Dashboard</v-list-item-title>
+              </v-list-item>
+              <v-divider />
+              <v-list-item @click="$router.push('/profile')" data-testid="view-profile">
+                <template v-slot:prepend>
+                  <v-icon>mdi-account</v-icon>
+                </template>
+                <v-list-item-title>View Profile</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="$router.push('/profile/edit')" data-testid="profile-settings">
+                <template v-slot:prepend>
+                  <v-icon>mdi-cog</v-icon>
+                </template>
+                <v-list-item-title>Profile Settings</v-list-item-title>
+              </v-list-item>
+              <v-divider />
+              <v-list-item @click="handleLogout" data-testid="logout-button">
+                <template v-slot:prepend>
+                  <v-icon>mdi-logout</v-icon>
+                </template>
+                <v-list-item-title>Logout</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </div>
       </div>
     </header>
@@ -104,7 +121,6 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
-import { User, SwitchButton, Grid, Setting } from '@element-plus/icons-vue'
 import EmailVerificationBanner from '@/components/EmailVerificationBanner.vue'
 
 const route = useRoute()
@@ -122,9 +138,15 @@ const userName = computed(() => {
 })
 
 const userFirstName = computed(() => {
-  const fullName = authStore.user?.name || authStore.user?.username || 'User'
+  // Prioritize username if name contains an email
+  let fullName = authStore.user?.name || 'User'
+  if (fullName.includes('@') && authStore.user?.username) {
+    fullName = authStore.user.username
+  } else if (!authStore.user?.name && authStore.user?.username) {
+    fullName = authStore.user.username
+  }
   
-  // If it's an email, extract the part before @
+  // If it's still an email, extract the part before @
   if (fullName.includes('@')) {
     const emailPart = fullName.split('@')[0]
     // Capitalize first letter

@@ -96,15 +96,20 @@ export const useAuthStore = defineStore('auth', () => {
     console.log('fetchProfile called')
     try {
       user.value = await AuthService.getProfile()
-      console.log('Profile fetched successfully')
+      console.log('Profile fetched successfully, Email verified:', user.value?.email_verified)
       // Store user data in localStorage for router guards
       if (user.value) {
         localStorage.setItem('auth_user', JSON.stringify(user.value))
       }
     } catch (error) {
-      console.error('fetchProfile failed, calling clearAuth:', error)
-      console.trace('fetchProfile failure stack trace')
-      clearAuth()
+      console.error('fetchProfile failed:', error)
+      // Only clear auth if it's an authentication error (401), not for other errors
+      if (error instanceof Error && error.message.includes('401')) {
+        console.log('Authentication error detected, clearing auth')
+        clearAuth()
+      } else {
+        console.log('Non-auth error in fetchProfile, keeping user logged in')
+      }
     }
   }
   

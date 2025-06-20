@@ -25,7 +25,17 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
 
 <template>
   <div>
-    <v-container class="py-8">
+    <!-- Loading State -->
+    <div v-if="isLoading" class="text-center py-8">
+      <v-progress-circular
+        indeterminate
+        color="primary"
+        size="64"
+      ></v-progress-circular>
+      <p class="text-h6 mt-4">Loading template...</p>
+    </div>
+
+    <v-container v-else class="py-8">
       <v-row>
         <v-col cols="12" md="8" class="mx-auto">
           <div class="d-flex align-center mb-4">
@@ -36,8 +46,11 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
               @click="$router.back()"
             ></v-btn>
             <h1 class="text-h4 font-weight-bold">
-              {{ isEdit ? 'Edit Recipe' : 'Create Recipe' }}
+              {{ isEdit ? 'Edit Recipe' : isTemplate ? 'Modify Recipe' : 'Create Recipe' }}
             </h1>
+            <p v-if="isTemplate" class="text-subtitle-1 text-medium-emphasis mt-2">
+              Creating a new recipe based on template
+            </p>
           </div>
 
           <v-form
@@ -54,9 +67,9 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
                 <v-row>
                   <v-col cols="12">
                     <v-text-field
-                      v-model="recipe.title"
-                      label="Recipe Title"
-                      :rules="[v => !!v || 'Title is required']"
+                      v-model="recipe.name"
+                      label="Recipe Name"
+                      :rules="[v => !!v || 'Name is required']"
                       required
                     ></v-text-field>
                   </v-col>
@@ -79,12 +92,12 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
                   </v-col>
                   <v-col cols="12" md="6">
                     <v-text-field
-                      v-model.number="recipe.cookingTime"
-                      label="Cooking Time (minutes)"
+                      v-model.number="recipe.cook_time"
+                      label="Cook Time (minutes)"
                       type="number"
                       :rules="[
-                        v => !!v || 'Cooking time is required',
-                        v => v > 0 || 'Cooking time must be greater than 0'
+                        v => !!v || 'Cook time is required',
+                        v => v > 0 || 'Cook time must be greater than 0'
                       ]"
                       required
                     ></v-text-field>
@@ -105,22 +118,18 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
                   class="d-flex align-center mb-4"
                 >
                   <v-text-field
-                    v-model="ingredient.name"
-                    label="Ingredient Name"
+                    v-model="recipe.ingredients[index]"
+                    :label="`Ingredient ${index + 1}`"
+                    placeholder="e.g., 2 cups all-purpose flour"
                     class="mr-4"
-                    :rules="[v => !!v || 'Name is required']"
-                  ></v-text-field>
-                  <v-text-field
-                    v-model="ingredient.amount"
-                    label="Amount"
-                    class="mr-4"
-                    :rules="[v => !!v || 'Amount is required']"
+                    :rules="[v => !!v || 'Ingredient is required']"
                   ></v-text-field>
                   <v-btn
                     icon="mdi-delete"
                     variant="text"
                     color="error"
                     @click="removeIngredient(index)"
+                    :disabled="recipe.ingredients.length === 1"
                   ></v-btn>
                 </div>
                 <v-btn
@@ -155,6 +164,7 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
                     variant="text"
                     color="error"
                     @click="removeInstruction(index)"
+                    :disabled="recipe.instructions.length === 1"
                   ></v-btn>
                 </div>
                 <v-btn
@@ -176,28 +186,28 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
                 <v-row>
                   <v-col cols="12" md="6">
                     <v-text-field
-                      v-model="recipe.nutrition.calories"
+                      v-model.number="recipe.calories"
                       label="Calories"
                       type="number"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="12" md="6">
                     <v-text-field
-                      v-model="recipe.nutrition.protein"
+                      v-model.number="recipe.protein"
                       label="Protein (g)"
                       type="number"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="12" md="6">
                     <v-text-field
-                      v-model="recipe.nutrition.carbohydrates"
+                      v-model.number="recipe.carbs"
                       label="Carbohydrates (g)"
                       type="number"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="12" md="6">
                     <v-text-field
-                      v-model="recipe.nutrition.fat"
+                      v-model.number="recipe.fat"
                       label="Fat (g)"
                       type="number"
                     ></v-text-field>
@@ -206,28 +216,6 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
               </v-card-text>
             </v-card>
 
-            <!-- Image Upload -->
-            <v-card class="mb-6">
-              <v-card-title class="text-h5 font-weight-bold">
-                Recipe Image
-              </v-card-title>
-              <v-card-text>
-                <v-file-input
-                  v-model="imageFile"
-                  accept="image/*"
-                  label="Upload Image"
-                  prepend-icon="mdi-camera"
-                  @change="handleImageUpload"
-                ></v-file-input>
-                <v-img
-                  v-if="recipe.image"
-                  :src="recipe.image"
-                  height="200"
-                  cover
-                  class="rounded-lg mt-4"
-                ></v-img>
-              </v-card-text>
-            </v-card>
 
             <!-- Submit Button -->
             <div class="d-flex justify-end">
@@ -238,7 +226,7 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
                 :loading="isSubmitting"
                 :disabled="!isFormValid"
               >
-                {{ isEdit ? 'Update Recipe' : 'Create Recipe' }}
+                {{ isEdit ? 'Update Recipe' : isTemplate ? 'Create Modified Recipe' : 'Create Recipe' }}
               </v-btn>
             </div>
           </v-form>
@@ -249,17 +237,20 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { RecipeService } from '@/services/recipe.service'
+import type { Recipe } from '@/types/recipe.types'
 
 const route = useRoute()
 const router = useRouter()
 const form = ref<HTMLFormElement | null>(null)
 const isFormValid = ref(false)
 const isSubmitting = ref(false)
-const imageFile = ref(null)
 
 const isEdit = computed(() => route.name === 'recipe-edit')
+const isTemplate = computed(() => !!route.query.template)
+const templateId = computed(() => route.query.template as string)
 
 // Mock categories - replace with actual categories from your backend
 const categories = [
@@ -273,28 +264,36 @@ const categories = [
 
 // Initialize recipe data
 const recipe = ref({
-  title: '',
+  name: '',
   description: '',
   category: '',
-  cookingTime: 30,
-  image: '',
-  ingredients: [{ name: '', amount: '' }],
+  cuisine: '',
+  image_url: '',
+  ingredients: [''],
   instructions: [''],
-  nutrition: {
-    calories: '',
-    protein: '',
-    carbohydrates: '',
-    fat: ''
-  }
+  prep_time: 15,
+  cook_time: 30,
+  servings: 4,
+  difficulty: '',
+  calories: 0,
+  protein: 0,
+  carbs: 0,
+  fat: 0,
+  dietary_preferences: [],
+  tags: []
 })
+
+const isLoading = ref(false)
 
 // Methods for managing ingredients and instructions
 const addIngredient = () => {
-  recipe.value.ingredients.push({ name: '', amount: '' })
+  recipe.value.ingredients.push('')
 }
 
 const removeIngredient = (index: number) => {
-  recipe.value.ingredients.splice(index, 1)
+  if (recipe.value.ingredients.length > 1) {
+    recipe.value.ingredients.splice(index, 1)
+  }
 }
 
 const addInstruction = () => {
@@ -302,17 +301,11 @@ const addInstruction = () => {
 }
 
 const removeInstruction = (index: number) => {
-  recipe.value.instructions.splice(index, 1)
-}
-
-// Handle image upload
-const handleImageUpload = (file: File) => {
-  if (file) {
-    // TODO: Implement actual image upload to your backend
-    // For now, we'll just create a local URL
-    recipe.value.image = URL.createObjectURL(file)
+  if (recipe.value.instructions.length > 1) {
+    recipe.value.instructions.splice(index, 1)
   }
 }
+
 
 // Handle form submission
 const handleSubmit = async () => {
@@ -320,17 +313,17 @@ const handleSubmit = async () => {
 
   isSubmitting.value = true
   try {
-    // TODO: Implement actual API call to your backend
     if (isEdit.value) {
-      // Update existing recipe
+      // Update existing recipe (not implemented yet)
       console.log('Updating recipe:', recipe.value)
     } else {
-      // Create new recipe
-      console.log('Creating recipe:', recipe.value)
+      // Create new recipe (either from scratch or from template)
+      const createdRecipe = await RecipeService.createRecipe(recipe.value)
+      console.log('Created recipe:', createdRecipe)
+      
+      // Navigate to the new recipe details
+      router.push(`/recipes/${createdRecipe.id}`)
     }
-    
-    // Navigate back to recipe list on success
-    router.push('/recipes')
   } catch (error) {
     console.error('Error saving recipe:', error)
     // TODO: Show error message to user
@@ -339,34 +332,49 @@ const handleSubmit = async () => {
   }
 }
 
-// Load recipe data if in edit mode
-if (isEdit.value) {
-  // TODO: Fetch existing recipe data from your backend
-  // For now, we'll use mock data
-  recipe.value = {
-    title: 'Classic Margherita Pizza',
-    description: 'A simple yet delicious pizza with fresh tomatoes, mozzarella, and basil.',
-    category: 'Dinner',
-    cookingTime: 30,
-    image: 'https://picsum.photos/800/600?random=1',
-    ingredients: [
-      { name: 'Pizza dough', amount: '1 ball' },
-      { name: 'Fresh mozzarella', amount: '200g' },
-      { name: 'Fresh basil leaves', amount: '1 cup' }
-    ],
-    instructions: [
-      'Preheat your oven to 450°F (230°C)',
-      'Roll out the pizza dough',
-      'Add toppings and bake for 12-15 minutes'
-    ],
-    nutrition: {
-      calories: '266',
-      protein: '11',
-      carbohydrates: '33',
-      fat: '10'
+// Load template data if template ID is provided
+const loadTemplate = async () => {
+  if (!templateId.value) return
+  
+  isLoading.value = true
+  try {
+    const templateRecipe = await RecipeService.getRecipeById(templateId.value)
+    
+    // Copy template data but reset ID and dates (creating new recipe)
+    recipe.value = {
+      name: `${templateRecipe.name} (Modified)`,
+      description: templateRecipe.description,
+      category: templateRecipe.category,
+      cuisine: templateRecipe.cuisine,
+      image_url: templateRecipe.image_url || '',
+      ingredients: [...templateRecipe.ingredients],
+      instructions: [...templateRecipe.instructions],
+      prep_time: templateRecipe.prep_time || 15,
+      cook_time: templateRecipe.cook_time || 30,
+      servings: templateRecipe.servings || 4,
+      difficulty: templateRecipe.difficulty || '',
+      calories: templateRecipe.calories,
+      protein: templateRecipe.protein,
+      carbs: templateRecipe.carbs,
+      fat: templateRecipe.fat,
+      dietary_preferences: [...templateRecipe.dietary_preferences],
+      tags: [...templateRecipe.tags]
     }
+  } catch (error) {
+    console.error('Error loading template:', error)
+    // TODO: Show error message to user
+  } finally {
+    isLoading.value = false
   }
 }
+
+// Load data on component mount
+onMounted(() => {
+  if (isTemplate.value) {
+    loadTemplate()
+  }
+  // TODO: Load existing recipe data if in edit mode
+})
 </script>
 
 <style scoped>

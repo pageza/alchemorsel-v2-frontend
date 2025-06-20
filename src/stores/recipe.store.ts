@@ -63,21 +63,38 @@ export const useRecipeStore = defineStore('recipe', () => {
   }
   
   async function toggleFavorite(recipeId: string, currentStatus?: boolean): Promise<{ is_favorite: boolean; message: string }> {
+    // Find the current recipe
+    const index = recipes.value.findIndex(r => r.id === recipeId)
+    if (index === -1) {
+      throw new Error('Recipe not found')
+    }
+    
+    // Get current status (default to false if undefined)
+    const currentFavoriteStatus = currentStatus !== undefined ? currentStatus : (recipes.value[index].isFavorite || false)
+    const newStatus = !currentFavoriteStatus
+    
+    // OPTIMISTIC UPDATE: Update UI immediately
+    recipes.value[index].isFavorite = newStatus
+    
     try {
-      // Find the current recipe to get its favorite status
-      const index = recipes.value.findIndex(r => r.id === recipeId)
-      const status = currentStatus !== undefined ? currentStatus : (index !== -1 ? recipes.value[index].isFavorite : false)
+      // Call backend with the CURRENT status (not the new one)
+      const result = await RecipeService.toggleFavorite(recipeId, currentFavoriteStatus)
       
-      const result = await RecipeService.toggleFavorite(recipeId, status)
+      // Backend confirmed - update with actual status
+      recipes.value[index].isFavorite = result.is_favorite
       
-      // Update the recipe in the list with the new status
-      if (index !== -1) {
-        recipes.value[index].isFavorite = result.is_favorite
-      }
-      
-      // Return the result so components can use it
       return result
     } catch (e) {
+      // Revert optimistic update on error
+      recipes.value[index].isFavorite = currentFavoriteStatus
+      
+      // Handle 409 conflict gracefully
+      if (e instanceof Error && e.message.includes('409')) {
+        // Recipe was already in the desired state, keep the UI as is
+        recipes.value[index].isFavorite = newStatus
+        return { is_favorite: newStatus, message: 'Already updated' }
+      }
+      
       error.value = e instanceof Error ? e.message : 'Failed to toggle favorite'
       throw e
     }

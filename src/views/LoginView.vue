@@ -76,6 +76,7 @@ This needs investigation to identify the root cause and implement a proper fix, 
           Sign In
         </el-button>
 
+        <!-- Social login temporarily hidden
         <el-divider>
           <span class="divider-text">or continue with</span>
         </el-divider>
@@ -98,6 +99,7 @@ This needs investigation to identify the root cause and implement a proper fix, 
             GitHub
           </el-button>
         </div>
+        -->
 
         <div class="signup-prompt">
           <span>Don't have an account?</span>

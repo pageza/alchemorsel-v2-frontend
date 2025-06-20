@@ -63,7 +63,7 @@ const router = createRouter({
           path: 'generate', 
           name: 'generate', 
           component: () => import('../views/RecipeGeneratorView.vue'),
-          meta: { requiresEmailVerification: true }
+          meta: { requiresEmailVerification: false } // Allow viewing/modifying drafts without email verification
         },
         { path: 'favorites', name: 'favorites', component: () => import('../views/FavoritesView.vue') },
         { path: 'profile', name: 'profile', component: () => import('../views/ProfileView.vue') },
