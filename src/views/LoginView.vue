@@ -17,110 +17,129 @@ This needs investigation to identify the root cause and implement a proper fix, 
 
 <template>
   <div class="login-container">
-    <el-card class="login-card">
-      <template #header>
-        <div class="card-header">
+    <v-card class="login-card" elevation="4">
+      <v-card-title class="card-header">
+        <div>
           <h2 class="welcome-title">Welcome Back</h2>
           <p class="welcome-subtitle">Sign in to continue to Alchemorsel</p>
         </div>
-      </template>
+      </v-card-title>
 
-      <el-form
-        ref="form"
-        :model="formData"
-        :rules="rules"
-        @submit.prevent="handleSubmit"
-        data-testid="login-form"
-      >
-        <el-form-item prop="email">
-          <el-input
+      <v-card-text>
+        <v-form
+          ref="form"
+          v-model="isFormValid"
+          @submit.prevent="handleSubmit"
+          data-testid="login-form"
+        >
+          <v-text-field
             v-model="formData.email"
+            label="Email"
             type="email"
             placeholder="Email"
-            :prefix-icon="Message"
+            variant="outlined"
+            density="comfortable"
+            :rules="emailRules"
+            prepend-inner-icon="mdi-email"
             data-testid="email-input"
+            class="mb-4"
           />
-        </el-form-item>
 
-        <el-form-item prop="password">
-          <el-input
+          <v-text-field
             v-model="formData.password"
             :type="showPassword ? 'text' : 'password'"
+            label="Password"
             placeholder="Password"
-            :prefix-icon="Lock"
-            :suffix-icon="showPassword ? View : Hide"
-            @click:suffix-icon="showPassword = !showPassword"
+            variant="outlined"
+            density="comfortable"
+            :rules="passwordRules"
+            prepend-inner-icon="mdi-lock"
+            :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+            @click:append-inner="showPassword = !showPassword"
             data-testid="password-input"
+            class="mb-4"
           />
-        </el-form-item>
 
-        <div class="form-options">
-          <el-checkbox v-model="formData.rememberMe" data-testid="remember-me">Remember me</el-checkbox>
-          <el-button
-            type="primary"
-            link
-            @click="handleForgotPassword"
-            data-testid="forgot-password"
+          <div class="form-options mb-6">
+            <v-checkbox 
+              v-model="formData.rememberMe" 
+              label="Remember me"
+              data-testid="remember-me"
+              density="compact"
+              hide-details
+            />
+            <v-btn
+              variant="text"
+              color="primary"
+              @click="handleForgotPassword"
+              data-testid="forgot-password"
+              class="pa-0"
+            >
+              Forgot Password?
+            </v-btn>
+          </div>
+
+          <v-btn
+            type="submit"
+            color="primary"
+            size="large"
+            :loading="isLoading"
+            :disabled="!isFormValid"
+            block
+            data-testid="login-submit"
+            class="submit-button mb-6"
           >
-            Forgot Password?
-          </el-button>
-        </div>
+            Sign In
+          </v-btn>
 
-        <el-button
-          type="primary"
-          native-type="submit"
-          :loading="isLoading"
-          class="submit-button"
-          data-testid="login-submit"
-        >
-          Sign In
-        </el-button>
+          <!-- Social login temporarily hidden
+          <v-divider class="mb-4">
+            <span class="divider-text">or continue with</span>
+          </v-divider>
 
-        <!-- Social login temporarily hidden
-        <el-divider>
-          <span class="divider-text">or continue with</span>
-        </el-divider>
+          <div class="social-buttons mb-6">
+            <v-btn
+              variant="outlined"
+              class="social-button"
+              @click="handleSocialLogin"
+              data-testid="google-login"
+            >
+              <v-icon start>mdi-google</v-icon>
+              Google
+            </v-btn>
+            <v-btn
+              variant="outlined"
+              class="social-button"
+              @click="handleSocialLogin"
+              data-testid="github-login"
+            >
+              <v-icon start>mdi-github</v-icon>
+              GitHub
+            </v-btn>
+          </div>
+          -->
 
-        <div class="social-buttons">
-          <el-button
-            class="social-button"
-            @click="handleSocialLogin"
-            data-testid="google-login"
-          >
-            <el-icon><ChromeFilled /></el-icon>
-            Google
-          </el-button>
-          <el-button
-            class="social-button"
-            @click="handleSocialLogin"
-            data-testid="github-login"
-          >
-            <el-icon><Platform /></el-icon>
-            GitHub
-          </el-button>
-        </div>
-        -->
-
-        <div class="signup-prompt">
-          <span>Don't have an account?</span>
-          <el-button
-            type="primary"
-            link
-            @click="$router.push('/register')"
-            data-testid="register-link"
-          >
-            Sign Up
-          </el-button>
-        </div>
-      </el-form>
-    </el-card>
+          <div class="signup-prompt">
+            <span>Don't have an account?</span>
+            <v-btn
+              variant="text"
+              color="primary"
+              @click="$router.push('/register')"
+              data-testid="register-link"
+              class="pa-0 ml-1"
+            >
+              Sign Up
+            </v-btn>
+          </div>
+        </v-form>
+      </v-card-text>
+    </v-card>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { Message, Lock, View, Hide, ChromeFilled, Platform } from '@element-plus/icons-vue'
 import { useAuth } from '@/composables/useAuth'
 import { useNotification } from '@/composables/useNotification'
 
@@ -128,8 +147,9 @@ const { login } = useAuth()
 const { success, error: errorNotification } = useNotification()
 
 const router = useRouter()
-const form = ref<{ validate: () => Promise<boolean> } | null>(null)
+const form = ref()
 const isLoading = ref(false)
+const isFormValid = ref(false)
 const showPassword = ref(false)
 
 const formData = reactive({
@@ -138,15 +158,14 @@ const formData = reactive({
   rememberMe: false
 })
 
-const rules = {
-  email: [
-    { required: true, message: 'Email is required', trigger: 'blur' },
-    { type: 'email', message: 'Please enter a valid email', trigger: 'blur' }
-  ],
-  password: [
-    { required: true, message: 'Password is required', trigger: 'blur' }
-  ]
-}
+const emailRules = [
+  (v: string) => !!v || 'Email is required',
+  (v: string) => /.+@.+\..+/.test(v) || 'Please enter a valid email'
+]
+
+const passwordRules = [
+  (v: string) => !!v || 'Password is required'
+]
 
 const handleSubmit = async () => {
   console.log('handleSubmit called!')
@@ -168,7 +187,8 @@ const handleSubmit = async () => {
   
   try {
     console.log('Validating form...')
-    await form.value?.validate()
+    const { valid } = await form.value.validate()
+    if (!valid) return
     console.log('Form validated, starting login...')
     isLoading.value = true
     await login({
@@ -220,12 +240,12 @@ const handleSocialLogin = () => {
   align-items: center;
   justify-content: center;
   padding: 24px;
+  background: #f5f5f5;
 }
 
 .login-card {
   width: 100%;
   max-width: 500px;
-  border-radius: 12px;
 }
 
 .card-header {
@@ -237,34 +257,33 @@ const handleSocialLogin = () => {
   font-size: 2rem;
   font-weight: bold;
   margin: 0;
+  color: #2c3e50;
 }
 
 .welcome-subtitle {
-  color: var(--el-text-color-secondary);
+  color: #7f8c8d;
   margin: 8px 0 0;
+  font-size: 0.9rem;
 }
 
 .form-options {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
 }
 
 .submit-button {
   width: 100%;
-  margin-bottom: 24px;
 }
 
 .divider-text {
-  color: var(--el-text-color-secondary);
+  color: #7f8c8d;
   font-size: 0.875rem;
 }
 
 .social-buttons {
   display: flex;
   gap: 16px;
-  margin-bottom: 24px;
 }
 
 .social-button {
@@ -273,18 +292,46 @@ const handleSocialLogin = () => {
 
 .signup-prompt {
   text-align: center;
-  color: var(--el-text-color-secondary);
+  color: #7f8c8d;
 }
 
-:deep(.el-input__wrapper) {
-  box-shadow: 0 0 0 1px var(--el-border-color) inset;
+/* Desktop-first responsive design */
+@media (max-width: 768px) {
+  .login-container {
+    padding: 16px;
+  }
+  
+  .login-card {
+    max-width: 100%;
+  }
+  
+  .welcome-title {
+    font-size: 1.5rem;
+  }
+  
+  .social-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .social-button {
+    flex: 1 1 100%;
+  }
 }
 
-:deep(.el-input__wrapper:hover) {
-  box-shadow: 0 0 0 1px var(--el-border-color-hover) inset;
-}
-
-:deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+@media (max-width: 480px) {
+  .card-header {
+    padding: 16px 0;
+  }
+  
+  .welcome-title {
+    font-size: 1.25rem;
+  }
+  
+  .form-options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
 }
 </style> 

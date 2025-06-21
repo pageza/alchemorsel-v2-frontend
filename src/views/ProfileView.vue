@@ -9,11 +9,11 @@
               <div class="d-flex align-center justify-space-between">
                 <div class="d-flex align-center">
                   <v-avatar
-                    :image="user?.profile?.profile_picture_url || '/default-avatar.png'"
+                    :image="user?.profile_picture_url || '/default-avatar.png'"
                     size="100"
                     class="mr-6"
                   >
-                    <v-icon v-if="!user?.profile?.profile_picture_url" size="50">mdi-account</v-icon>
+                    <v-icon v-if="!user?.profile_picture_url" size="50">mdi-account</v-icon>
                   </v-avatar>
                   <div>
                     <h1 class="text-h4 font-weight-bold mb-2">{{ user?.name || user?.username || 'User' }}</h1>

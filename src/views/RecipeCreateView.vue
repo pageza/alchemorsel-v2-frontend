@@ -263,7 +263,25 @@ const categories = [
 ]
 
 // Initialize recipe data
-const recipe = ref({
+const recipe = ref<{
+  name: string
+  description: string
+  category: string
+  cuisine: string
+  image_url: string
+  ingredients: string[]
+  instructions: string[]
+  prep_time: number
+  cook_time: number
+  servings: number
+  difficulty: string
+  calories: number
+  protein: number
+  carbs: number
+  fat: number
+  dietary_preferences: string[]
+  tags: string[]
+}>({
   name: '',
   description: '',
   category: '',

@@ -4,11 +4,15 @@
     
     <!-- Global feedback button - available on all pages -->
     <FeedbackButton />
+    
+    <!-- Global notification toasts -->
+    <NotificationToast />
   </div>
 </template>
 
 <script setup lang="ts">
 import FeedbackButton from '@/components/FeedbackButton.vue'
+import NotificationToast from '@/components/NotificationToast.vue'
 </script>
 
 <style>

@@ -38,11 +38,12 @@ export const useAuthStore = defineStore('auth', () => {
           username: credentials.email,
           name: credentials.email,
           role: 'user',
-          dietaryPreferences: [],
-          allergies: [],
+          dietary_lifestyles: [],
+          cuisine_preferences: [],
+          allergens: [],
           email_verified: false,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         }
       }
     } catch (e) {
@@ -76,11 +77,12 @@ export const useAuthStore = defineStore('auth', () => {
           username: data.username || data.email,
           name: data.name || data.email,
           role: 'user',
-          dietaryPreferences: data.dietary_preferences || [],
-          allergies: data.allergies || [],
+          dietary_lifestyles: data.dietary_lifestyles || [],
+          cuisine_preferences: data.cuisine_preferences || [],
+          allergens: [],
           email_verified: false,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         }
       }
     } catch (e) {

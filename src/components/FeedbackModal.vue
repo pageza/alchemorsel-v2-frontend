@@ -95,10 +95,10 @@ import { useNotificationStore } from '@/stores/notification.store'
 import { FeedbackService } from '@/services/feedback.service'
 
 interface FeedbackData {
-  type: string
+  type: 'bug' | 'feature' | 'general'
   title: string
   description: string
-  priority: string
+  priority: 'low' | 'medium' | 'high' | 'critical'
 }
 
 const props = defineProps<{
@@ -122,7 +122,7 @@ const valid = ref(false)
 const isSubmitting = ref(false)
 
 const formData = ref<FeedbackData>({
-  type: '',
+  type: 'general',
   title: '',
   description: '',
   priority: 'medium'
@@ -149,7 +149,7 @@ const rules = {
 
 const resetForm = () => {
   formData.value = {
-    type: '',
+    type: 'general',
     title: '',
     description: '',
     priority: 'medium'
@@ -171,8 +171,7 @@ const collectSessionInfo = () => {
     userAgent: navigator.userAgent,
     url: window.location.href,
     timestamp: new Date().toISOString(),
-    viewport: `${window.innerWidth}x${window.innerHeight}`,
-    userAgent: navigator.userAgent
+    viewport: `${window.innerWidth}x${window.innerHeight}`
   }
 }
 

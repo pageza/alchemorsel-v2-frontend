@@ -15,6 +15,7 @@ export interface Recipe {
   category: string
   cuisine: string
   dietary_preferences: string[]
+  dietary_tags?: string[]  // Legacy field for compatibility
   tags: string[]
   prep_time?: number
   cook_time?: number

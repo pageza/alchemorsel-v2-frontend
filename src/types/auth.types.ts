@@ -38,6 +38,7 @@ export interface RegisterRequest {
   dietary_lifestyles: string[]
   cuisine_preferences: string[]
   allergies: string[]
+  dietary_preferences?: string[]
 }
 
 export interface AuthResponse {

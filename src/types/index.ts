@@ -1,6 +1,7 @@
 // Re-export existing types
 export * from './auth.types'
 export * from './recipe.types'
+import type { Allergen } from './auth.types'
 
 // Admin types
 export interface AdminAction {
@@ -43,14 +44,28 @@ export interface TopUser {
 export interface User {
   id: string
   email: string
+  username: string
   name: string
   role: 'user' | 'admin' | 'moderator'
-  is_banned: boolean
+  is_banned?: boolean
   banned_at?: string
   ban_reason?: string
+  profile_picture_url?: string
+  bio?: string
+  privacy_level?: string
+  dietary_lifestyles: string[]
+  cuisine_preferences: string[]
+  allergens: Allergen[]
+  email_verified: boolean
+  email_verified_at?: string
   created_at: string
   updated_at: string
   profile?: UserProfile
+  // Legacy field aliases for backward compatibility
+  dietaryPreferences?: string[]
+  allergies?: string[]
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface UserProfile {

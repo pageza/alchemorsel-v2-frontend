@@ -3,125 +3,145 @@
     <div class="register-container">
       <h2>Create Your Account</h2>
       
-      <el-form
+      <v-form
         ref="form"
-        :model="formData"
-        :rules="rules"
-        label-position="top"
+        v-model="isFormValid"
         @submit.prevent="handleSubmit"
         class="register-form"
         data-testid="register-form"
       >
         <!-- Basic Information -->
-        <el-form-item label="Email" prop="email">
-          <el-input
-            v-model="formData.email"
-            type="email"
-            placeholder="your@email.com"
-            size="large"
-            data-testid="email-input"
-          />
-        </el-form-item>
+        <v-text-field
+          v-model="formData.email"
+          label="Email"
+          type="email"
+          placeholder="your@email.com"
+          variant="outlined"
+          density="comfortable"
+          :rules="emailRules"
+          data-testid="email-input"
+          class="mb-4"
+        />
 
-        <el-form-item label="Username" prop="username">
-          <el-input
-            v-model="formData.username"
-            placeholder="johndoe"
-            size="large"
-            data-testid="username-input"
-          />
-        </el-form-item>
+        <v-text-field
+          v-model="formData.username"
+          label="Username"
+          placeholder="johndoe"
+          variant="outlined"
+          density="comfortable"
+          :rules="usernameRules"
+          data-testid="username-input"
+          class="mb-4"
+        />
 
-        <el-form-item label="Full Name" prop="full_name">
-          <el-input
-            v-model="formData.full_name"
-            placeholder="John Doe"
-            size="large"
-            data-testid="fullname-input"
-          />
-        </el-form-item>
+        <v-text-field
+          v-model="formData.full_name"
+          label="Full Name"
+          placeholder="John Doe"
+          variant="outlined"
+          density="comfortable"
+          :rules="fullNameRules"
+          data-testid="fullname-input"
+          class="mb-4"
+        />
 
-        <el-form-item label="Password" prop="password">
-          <el-input
-            v-model="formData.password"
-            type="password"
-            placeholder="••••••••"
-            size="large"
-            show-password
-            data-testid="password-input"
-          />
-          <div class="password-hint">
-            Min 8 chars, 1 uppercase, 1 number, 1 special char
-          </div>
-        </el-form-item>
+        <v-text-field
+          v-model="formData.password"
+          :type="showPassword ? 'text' : 'password'"
+          label="Password"
+          placeholder="••••••••"
+          variant="outlined"
+          density="comfortable"
+          :rules="passwordRules"
+          :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+          @click:append-inner="showPassword = !showPassword"
+          data-testid="password-input"
+          class="mb-2"
+        />
+        <div class="password-hint mb-4">
+          Min 8 chars, 1 uppercase, 1 number, 1 special char
+        </div>
 
         <!-- Dietary Lifestyles -->
-        <el-form-item label="Dietary Lifestyles">
+        <div class="form-section mb-4">
+          <v-label class="form-label mb-2">Dietary Lifestyles</v-label>
           <div class="checkbox-group" data-testid="dietary-lifestyles">
-            <el-checkbox
+            <v-checkbox
               v-for="lifestyle in dietaryLifestyleOptions"
               :key="lifestyle"
               v-model="formData.dietary_lifestyles"
               :value="lifestyle"
               :label="lifestyle.charAt(0).toUpperCase() + lifestyle.slice(1)"
               :data-testid="`dietary-${lifestyle}`"
+              density="compact"
+              hide-details
+              class="checkbox-item"
             />
           </div>
-        </el-form-item>
+        </div>
 
         <!-- Cuisine Preferences -->
-        <el-form-item label="Cuisine Preferences">
+        <div class="form-section mb-4">
+          <v-label class="form-label mb-2">Cuisine Preferences</v-label>
           <div class="checkbox-group" data-testid="cuisine-preferences">
-            <el-checkbox
+            <v-checkbox
               v-for="cuisine in cuisineOptions"
               :key="cuisine"
               v-model="formData.cuisine_preferences"
               :value="cuisine"
               :label="cuisine.charAt(0).toUpperCase() + cuisine.slice(1)"
               :data-testid="`cuisine-${cuisine}`"
+              density="compact"
+              hide-details
+              class="checkbox-item"
             />
           </div>
-        </el-form-item>
+        </div>
 
         <!-- Food Allergies -->
-        <el-form-item label="Food Allergies">
+        <div class="form-section mb-4">
+          <v-label class="form-label mb-2">Food Allergies</v-label>
           <div class="checkbox-group" data-testid="allergies">
-            <el-checkbox
+            <v-checkbox
               v-for="allergy in allergyOptions"
               :key="allergy"
               v-model="formData.allergies"
               :value="allergy"
               :label="allergy.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')"
               :data-testid="`allergy-${allergy.replace(/\s+/g, '-')}`"
+              density="compact"
+              hide-details
+              class="checkbox-item"
             />
           </div>
-        </el-form-item>
+        </div>
 
-        <el-form-item>
-          <el-button
-            type="primary"
-            size="large"
-            :loading="isLoading"
-            @click="handleSubmit"
-            style="width: 100%"
-            data-testid="register-submit"
-          >
-            Sign Up
-          </el-button>
-        </el-form-item>
+        <v-btn
+          type="submit"
+          color="primary"
+          size="large"
+          :loading="isLoading"
+          :disabled="!isFormValid"
+          block
+          data-testid="register-submit"
+          class="mb-4"
+        >
+          Sign Up
+        </v-btn>
 
         <div class="login-link">
           Already have an account? 
-          <el-button 
-            type="primary" 
-            link 
+          <v-btn 
+            variant="text" 
+            color="primary"
             @click="$router.push('/login')"
             data-testid="login-link"
+            class="pa-0"
           >
             Login
-          </el-button>
+          </v-btn>
         </div>
-      </el-form>
+      </v-form>
     </div>
   </div>
 </template>
@@ -132,14 +152,15 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
 import { useNotificationStore } from '@/stores/notification.store'
-import type { ElForm } from 'element-plus'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const notificationStore = useNotificationStore()
 
-const form = ref<InstanceType<typeof ElForm>>()
+const form = ref()
 const isLoading = ref(false)
+const isFormValid = ref(false)
+const showPassword = ref(false)
 
 const formData = reactive({
   email: '',
@@ -180,29 +201,31 @@ const allergyOptions = [
   'gluten'
 ]
 
-const rules = {
-  email: [
-    { required: true, message: 'Email is required', trigger: 'blur' },
-    { type: 'email', message: 'Please enter a valid email', trigger: 'blur' }
-  ],
-  username: [
-    { required: true, message: 'Username is required', trigger: 'blur' },
-    { min: 3, message: 'Username must be at least 3 characters', trigger: 'blur' }
-  ],
-  full_name: [
-    { required: true, message: 'Full name is required', trigger: 'blur' }
-  ],
-  password: [
-    { required: true, message: 'Password is required', trigger: 'blur' },
-    { min: 8, message: 'Password must be at least 8 characters', trigger: 'blur' }
-  ]
-}
+const emailRules = [
+  (v: string) => !!v || 'Email is required',
+  (v: string) => /.+@.+\..+/.test(v) || 'Please enter a valid email'
+]
+
+const usernameRules = [
+  (v: string) => !!v || 'Username is required',
+  (v: string) => v.length >= 3 || 'Username must be at least 3 characters'
+]
+
+const fullNameRules = [
+  (v: string) => !!v || 'Full name is required'
+]
+
+const passwordRules = [
+  (v: string) => !!v || 'Password is required',
+  (v: string) => v.length >= 8 || 'Password must be at least 8 characters',
+  (v: string) => /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(v) || 'Password must contain at least 1 uppercase, 1 number, and 1 special character'
+]
 
 const handleSubmit = async () => {
   if (!form.value) return
   
   try {
-    const valid = await form.value.validate()
+    const { valid } = await form.value.validate()
     if (!valid) return
     
     isLoading.value = true
@@ -285,39 +308,41 @@ const handleSubmit = async () => {
   width: 100%;
 }
 
+.form-section {
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #2c3e50;
+  font-size: 0.875rem;
+  display: block;
+}
+
 .checkbox-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
+  gap: 8px;
   margin-top: 8px;
 }
 
-.checkbox-group .el-checkbox {
+.checkbox-item {
+  flex: 0 0 auto;
   margin-right: 0;
-  margin-bottom: 8px;
 }
 
 .password-hint {
   font-size: 0.875rem;
   color: #7f8c8d;
-  margin-top: 5px;
+  margin-left: 4px;
 }
 
 .login-link {
   text-align: center;
-  margin-top: 20px;
   color: #7f8c8d;
 }
 
-.el-form-item {
-  margin-bottom: 20px;
-}
-
-.el-form-item__label {
-  font-weight: 500;
-  color: #2c3e50;
-}
-
+/* Desktop-first responsive design */
 @media (max-width: 768px) {
   .register-page {
     padding: 20px 15px;
@@ -325,6 +350,7 @@ const handleSubmit = async () => {
   
   .register-container {
     padding: 30px 20px;
+    max-width: 100%;
   }
   
   .register-container h2 {
@@ -333,7 +359,11 @@ const handleSubmit = async () => {
   
   .checkbox-group {
     flex-direction: column;
-    gap: 10px;
+    gap: 4px;
+  }
+  
+  .checkbox-item {
+    flex: 1 1 100%;
   }
 }
 
@@ -342,8 +372,8 @@ const handleSubmit = async () => {
     padding: 20px 15px;
   }
   
-  .checkbox-group {
-    gap: 8px;
+  .register-container h2 {
+    font-size: 1.25rem;
   }
 }
 </style> 

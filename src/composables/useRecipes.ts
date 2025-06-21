@@ -22,8 +22,8 @@ export function useRecipes() {
     return store.fetchRecipeById(id)
   }
 
-  function toggleFavorite(id: string) {
-    return store.toggleFavorite(id)
+  function toggleFavorite(id: string, currentStatus?: boolean) {
+    return store.toggleFavorite(id, currentStatus)
   }
 
   return {
