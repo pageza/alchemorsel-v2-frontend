@@ -2,6 +2,11 @@
 
 A modern Vue 3 frontend for the Alchemorsel recipe management application.
 
+## CI/CD Status
+- Automated testing on push to developing branch
+- 80% code coverage requirement enforced
+- Bundle size validation (< 2MB)
+
 ## Tech Stack
 
 - Vue 3 with Composition API
