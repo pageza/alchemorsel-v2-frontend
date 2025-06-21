@@ -100,7 +100,7 @@
             :items="adminActions"
             :loading="loading"
             :server-items-length="totalActions"
-            :options.sync="actionOptions"
+            v-model:options="actionOptions"
             @update:options="loadAdminActions"
             class="elevation-1"
           >

@@ -31,8 +31,7 @@ export default defineConfig(({ mode }) => {
             strictPort: true,
             cors: true,
             // Disable host checking completely  
-            allowedHosts: 'all',
-            disableHostCheck: true,
+            allowedHosts: true,
             hmr: {
                 clientPort: 5173,
                 host: 'localhost'

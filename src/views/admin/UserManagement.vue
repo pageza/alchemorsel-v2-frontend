@@ -38,7 +38,7 @@
             :items="users"
             :loading="loading"
             :server-items-length="totalUsers"
-            :options.sync="options"
+            v-model:options="options"
             @update:options="loadUsers"
             class="elevation-1"
           >

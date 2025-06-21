@@ -28,7 +28,7 @@
             :items="recipes"
             :loading="loading"
             :server-items-length="totalRecipes"
-            :options.sync="options"
+            v-model:options="options"
             @update:options="loadRecipes"
             class="elevation-1"
           >
