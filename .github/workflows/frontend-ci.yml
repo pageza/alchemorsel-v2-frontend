@@ -33,7 +33,8 @@ jobs:
         run: npm run type-check
 
       - name: Lint code
-        run: npm run lint || echo "⚠️ Linting issues found but allowing CI to continue"
+        run: npm run lint || true
+        continue-on-error: true
 
       - name: Run unit tests
         run: npm run test:unit
