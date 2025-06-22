@@ -292,7 +292,8 @@ const query = ref('')
 const modifyQuery = ref('')
 const currentDraft = ref<RecipeDraft | null>(null)
 const currentDraftId = ref<string>('')
-const similarRecipes = ref<any[]>([])
+// ESLINT-FIX-2025-I: Replace 'any[]' with proper recipe array type
+const similarRecipes = ref<Array<{ [key: string]: unknown }>>([])
 const isLoading = ref(false)
 const isModifying = ref(false)
 const isSaving = ref(false)
@@ -316,7 +317,8 @@ const generateRecipe = async () => {
   loadingSubMessage.value = 'Our AI chef is working on something delicious for you'
 
   const maxRetries = 3
-  let lastError: any = null
+  // ESLINT-FIX-2025-I: Replace 'any' with proper error type and use variable
+  let lastError: unknown = null
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     retryAttempt.value = attempt
@@ -345,7 +347,8 @@ const generateRecipe = async () => {
 
       // Success - break out of retry loop
       break
-    } catch (err: any) {
+    } catch (err: unknown) {
+      // ESLINT-FIX-2025-I: Replace 'any' with proper error type
       lastError = err
       console.error(`Recipe generation attempt ${attempt} failed:`, err)
 
@@ -384,6 +387,12 @@ const generateRecipe = async () => {
     }
   }
 
+  // ESLINT-FIX-2025-I: Use lastError to handle final failure after all retries
+  if (lastError) {
+    console.error('All recipe generation attempts failed:', lastError)
+    error.value = 'Failed to generate recipe after multiple attempts. Please try again.'
+  }
+
   isLoading.value = false
 }
 
@@ -418,7 +427,8 @@ const generateNewVariation = async () => {
         currentDraftId.value = response.draft_id || ''
       }
       break // Success
-    } catch (err: any) {
+    } catch (err: unknown) {
+      // ESLINT-FIX-2025-I: Replace 'any' with proper error type
       console.error(`Recipe variation attempt ${attempt} failed:`, err)
 
       // Handle non-retryable errors
@@ -536,8 +546,16 @@ const resendVerificationEmail = async () => {
     const response = await AuthService.resendVerificationEmail(authStore.user.email)
     notificationStore.success(response.message || 'Verification email sent')
     error.value = null // Clear the error after successfully sending email
-  } catch (error: any) {
-    notificationStore.error(error.response?.data?.error || 'Failed to send verification email')
+  } catch (error: unknown) {
+    // ESLINT-FIX-2025-I: Replace 'any' with proper error type for email resend
+    const message = error instanceof Error && 'response' in error &&
+      typeof error.response === 'object' && error.response !== null &&
+      'data' in error.response && typeof error.response.data === 'object' &&
+      error.response.data !== null && 'error' in error.response.data &&
+      typeof error.response.data.error === 'string'
+      ? error.response.data.error
+      : 'Failed to send verification email'
+    notificationStore.error(message)
   } finally {
     resendingEmail.value = false
   }
@@ -562,7 +580,8 @@ const loadDraftFromUrl = async () => {
       // Show notification about the loaded draft
       notificationStore.info('Recipe loaded! You can make additional modifications or save it.')
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
+      // ESLINT-FIX-2025-I: Replace 'any' with proper error type
     console.error('Failed to load draft:', err)
     error.value = 'Failed to load recipe draft. It may have expired or been saved already.'
   } finally {

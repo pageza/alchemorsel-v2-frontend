@@ -186,7 +186,8 @@ const adminStore = useAdminStore()
 const trendDays = ref(30)
 const chartInstance = ref<Chart | null>(null)
 const chartCanvas = ref<HTMLCanvasElement | null>(null)
-const recentStats = ref<any>(null)
+// ESLINT-FIX-2025-I: Replace 'any' with proper stats interface
+const recentStats = ref<{ [key: string]: unknown } | null>(null)
 
 const trendOptions = [
   { text: 'Last 7 days', value: 7 },

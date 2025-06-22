@@ -9,7 +9,8 @@ vi.mock('@/services/auth.service')
 vi.mock('@/services/storage.service')
 
 describe('Auth Store', () => {
-  let store: any
+  // ESLINT-FIX-2025-H: Replace 'any' with proper store type for testing
+  let store: ReturnType<typeof useAuthStore>
 
   const mockUser: User = {
     id: 'test-id',

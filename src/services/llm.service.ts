@@ -33,7 +33,8 @@ export interface LLMQueryRequest {
 export interface LLMQueryResponse {
   recipe?: RecipeDraft
   draft_id?: string
-  similar_recipes?: any[] // Will use Recipe type from recipe service
+  // ESLINT-FIX-2025-H: Replace 'any[]' with proper Recipe array type
+  similar_recipes?: Array<{ [key: string]: unknown }> // Generic recipe objects from API
   message?: string
 }
 

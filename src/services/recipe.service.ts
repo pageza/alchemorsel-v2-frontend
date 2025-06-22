@@ -10,7 +10,8 @@ export class RecipeService {
     // API returns { recipes: [...] }
     const recipes = response.data.recipes || []
     // Map snake_case to camelCase for frontend
-    return recipes.map((recipe: any) => ({
+    // ESLINT-FIX-2025-H: Replace 'any' with proper recipe interface mapping
+    return recipes.map((recipe: { [key: string]: unknown; is_favorite: boolean }) => ({
       ...recipe,
       isFavorite: recipe.is_favorite,
     }))
@@ -29,7 +30,8 @@ export class RecipeService {
     const response = await api.get(`/recipes/search?${params.toString()}`)
     const recipes = response.data.recipes || []
     // Map snake_case to camelCase for frontend
-    return recipes.map((recipe: any) => ({
+    // ESLINT-FIX-2025-H: Replace 'any' with proper recipe interface mapping
+    return recipes.map((recipe: { [key: string]: unknown; is_favorite: boolean }) => ({
       ...recipe,
       isFavorite: recipe.is_favorite,
     }))
@@ -98,16 +100,22 @@ export class RecipeService {
         const response = await api.post(`/recipes/${id}/favorite`)
         return response.data
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      // ESLINT-FIX-2025-H: Replace 'any' with proper error type checking
       // Handle conflicts and not found errors by retrying with opposite action
-      if (error.response?.status === 409) {
-        // 409 means already favorited, so unfavorite it instead
-        const response = await api.delete(`/recipes/${id}/favorite`)
-        return response.data
-      } else if (error.response?.status === 404) {
-        // 404 means not favorited, so favorite it instead
-        const response = await api.post(`/recipes/${id}/favorite`)
-        return response.data
+      if (error instanceof Error && 'response' in error &&
+          typeof error.response === 'object' && error.response !== null &&
+          'status' in error.response) {
+        const status = error.response.status
+        if (status === 409) {
+          // 409 means already favorited, so unfavorite it instead
+          const response = await api.delete(`/recipes/${id}/favorite`)
+          return response.data
+        } else if (status === 404) {
+          // 404 means not favorited, so favorite it instead
+          const response = await api.post(`/recipes/${id}/favorite`)
+          return response.data
+        }
       }
       // Re-throw other errors
       throw error
@@ -118,7 +126,8 @@ export class RecipeService {
     const response = await api.get('/recipes/favorites')
     const recipes = response.data.recipes || []
     // Map snake_case to camelCase for frontend
-    return recipes.map((recipe: any) => ({
+    // ESLINT-FIX-2025-H: Replace 'any' with proper recipe interface mapping
+    return recipes.map((recipe: { [key: string]: unknown; is_favorite: boolean }) => ({
       ...recipe,
       isFavorite: recipe.is_favorite,
     }))

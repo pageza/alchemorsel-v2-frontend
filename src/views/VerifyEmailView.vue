@@ -72,9 +72,17 @@ onMounted(async () => {
     if (authStore.isAuthenticated) {
       await authStore.fetchProfile()
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
+    // ESLINT-FIX-2025-I: Replace 'any' with proper error type for email verification
     error.value = true
-    errorMessage.value = err.response?.data?.error || 'Invalid or expired verification token'
+    const message = err instanceof Error && 'response' in err &&
+      typeof err.response === 'object' && err.response !== null &&
+      'data' in err.response && typeof err.response.data === 'object' &&
+      err.response.data !== null && 'error' in err.response.data &&
+      typeof err.response.data.error === 'string'
+      ? err.response.data.error
+      : 'Invalid or expired verification token'
+    errorMessage.value = message
   } finally {
     loading.value = false
   }

@@ -11,7 +11,8 @@ export interface AdminAction {
   action: string
   target_type: string
   target_id?: string
-  details?: Record<string, any>
+  // ESLINT-FIX-2025-H: Replace 'any' with unknown for flexible admin action details
+  details?: Record<string, unknown>
   ip_address?: string
   user_agent?: string
   created_at: string

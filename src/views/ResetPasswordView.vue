@@ -113,8 +113,16 @@ onMounted(async () => {
   try {
     await AuthService.verifyResetToken(token.value)
     tokenValid.value = true
-  } catch (error: any) {
-    errorMessage.value = error.response?.data?.error || 'Invalid or expired reset token'
+  } catch (error: unknown) {
+    // ESLINT-FIX-2025-I: Replace 'any' with proper error type for token verification
+    const message = error instanceof Error && 'response' in error &&
+      typeof error.response === 'object' && error.response !== null &&
+      'data' in error.response && typeof error.response.data === 'object' &&
+      error.response.data !== null && 'error' in error.response.data &&
+      typeof error.response.data.error === 'string'
+      ? error.response.data.error
+      : 'Invalid or expired reset token'
+    errorMessage.value = message
     tokenValid.value = false
   } finally {
     tokenValidated.value = true
@@ -131,9 +139,16 @@ const resetPassword = async () => {
     const response = await AuthService.completePasswordReset(token.value, password.value)
     notificationStore.success(response.message || 'Password has been reset successfully')
     router.push('/login')
-  } catch (error: any) {
-    errorMessage.value =
-      error.response?.data?.error || 'Failed to reset password. Please try again.'
+  } catch (error: unknown) {
+    // ESLINT-FIX-2025-I: Replace 'any' with proper error type for password reset
+    const message = error instanceof Error && 'response' in error &&
+      typeof error.response === 'object' && error.response !== null &&
+      'data' in error.response && typeof error.response.data === 'object' &&
+      error.response.data !== null && 'error' in error.response.data &&
+      typeof error.response.data.error === 'string'
+      ? error.response.data.error
+      : 'Failed to reset password. Please try again.'
+    errorMessage.value = message
   } finally {
     loading.value = false
   }

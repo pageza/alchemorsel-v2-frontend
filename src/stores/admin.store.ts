@@ -4,6 +4,17 @@ import type { User, Recipe, AdminAction, PlatformStats, DailyStats, TopUser } fr
 import adminService from '@/services/admin.service'
 
 export const useAdminStore = defineStore('admin', () => {
+  // ESLINT-FIX-2025-G: Helper function for consistent error handling
+  const extractErrorMessage = (err: unknown, defaultMessage: string): string => {
+    return err instanceof Error && 'response' in err &&
+      typeof err.response === 'object' && err.response !== null &&
+      'data' in err.response && typeof err.response.data === 'object' &&
+      err.response.data !== null && 'error' in err.response.data &&
+      typeof err.response.data.error === 'string'
+      ? err.response.data.error
+      : defaultMessage
+  }
+
   // State
   const users = ref<User[]>([])
   const totalUsers = ref(0)
@@ -40,8 +51,9 @@ export const useAdminStore = defineStore('admin', () => {
       )
       users.value = response.users
       totalUsers.value = response.total
-    } catch (err: any) {
-      error.value = err.response?.data?.error || 'Failed to fetch users'
+    } catch (err: unknown) {
+      // ESLINT-FIX-2025-G: Use helper function for consistent error handling
+      error.value = extractErrorMessage(err, 'Failed to fetch users')
       throw err
     } finally {
       loading.value = false
@@ -53,8 +65,9 @@ export const useAdminStore = defineStore('admin', () => {
     error.value = null
     try {
       return await adminService.getUserDetails(userId)
-    } catch (err: any) {
-      error.value = err.response?.data?.error || 'Failed to fetch user details'
+    } catch (err: unknown) {
+      // ESLINT-FIX-2025-G: Use helper function for consistent error handling
+      error.value = extractErrorMessage(err, 'Failed to fetch user details')
       throw err
     } finally {
       loading.value = false
@@ -68,8 +81,9 @@ export const useAdminStore = defineStore('admin', () => {
       await adminService.updateUserRole(userId, role)
       // Refresh user list
       await fetchUsers()
-    } catch (err: any) {
-      error.value = err.response?.data?.error || 'Failed to update user role'
+    } catch (err: unknown) {
+      // ESLINT-FIX-2025-G: Use helper function for consistent error handling
+      error.value = extractErrorMessage(err, 'Failed to update user role')
       throw err
     } finally {
       loading.value = false
@@ -83,8 +97,9 @@ export const useAdminStore = defineStore('admin', () => {
       await adminService.banUser(userId, reason)
       // Refresh user list
       await fetchUsers()
-    } catch (err: any) {
-      error.value = err.response?.data?.error || 'Failed to ban user'
+    } catch (err: unknown) {
+      // ESLINT-FIX-2025-G: Use helper function for consistent error handling
+      error.value = extractErrorMessage(err, 'Failed to ban user')
       throw err
     } finally {
       loading.value = false
@@ -98,8 +113,9 @@ export const useAdminStore = defineStore('admin', () => {
       await adminService.unbanUser(userId)
       // Refresh user list
       await fetchUsers()
-    } catch (err: any) {
-      error.value = err.response?.data?.error || 'Failed to unban user'
+    } catch (err: unknown) {
+      // ESLINT-FIX-2025-G: Use helper function for consistent error handling
+      error.value = extractErrorMessage(err, 'Failed to unban user')
       throw err
     } finally {
       loading.value = false
@@ -113,8 +129,9 @@ export const useAdminStore = defineStore('admin', () => {
       await adminService.deleteUser(userId)
       // Refresh user list
       await fetchUsers()
-    } catch (err: any) {
-      error.value = err.response?.data?.error || 'Failed to delete user'
+    } catch (err: unknown) {
+      // ESLINT-FIX-2025-G: Use helper function for consistent error handling
+      error.value = extractErrorMessage(err, 'Failed to delete user')
       throw err
     } finally {
       loading.value = false
@@ -133,8 +150,9 @@ export const useAdminStore = defineStore('admin', () => {
       )
       recipes.value = response.recipes
       totalRecipes.value = response.total
-    } catch (err: any) {
-      error.value = err.response?.data?.error || 'Failed to fetch recipes'
+    } catch (err: unknown) {
+      // ESLINT-FIX-2025-G: Use helper function for consistent error handling
+      error.value = extractErrorMessage(err, 'Failed to fetch recipes')
       throw err
     } finally {
       loading.value = false
@@ -148,8 +166,9 @@ export const useAdminStore = defineStore('admin', () => {
       await adminService.hideRecipe(recipeId, reason)
       // Refresh recipe list
       await fetchRecipesForModeration()
-    } catch (err: any) {
-      error.value = err.response?.data?.error || 'Failed to hide recipe'
+    } catch (err: unknown) {
+      // ESLINT-FIX-2025-G: Use helper function for consistent error handling
+      error.value = extractErrorMessage(err, 'Failed to hide recipe')
       throw err
     } finally {
       loading.value = false
@@ -163,8 +182,9 @@ export const useAdminStore = defineStore('admin', () => {
       await adminService.unhideRecipe(recipeId)
       // Refresh recipe list
       await fetchRecipesForModeration()
-    } catch (err: any) {
-      error.value = err.response?.data?.error || 'Failed to unhide recipe'
+    } catch (err: unknown) {
+      // ESLINT-FIX-2025-G: Use helper function for consistent error handling
+      error.value = extractErrorMessage(err, 'Failed to unhide recipe')
       throw err
     } finally {
       loading.value = false
@@ -178,8 +198,9 @@ export const useAdminStore = defineStore('admin', () => {
       await adminService.deleteRecipe(recipeId)
       // Refresh recipe list
       await fetchRecipesForModeration()
-    } catch (err: any) {
-      error.value = err.response?.data?.error || 'Failed to delete recipe'
+    } catch (err: unknown) {
+      // ESLINT-FIX-2025-G: Use helper function for consistent error handling
+      error.value = extractErrorMessage(err, 'Failed to delete recipe')
       throw err
     } finally {
       loading.value = false
@@ -192,8 +213,9 @@ export const useAdminStore = defineStore('admin', () => {
     error.value = null
     try {
       platformStats.value = await adminService.getPlatformStats()
-    } catch (err: any) {
-      error.value = err.response?.data?.error || 'Failed to fetch platform stats'
+    } catch (err: unknown) {
+      // ESLINT-FIX-2025-G: Use helper function for consistent error handling
+      error.value = extractErrorMessage(err, 'Failed to fetch platform stats')
       throw err
     } finally {
       loading.value = false
@@ -206,8 +228,9 @@ export const useAdminStore = defineStore('admin', () => {
     try {
       const response = await adminService.getDailyStats(days)
       dailyStats.value = response.stats
-    } catch (err: any) {
-      error.value = err.response?.data?.error || 'Failed to fetch daily stats'
+    } catch (err: unknown) {
+      // ESLINT-FIX-2025-G: Use helper function for consistent error handling
+      error.value = extractErrorMessage(err, 'Failed to fetch daily stats')
       throw err
     } finally {
       loading.value = false
@@ -220,8 +243,9 @@ export const useAdminStore = defineStore('admin', () => {
     try {
       const response = await adminService.getTopUsers(limit)
       topUsers.value = response.users
-    } catch (err: any) {
-      error.value = err.response?.data?.error || 'Failed to fetch top users'
+    } catch (err: unknown) {
+      // ESLINT-FIX-2025-G: Use helper function for consistent error handling
+      error.value = extractErrorMessage(err, 'Failed to fetch top users')
       throw err
     } finally {
       loading.value = false
@@ -229,7 +253,14 @@ export const useAdminStore = defineStore('admin', () => {
   }
 
   // Admin Actions Log
-  async function fetchAdminActions(page?: number, filters?: any) {
+  // ESLINT-FIX-2025-G: Replace 'any' with proper filter interface
+  async function fetchAdminActions(page?: number, filters?: {
+    adminId?: string
+    targetType?: string
+    action?: string
+    dateFrom?: string
+    dateTo?: string
+  }) {
     loading.value = true
     error.value = null
     try {
@@ -241,8 +272,9 @@ export const useAdminStore = defineStore('admin', () => {
       )
       adminActions.value = response.actions
       totalActions.value = response.total
-    } catch (err: any) {
-      error.value = err.response?.data?.error || 'Failed to fetch admin actions'
+    } catch (err: unknown) {
+      // ESLINT-FIX-2025-G: Use helper function for consistent error handling
+      error.value = extractErrorMessage(err, 'Failed to fetch admin actions')
       throw err
     } finally {
       loading.value = false

@@ -214,7 +214,8 @@ const notificationStore = useNotificationStore()
 // State
 const searchQuery = ref('')
 const selectedUser = ref<User | null>(null)
-const userStats = ref<any>(null)
+// ESLINT-FIX-2025-I: Replace 'any' with proper user stats interface
+const userStats = ref<{ [key: string]: unknown } | null>(null)
 const detailsDialog = ref(false)
 const roleDialog = ref(false)
 const banDialog = ref(false)

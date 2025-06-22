@@ -217,7 +217,8 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { RecipeService } from '@/services/recipe.service'
-import type { Recipe } from '@/types/recipe.types'
+// ESLINT-FIX-2025-I: Recipe type import removed as it's not used in this component
+// Recipe creation uses form data structure, not the Recipe type directly
 
 const route = useRoute()
 const router = useRouter()
