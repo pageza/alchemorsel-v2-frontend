@@ -292,8 +292,16 @@ const query = ref('')
 const modifyQuery = ref('')
 const currentDraft = ref<RecipeDraft | null>(null)
 const currentDraftId = ref<string>('')
-// ESLINT-FIX-2025-I: Replace 'any[]' with proper recipe array type
-const similarRecipes = ref<Array<{ [key: string]: unknown }>>([])
+// ESLINT-FIX-2025-K: Use proper recipe interface for similar recipes with typed id
+interface SimilarRecipe {
+  id: string
+  name: string
+  description: string
+  total_time?: string
+  calories?: number
+  [key: string]: unknown
+}
+const similarRecipes = ref<SimilarRecipe[]>([])
 const isLoading = ref(false)
 const isModifying = ref(false)
 const isSaving = ref(false)
@@ -336,7 +344,8 @@ const generateRecipe = async () => {
 
       // Check if we got similar recipes instead of a new generation
       if (response.similar_recipes && response.similar_recipes.length > 0) {
-        similarRecipes.value = response.similar_recipes
+        // ESLINT-FIX-2025-K: Type assertion for similar recipes from API
+        similarRecipes.value = response.similar_recipes as SimilarRecipe[]
         currentDraft.value = null
         currentDraftId.value = ''
       } else if (response.recipe) {
@@ -353,28 +362,37 @@ const generateRecipe = async () => {
       console.error(`Recipe generation attempt ${attempt} failed:`, err)
 
       // Handle email verification required error (don't retry)
-      if (err.response?.status === 403) {
-        const errorData = err.response?.data
-        if (errorData?.error === 'email verification required') {
-          error.value = errorData.message || 'Please verify your email address to generate recipes.'
-          notificationStore.info('Email verification required to generate recipes')
+      // ESLINT-FIX-2025-K: Proper type checking for error response
+      if (err && typeof err === 'object' && 'response' in err) {
+        const errResponse = (err as { response?: { status?: number; data?: { error?: string; message?: string } } }).response
+        if (errResponse?.status === 403) {
+          const errorData = errResponse?.data
+          if (errorData?.error === 'email verification required') {
+            error.value = errorData.message || 'Please verify your email address to generate recipes.'
+            notificationStore.info('Email verification required to generate recipes')
+            break
+          } else {
+            error.value = 'Access denied. Please check your account status.'
+            break
+          }
+        } else if (errResponse?.status === 401) {
+          error.value = 'Your session has expired. Please log in again.'
           break
-        } else {
-          error.value = 'Access denied. Please check your account status.'
+        } else if (errResponse?.status === 429) {
+          error.value = 'Rate limit exceeded. Please wait before trying again.'
           break
         }
-      } else if (err.response?.status === 401) {
-        error.value = 'Your session has expired. Please log in again.'
-        break
-      } else if (err.response?.status === 429) {
-        error.value = 'Rate limit exceeded. Please wait before trying again.'
-        break
       }
 
       // If this is the last attempt, set the error
       if (attempt === maxRetries) {
-        if (err.response?.status && err.response.status >= 500) {
-          error.value = `Recipe generation failed after ${maxRetries} attempts. Our AI chef seems to be having trouble - please try again later.`
+        if (err && typeof err === 'object' && 'response' in err) {
+          const errResponse = (err as { response?: { status?: number } }).response
+          if (errResponse?.status && errResponse.status >= 500) {
+            error.value = `Recipe generation failed after ${maxRetries} attempts. Our AI chef seems to be having trouble - please try again later.`
+          } else {
+            error.value = `Failed to generate recipe after ${maxRetries} attempts. Please try again.`
+          }
         } else {
           error.value = `Failed to generate recipe after ${maxRetries} attempts. Please try again.`
         }
@@ -432,28 +450,37 @@ const generateNewVariation = async () => {
       console.error(`Recipe variation attempt ${attempt} failed:`, err)
 
       // Handle non-retryable errors
-      if (err.response?.status === 403) {
-        const errorData = err.response?.data
-        if (errorData?.error === 'email verification required') {
-          error.value = errorData.message || 'Please verify your email address to generate recipes.'
-          notificationStore.info('Email verification required to generate recipes')
+      // ESLINT-FIX-2025-K: Proper type checking for error response
+      if (err && typeof err === 'object' && 'response' in err) {
+        const errResponse = (err as { response?: { status?: number; data?: { error?: string; message?: string } } }).response
+        if (errResponse?.status === 403) {
+          const errorData = errResponse?.data
+          if (errorData?.error === 'email verification required') {
+            error.value = errorData.message || 'Please verify your email address to generate recipes.'
+            notificationStore.info('Email verification required to generate recipes')
+            break
+          } else {
+            error.value = 'Access denied. Please check your account status.'
+            break
+          }
+        } else if (errResponse?.status === 401) {
+          error.value = 'Your session has expired. Please log in again.'
           break
-        } else {
-          error.value = 'Access denied. Please check your account status.'
+        } else if (errResponse?.status === 429) {
+          error.value = 'Rate limit exceeded. Please wait before trying again.'
           break
         }
-      } else if (err.response?.status === 401) {
-        error.value = 'Your session has expired. Please log in again.'
-        break
-      } else if (err.response?.status === 429) {
-        error.value = 'Rate limit exceeded. Please wait before trying again.'
-        break
       }
 
       // If this is the last attempt, set the error
       if (attempt === maxRetries) {
-        if (err.response?.status && err.response.status >= 500) {
-          error.value = `Recipe generation failed after ${maxRetries} attempts. Our AI chef seems to be having trouble - please try again later.`
+        if (err && typeof err === 'object' && 'response' in err) {
+          const errResponse = (err as { response?: { status?: number } }).response
+          if (errResponse?.status && errResponse.status >= 500) {
+            error.value = `Recipe generation failed after ${maxRetries} attempts. Our AI chef seems to be having trouble - please try again later.`
+          } else {
+            error.value = `Failed to generate recipe after ${maxRetries} attempts. Please try again.`
+          }
         } else {
           error.value = `Failed to generate recipe after ${maxRetries} attempts. Please try again.`
         }
