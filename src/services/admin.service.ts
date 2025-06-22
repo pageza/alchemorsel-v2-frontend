@@ -44,7 +44,9 @@ interface TopUsersResponse {
 class AdminService {
   // User Management
   async getUsers(page = 1, pageSize = 20, search?: string): Promise<UsersResponse> {
-    const params: any = { page, page_size: pageSize }
+    // LINT-FIX-2025: Replace 'any' with proper interface for better type safety
+    // Define explicit type for API parameters to catch type errors at compile time
+    const params: { page: number; page_size: number; search?: string } = { page, page_size: pageSize }
     if (search) params.search = search
 
     const response = await apiClient.get('/admin/users', { params })
@@ -122,7 +124,15 @@ class AdminService {
       action?: string
     },
   ): Promise<AdminActionsResponse> {
-    const params: any = { page, page_size: pageSize }
+    // LINT-FIX-2025: Replace 'any' with proper interface for better type safety
+    // Define explicit type for API parameters to catch type errors at compile time
+    const params: {
+      page: number
+      page_size: number
+      admin_id?: string
+      target_type?: string
+      action?: string
+    } = { page, page_size: pageSize }
     if (filters?.adminId) params.admin_id = filters.adminId
     if (filters?.targetType) params.target_type = filters.targetType
     if (filters?.action) params.action = filters.action

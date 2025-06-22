@@ -86,7 +86,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useAuthStore } from '@/stores/auth.store'
+// LINT-FIX-2025: Removed unused useAuthStore import - not needed for feedback functionality
 import { useNotificationStore } from '@/stores/notification.store'
 import { FeedbackService } from '@/services/feedback.service'
 
@@ -105,7 +105,8 @@ const emit = defineEmits<{
   'update:modelValue': [value: boolean]
 }>()
 
-const authStore = useAuthStore()
+// LINT-FIX-2025: Removed unused authStore import - FeedbackModal doesn't need auth context
+// If authentication becomes required for feedback submission, this can be re-added
 const notificationStore = useNotificationStore()
 
 const showModal = computed({

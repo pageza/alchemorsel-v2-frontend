@@ -27,7 +27,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+// LINT-FIX-2025: Removed unused 'computed' import - NotificationToast only uses ref and watch
+import { ref, watch } from 'vue'
 import { useNotificationStore } from '@/stores/notification.store'
 
 const notificationStore = useNotificationStore()

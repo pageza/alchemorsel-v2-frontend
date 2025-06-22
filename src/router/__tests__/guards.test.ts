@@ -14,7 +14,8 @@ Object.defineProperty(window, 'localStorage', { value: localStorageMock })
 vi.spyOn(console, 'log').mockImplementation(() => {})
 
 describe('Router Guards', () => {
-  let router: any
+  // LINT-FIX-2025: Removed unused router variable - tests don't require router instance
+  // LINT-FIX-2025: Using proper types instead of 'any' for better type safety
   let mockTo: RouteLocationNormalized
   let mockFrom: RouteLocationNormalized
   let mockNext: NavigationGuardNext
@@ -22,16 +23,32 @@ describe('Router Guards', () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
+    // LINT-FIX-2025: Replace 'as any' with proper type assertion for better type safety
+    // Create mock route with only required properties instead of casting to any
     mockTo = {
       name: 'dashboard',
       path: '/dashboard',
       matched: [{ meta: { requiresAuth: true } }],
-    } as any
+      // Add minimal required properties for RouteLocationNormalized
+      fullPath: '/dashboard',
+      hash: '',
+      query: {},
+      params: {},
+      redirectedFrom: undefined,
+    } as RouteLocationNormalized
 
+    // LINT-FIX-2025: Replace 'as any' with proper type assertion for better type safety
     mockFrom = {
       name: 'home',
       path: '/',
-    } as any
+      // Add minimal required properties for RouteLocationNormalized
+      fullPath: '/',
+      hash: '',
+      query: {},
+      params: {},
+      matched: [],
+      redirectedFrom: undefined,
+    } as RouteLocationNormalized
 
     mockNext = vi.fn()
   })
