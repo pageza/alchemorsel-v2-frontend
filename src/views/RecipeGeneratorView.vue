@@ -364,11 +364,14 @@ const generateRecipe = async () => {
       // Handle email verification required error (don't retry)
       // ESLINT-FIX-2025-K: Proper type checking for error response
       if (err && typeof err === 'object' && 'response' in err) {
-        const errResponse = (err as { response?: { status?: number; data?: { error?: string; message?: string } } }).response
+        const errResponse = (
+          err as { response?: { status?: number; data?: { error?: string; message?: string } } }
+        ).response
         if (errResponse?.status === 403) {
           const errorData = errResponse?.data
           if (errorData?.error === 'email verification required') {
-            error.value = errorData.message || 'Please verify your email address to generate recipes.'
+            error.value =
+              errorData.message || 'Please verify your email address to generate recipes.'
             notificationStore.info('Email verification required to generate recipes')
             break
           } else {
@@ -452,11 +455,14 @@ const generateNewVariation = async () => {
       // Handle non-retryable errors
       // ESLINT-FIX-2025-K: Proper type checking for error response
       if (err && typeof err === 'object' && 'response' in err) {
-        const errResponse = (err as { response?: { status?: number; data?: { error?: string; message?: string } } }).response
+        const errResponse = (
+          err as { response?: { status?: number; data?: { error?: string; message?: string } } }
+        ).response
         if (errResponse?.status === 403) {
           const errorData = errResponse?.data
           if (errorData?.error === 'email verification required') {
-            error.value = errorData.message || 'Please verify your email address to generate recipes.'
+            error.value =
+              errorData.message || 'Please verify your email address to generate recipes.'
             notificationStore.info('Email verification required to generate recipes')
             break
           } else {
@@ -575,13 +581,18 @@ const resendVerificationEmail = async () => {
     error.value = null // Clear the error after successfully sending email
   } catch (error: unknown) {
     // ESLINT-FIX-2025-I: Replace 'any' with proper error type for email resend
-    const message = error instanceof Error && 'response' in error &&
-      typeof error.response === 'object' && error.response !== null &&
-      'data' in error.response && typeof error.response.data === 'object' &&
-      error.response.data !== null && 'error' in error.response.data &&
+    const message =
+      error instanceof Error &&
+      'response' in error &&
+      typeof error.response === 'object' &&
+      error.response !== null &&
+      'data' in error.response &&
+      typeof error.response.data === 'object' &&
+      error.response.data !== null &&
+      'error' in error.response.data &&
       typeof error.response.data.error === 'string'
-      ? error.response.data.error
-      : 'Failed to send verification email'
+        ? error.response.data.error
+        : 'Failed to send verification email'
     notificationStore.error(message)
   } finally {
     resendingEmail.value = false
@@ -608,7 +619,7 @@ const loadDraftFromUrl = async () => {
       notificationStore.info('Recipe loaded! You can make additional modifications or save it.')
     }
   } catch (err: unknown) {
-      // ESLINT-FIX-2025-I: Replace 'any' with proper error type
+    // ESLINT-FIX-2025-I: Replace 'any' with proper error type
     console.error('Failed to load draft:', err)
     error.value = 'Failed to load recipe draft. It may have expired or been saved already.'
   } finally {

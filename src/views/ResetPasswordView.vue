@@ -115,13 +115,18 @@ onMounted(async () => {
     tokenValid.value = true
   } catch (error: unknown) {
     // ESLINT-FIX-2025-I: Replace 'any' with proper error type for token verification
-    const message = error instanceof Error && 'response' in error &&
-      typeof error.response === 'object' && error.response !== null &&
-      'data' in error.response && typeof error.response.data === 'object' &&
-      error.response.data !== null && 'error' in error.response.data &&
+    const message =
+      error instanceof Error &&
+      'response' in error &&
+      typeof error.response === 'object' &&
+      error.response !== null &&
+      'data' in error.response &&
+      typeof error.response.data === 'object' &&
+      error.response.data !== null &&
+      'error' in error.response.data &&
       typeof error.response.data.error === 'string'
-      ? error.response.data.error
-      : 'Invalid or expired reset token'
+        ? error.response.data.error
+        : 'Invalid or expired reset token'
     errorMessage.value = message
     tokenValid.value = false
   } finally {
@@ -141,13 +146,18 @@ const resetPassword = async () => {
     router.push('/login')
   } catch (error: unknown) {
     // ESLINT-FIX-2025-I: Replace 'any' with proper error type for password reset
-    const message = error instanceof Error && 'response' in error &&
-      typeof error.response === 'object' && error.response !== null &&
-      'data' in error.response && typeof error.response.data === 'object' &&
-      error.response.data !== null && 'error' in error.response.data &&
+    const message =
+      error instanceof Error &&
+      'response' in error &&
+      typeof error.response === 'object' &&
+      error.response !== null &&
+      'data' in error.response &&
+      typeof error.response.data === 'object' &&
+      error.response.data !== null &&
+      'error' in error.response.data &&
       typeof error.response.data.error === 'string'
-      ? error.response.data.error
-      : 'Failed to reset password. Please try again.'
+        ? error.response.data.error
+        : 'Failed to reset password. Please try again.'
     errorMessage.value = message
   } finally {
     loading.value = false

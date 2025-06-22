@@ -95,13 +95,18 @@ const submitRequest = async () => {
     email.value = ''
   } catch (error: unknown) {
     // ESLINT-FIX-2025-I: Replace 'any' with proper error type for password reset
-    const message = error instanceof Error && 'response' in error &&
-      typeof error.response === 'object' && error.response !== null &&
-      'data' in error.response && typeof error.response.data === 'object' &&
-      error.response.data !== null && 'error' in error.response.data &&
+    const message =
+      error instanceof Error &&
+      'response' in error &&
+      typeof error.response === 'object' &&
+      error.response !== null &&
+      'data' in error.response &&
+      typeof error.response.data === 'object' &&
+      error.response.data !== null &&
+      'error' in error.response.data &&
       typeof error.response.data.error === 'string'
-      ? error.response.data.error
-      : 'Failed to process request. Please try again.'
+        ? error.response.data.error
+        : 'Failed to process request. Please try again.'
     errorMessage.value = message
   } finally {
     loading.value = false

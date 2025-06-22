@@ -6,10 +6,14 @@ import adminService from '@/services/admin.service'
 export const useAdminStore = defineStore('admin', () => {
   // ESLINT-FIX-2025-G: Helper function for consistent error handling
   const extractErrorMessage = (err: unknown, defaultMessage: string): string => {
-    return err instanceof Error && 'response' in err &&
-      typeof err.response === 'object' && err.response !== null &&
-      'data' in err.response && typeof err.response.data === 'object' &&
-      err.response.data !== null && 'error' in err.response.data &&
+    return err instanceof Error &&
+      'response' in err &&
+      typeof err.response === 'object' &&
+      err.response !== null &&
+      'data' in err.response &&
+      typeof err.response.data === 'object' &&
+      err.response.data !== null &&
+      'error' in err.response.data &&
       typeof err.response.data.error === 'string'
       ? err.response.data.error
       : defaultMessage
@@ -254,13 +258,16 @@ export const useAdminStore = defineStore('admin', () => {
 
   // Admin Actions Log
   // ESLINT-FIX-2025-G: Replace 'any' with proper filter interface
-  async function fetchAdminActions(page?: number, filters?: {
-    adminId?: string
-    targetType?: string
-    action?: string
-    dateFrom?: string
-    dateTo?: string
-  }) {
+  async function fetchAdminActions(
+    page?: number,
+    filters?: {
+      adminId?: string
+      targetType?: string
+      action?: string
+      dateFrom?: string
+      dateTo?: string
+    },
+  ) {
     loading.value = true
     error.value = null
     try {

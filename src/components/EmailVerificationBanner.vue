@@ -61,13 +61,18 @@ const resendEmail = async () => {
   } catch (error: unknown) {
     // LINT-FIX-2025: Replace 'any' with proper error type for better type safety
     // Using unknown ensures we properly check error properties before accessing them
-    const errorMessage = error instanceof Error && 'response' in error && 
-      typeof error.response === 'object' && error.response !== null &&
-      'data' in error.response && typeof error.response.data === 'object' &&
-      error.response.data !== null && 'error' in error.response.data &&
+    const errorMessage =
+      error instanceof Error &&
+      'response' in error &&
+      typeof error.response === 'object' &&
+      error.response !== null &&
+      'data' in error.response &&
+      typeof error.response.data === 'object' &&
+      error.response.data !== null &&
+      'error' in error.response.data &&
       typeof error.response.data.error === 'string'
-      ? error.response.data.error
-      : 'Failed to send verification email'
+        ? error.response.data.error
+        : 'Failed to send verification email'
     notificationStore.error(errorMessage)
   } finally {
     loading.value = false

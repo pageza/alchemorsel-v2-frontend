@@ -46,7 +46,10 @@ class AdminService {
   async getUsers(page = 1, pageSize = 20, search?: string): Promise<UsersResponse> {
     // LINT-FIX-2025: Replace 'any' with proper interface for better type safety
     // Define explicit type for API parameters to catch type errors at compile time
-    const params: { page: number; page_size: number; search?: string } = { page, page_size: pageSize }
+    const params: { page: number; page_size: number; search?: string } = {
+      page,
+      page_size: pageSize,
+    }
     if (search) params.search = search
 
     const response = await apiClient.get('/admin/users', { params })

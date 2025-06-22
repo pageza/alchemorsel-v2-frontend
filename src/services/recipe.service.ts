@@ -104,9 +104,14 @@ export class RecipeService {
       // ESLINT-FIX-2025-H: Replace 'any' with proper error type checking
       // Handle conflicts and not found errors by retrying with opposite action
       // Support both Error instances and plain objects for testing compatibility
-      if (error && typeof error === 'object' && 'response' in error &&
-          typeof error.response === 'object' && error.response !== null &&
-          'status' in error.response) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'response' in error &&
+        typeof error.response === 'object' &&
+        error.response !== null &&
+        'status' in error.response
+      ) {
         const status = (error.response as { status: number }).status
         if (status === 409) {
           // 409 means already favorited, so unfavorite it instead
