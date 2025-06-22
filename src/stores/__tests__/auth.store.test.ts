@@ -133,7 +133,8 @@ describe('Auth Store', () => {
       email: 'test@example.com',
       password: 'password123',
       username: 'testuser',
-      dietary_preferences: ['vegetarian'],
+      dietary_lifestyles: ['vegetarian'],
+      cuisine_preferences: [],
       allergies: ['nuts']
     }
 
@@ -169,8 +170,8 @@ describe('Auth Store', () => {
         email: registerRequest.email,
         username: registerRequest.username,
         name: registerRequest.name,
-        dietaryPreferences: registerRequest.dietary_preferences,
-        allergies: registerRequest.allergies
+        dietary_lifestyles: registerRequest.dietary_lifestyles,
+        allergens: []
       })
     })
 

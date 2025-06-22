@@ -64,6 +64,8 @@ describe('LLMService', () => {
         query: mockQuery,
         intent: 'generate',
         skip_similar_check: false
+      }, {
+        timeout: 120000
       })
       expect(result).toEqual(mockResponse)
     })
@@ -160,6 +162,8 @@ describe('LLMService', () => {
         query: mockQuery,
         intent: 'modify',
         draft_id: draftId
+      }, {
+        timeout: 120000
       })
       expect(result).toEqual(mockResponse)
     })

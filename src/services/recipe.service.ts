@@ -79,14 +79,29 @@ export class RecipeService {
   }
 
   static async toggleFavorite(id: string, currentStatus?: boolean): Promise<{ is_favorite: boolean; message: string }> {
-    if (currentStatus) {
-      // If currently favorite, unfavorite it
-      const response = await api.delete(`/recipes/${id}/favorite`)
-      return response.data
-    } else {
-      // If not currently favorite, favorite it
-      const response = await api.post(`/recipes/${id}/favorite`)
-      return response.data
+    try {
+      if (currentStatus) {
+        // If currently favorite, unfavorite it
+        const response = await api.delete(`/recipes/${id}/favorite`)
+        return response.data
+      } else {
+        // If not currently favorite, favorite it
+        const response = await api.post(`/recipes/${id}/favorite`)
+        return response.data
+      }
+    } catch (error: any) {
+      // Handle conflicts and not found errors by retrying with opposite action
+      if (error.response?.status === 409) {
+        // 409 means already favorited, so unfavorite it instead
+        const response = await api.delete(`/recipes/${id}/favorite`)
+        return response.data
+      } else if (error.response?.status === 404) {
+        // 404 means not favorited, so favorite it instead
+        const response = await api.post(`/recipes/${id}/favorite`)
+        return response.data
+      }
+      // Re-throw other errors
+      throw error
     }
   }
 

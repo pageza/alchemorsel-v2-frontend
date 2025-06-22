@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useAuth } from '../useAuth'
-import type { LoginRequest, RegisterRequest } from '@/types/auth.types'
 
 // Mock the auth service to prevent API calls
 vi.mock('@/services/auth.service', () => ({
@@ -18,7 +17,10 @@ vi.mock('@/services/storage.service', () => ({
     getItem: vi.fn(),
     setItem: vi.fn(),
     removeItem: vi.fn(),
-    clear: vi.fn()
+    clear: vi.fn(),
+    getToken: vi.fn(() => null),
+    setToken: vi.fn(),
+    removeToken: vi.fn()
   }
 }))
 

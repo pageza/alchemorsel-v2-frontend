@@ -49,7 +49,7 @@ describe('RecipeService', () => {
 
       const result = await RecipeService.getRecipes()
 
-      expect(mockApi.get).toHaveBeenCalledWith('/recipes')
+      expect(mockApi.get).toHaveBeenCalledWith('/recipes?all=true')
       expect(result).toEqual(mockRecipes)
     })
 
@@ -75,7 +75,7 @@ describe('RecipeService', () => {
         }
       ]
 
-      mockApi.get.mockResolvedValue({ data: mockRecipes })
+      mockApi.get.mockResolvedValue({ data: { recipes: mockRecipes } })
 
       const result = await RecipeService.getRecipes()
 

@@ -105,13 +105,9 @@ export const useAuthStore = defineStore('auth', () => {
       }
     } catch (error) {
       console.error('fetchProfile failed:', error)
-      // Only clear auth if it's an authentication error (401), not for other errors
-      if (error instanceof Error && error.message.includes('401')) {
-        console.log('Authentication error detected, clearing auth')
-        clearAuth()
-      } else {
-        console.log('Non-auth error in fetchProfile, keeping user logged in')
-      }
+      // Clear auth on any profile fetch failure - could be expired token, permission issues, etc.
+      console.log('Profile fetch failed, clearing auth')
+      clearAuth()
     }
   }
   
