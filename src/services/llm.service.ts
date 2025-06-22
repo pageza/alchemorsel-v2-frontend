@@ -39,35 +39,47 @@ export interface LLMQueryResponse {
 
 export class LLMService {
   static async generateRecipe(query: string, skipSimilarCheck = false): Promise<LLMQueryResponse> {
-    const response = await api.post('/llm/query', {
-      query,
-      intent: 'generate',
-      skip_similar_check: skipSimilarCheck
-    }, {
-      timeout: 120000 // 2 minutes timeout for LLM operations
-    })
+    const response = await api.post(
+      '/llm/query',
+      {
+        query,
+        intent: 'generate',
+        skip_similar_check: skipSimilarCheck,
+      },
+      {
+        timeout: 120000, // 2 minutes timeout for LLM operations
+      },
+    )
     return response.data
   }
 
   static async modifyRecipe(query: string, draftId: string): Promise<LLMQueryResponse> {
-    const response = await api.post('/llm/query', {
-      query,
-      intent: 'modify',
-      draft_id: draftId
-    }, {
-      timeout: 120000 // 2 minutes timeout for LLM operations
-    })
+    const response = await api.post(
+      '/llm/query',
+      {
+        query,
+        intent: 'modify',
+        draft_id: draftId,
+      },
+      {
+        timeout: 120000, // 2 minutes timeout for LLM operations
+      },
+    )
     return response.data
   }
 
   static async forkRecipe(query: string, recipeId: string): Promise<LLMQueryResponse> {
-    const response = await api.post('/llm/query', {
-      query,
-      intent: 'fork',
-      recipe_id: recipeId
-    }, {
-      timeout: 120000 // 2 minutes timeout for LLM operations
-    })
+    const response = await api.post(
+      '/llm/query',
+      {
+        query,
+        intent: 'fork',
+        recipe_id: recipeId,
+      },
+      {
+        timeout: 120000, // 2 minutes timeout for LLM operations
+      },
+    )
     return response.data
   }
 }

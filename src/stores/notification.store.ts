@@ -59,6 +59,6 @@ export const useNotificationStore = defineStore('notification', () => {
     showSuccess: success,
     showError: error,
     showInfo: info,
-    showWarning: warning
+    showWarning: warning,
   }
-}) 
+})

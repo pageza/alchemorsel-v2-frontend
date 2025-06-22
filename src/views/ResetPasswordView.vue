@@ -28,9 +28,7 @@
               </div>
 
               <div v-else-if="tokenValid">
-                <p class="mb-4">
-                  Enter your new password below.
-                </p>
+                <p class="mb-4">Enter your new password below.</p>
 
                 <v-text-field
                   v-model="password"
@@ -55,12 +53,7 @@
             </v-form>
           </v-card-text>
           <v-card-actions>
-            <v-btn
-              color="secondary"
-              variant="text"
-              @click="goToLogin"
-              :disabled="loading"
-            >
+            <v-btn color="secondary" variant="text" @click="goToLogin" :disabled="loading">
               Back to Login
             </v-btn>
             <v-spacer></v-spacer>
@@ -139,7 +132,8 @@ const resetPassword = async () => {
     notificationStore.success(response.message || 'Password has been reset successfully')
     router.push('/login')
   } catch (error: any) {
-    errorMessage.value = error.response?.data?.error || 'Failed to reset password. Please try again.'
+    errorMessage.value =
+      error.response?.data?.error || 'Failed to reset password. Please try again.'
   } finally {
     loading.value = false
   }

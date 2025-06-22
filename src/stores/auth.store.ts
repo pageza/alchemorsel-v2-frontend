@@ -10,11 +10,11 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
-  
+
   // Getters
   const isAuthenticated = computed(() => !!token.value)
   const currentUser = computed(() => user.value)
-  
+
   // Actions
   async function login(credentials: LoginRequest): Promise<void> {
     isLoading.value = true
@@ -43,7 +43,7 @@ export const useAuthStore = defineStore('auth', () => {
           allergens: [],
           email_verified: false,
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         }
       }
     } catch (e) {
@@ -54,7 +54,7 @@ export const useAuthStore = defineStore('auth', () => {
       isLoading.value = false
     }
   }
-  
+
   async function register(data: RegisterRequest): Promise<void> {
     isLoading.value = true
     error.value = null
@@ -82,7 +82,7 @@ export const useAuthStore = defineStore('auth', () => {
           allergens: [],
           email_verified: false,
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         }
       }
     } catch (e) {
@@ -93,7 +93,7 @@ export const useAuthStore = defineStore('auth', () => {
       isLoading.value = false
     }
   }
-  
+
   async function fetchProfile(): Promise<void> {
     console.log('fetchProfile called')
     try {
@@ -110,37 +110,37 @@ export const useAuthStore = defineStore('auth', () => {
       clearAuth()
     }
   }
-  
+
   const isLoggingOut = ref(false)
   let logoutCallCount = 0
   let lastLogoutTime = 0
-  
+
   async function logout(): Promise<void> {
     const now = Date.now()
     logoutCallCount++
-    
+
     // Detect spam: more than 3 calls in 5 seconds
     if (now - lastLogoutTime < 5000 && logoutCallCount > 3) {
       console.error('LOGOUT SPAM DETECTED! Preventing further logout calls.')
       console.trace('Logout spam call stack trace')
       return
     }
-    
+
     // Reset counter if it's been more than 5 seconds
     if (now - lastLogoutTime > 5000) {
       logoutCallCount = 1
     }
-    
+
     lastLogoutTime = now
-    
+
     if (isLoggingOut.value) {
       console.warn('Already logging out, ignoring duplicate call')
       return
     }
-    
+
     console.log(`Logout called (call #${logoutCallCount})`)
     isLoggingOut.value = true
-    
+
     try {
       await AuthService.logout()
     } catch (error) {
@@ -151,12 +151,12 @@ export const useAuthStore = defineStore('auth', () => {
       console.log('Logout completed')
     }
   }
-  
+
   function setToken(newToken: string): void {
     token.value = newToken
     StorageService.setToken(newToken)
   }
-  
+
   function clearAuth(): void {
     console.log('clearAuth called')
     console.trace('clearAuth stack trace')
@@ -165,7 +165,7 @@ export const useAuthStore = defineStore('auth', () => {
     StorageService.clearToken()
     localStorage.removeItem('auth_user')
   }
-  
+
   // Initialize from storage
   function initialize(): void {
     console.log('Initializing auth store from localStorage')
@@ -176,10 +176,10 @@ export const useAuthStore = defineStore('auth', () => {
       fetchProfile()
     }
   }
-  
+
   // Auto-initialize when store is created
   initialize()
-  
+
   return {
     // State
     user,
@@ -196,4 +196,4 @@ export const useAuthStore = defineStore('auth', () => {
     fetchProfile,
     initialize,
   }
-}) 
+})

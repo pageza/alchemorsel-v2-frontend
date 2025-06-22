@@ -33,11 +33,7 @@
             class="elevation-1"
           >
             <template #[`item.name`]="{ item }">
-              <router-link
-                :to="`/recipe/${item.id}`"
-                target="_blank"
-                class="text-decoration-none"
-              >
+              <router-link :to="`/recipe/${item.id}`" target="_blank" class="text-decoration-none">
                 {{ item.name }}
               </router-link>
             </template>
@@ -45,10 +41,7 @@
               {{ item.user?.name || 'Unknown' }}
             </template>
             <template #[`item.is_hidden`]="{ item }">
-              <v-chip
-                small
-                :color="item.is_hidden ? 'error' : 'success'"
-              >
+              <v-chip small :color="item.is_hidden ? 'error' : 'success'">
                 {{ item.is_hidden ? 'Hidden' : 'Visible' }}
               </v-chip>
             </template>
@@ -65,21 +58,10 @@
               >
                 <v-icon>mdi-eye-off</v-icon>
               </v-btn>
-              <v-btn
-                v-else
-                icon
-                small
-                color="success"
-                @click="unhideRecipe(item)"
-              >
+              <v-btn v-else icon small color="success" @click="unhideRecipe(item)">
                 <v-icon>mdi-eye</v-icon>
               </v-btn>
-              <v-btn
-                icon
-                small
-                color="error"
-                @click="openDeleteDialog(item)"
-              >
+              <v-btn icon small color="error" @click="openDeleteDialog(item)">
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
             </template>
@@ -89,7 +71,7 @@
                   <v-col cols="12" md="6">
                     <h4 class="text-h6 mb-2">Description</h4>
                     <p>{{ item.description }}</p>
-                    
+
                     <h4 class="text-h6 mb-2 mt-4">Ingredients</h4>
                     <ul>
                       <li v-for="(ingredient, idx) in item.ingredients" :key="idx">
@@ -104,7 +86,7 @@
                         {{ instruction }}
                       </li>
                     </ol>
-                    
+
                     <div v-if="item.moderation_reason" class="mt-4">
                       <h4 class="text-h6 mb-2">Moderation Reason</h4>
                       <v-alert type="warning" variant="text">
@@ -134,13 +116,7 @@
         <v-card-actions>
           <v-spacer />
           <v-btn text @click="hideDialog = false">Cancel</v-btn>
-          <v-btn
-            color="warning"
-            :loading="loading"
-            @click="hideRecipe"
-          >
-            Hide Recipe
-          </v-btn>
+          <v-btn color="warning" :loading="loading" @click="hideRecipe"> Hide Recipe </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -155,13 +131,7 @@
         <v-card-actions>
           <v-spacer />
           <v-btn text @click="deleteDialog = false">Cancel</v-btn>
-          <v-btn
-            color="error"
-            :loading="loading"
-            @click="deleteRecipe"
-          >
-            Delete Recipe
-          </v-btn>
+          <v-btn color="error" :loading="loading" @click="deleteRecipe"> Delete Recipe </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -194,7 +164,7 @@ const options = ref({
   groupBy: [],
   groupDesc: [],
   multiSort: false,
-  mustSort: false
+  mustSort: false,
 })
 
 const headers = [
@@ -203,13 +173,13 @@ const headers = [
   { text: 'Category', value: 'category' },
   { text: 'Status', value: 'is_hidden' },
   { text: 'Created', value: 'created_at' },
-  { text: 'Actions', value: 'actions', sortable: false }
+  { text: 'Actions', value: 'actions', sortable: false },
 ]
 
 const statusOptions = [
   { text: 'All Recipes', value: null },
   { text: 'Visible Only', value: 'visible' },
-  { text: 'Hidden Only', value: 'hidden' }
+  { text: 'Hidden Only', value: 'hidden' },
 ]
 
 // Computed
@@ -234,7 +204,7 @@ function openHideDialog(recipe: Recipe) {
 
 async function hideRecipe() {
   if (!selectedRecipe.value) return
-  
+
   try {
     await adminStore.hideRecipe(selectedRecipe.value.id, hideReason.value)
     hideDialog.value = false
@@ -260,7 +230,7 @@ function openDeleteDialog(recipe: Recipe) {
 
 async function deleteRecipe() {
   if (!selectedRecipe.value) return
-  
+
   try {
     await adminStore.deleteRecipe(selectedRecipe.value.id)
     deleteDialog.value = false

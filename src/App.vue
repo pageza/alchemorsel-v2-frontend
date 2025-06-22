@@ -1,10 +1,10 @@
 <template>
   <div id="app">
     <router-view></router-view>
-    
+
     <!-- Global feedback button - available on all pages -->
     <FeedbackButton />
-    
+
     <!-- Global notification toasts -->
     <NotificationToast />
   </div>
@@ -22,7 +22,8 @@ import NotificationToast from '@/components/NotificationToast.vue'
   box-sizing: border-box;
 }
 
-body, #app {
+body,
+#app {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -44,4 +45,3 @@ body, #app {
   padding: 0 !important;
 }
 </style>
-

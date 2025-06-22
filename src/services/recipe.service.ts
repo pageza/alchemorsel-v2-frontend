@@ -12,22 +12,26 @@ export class RecipeService {
     // Map snake_case to camelCase for frontend
     return recipes.map((recipe: any) => ({
       ...recipe,
-      isFavorite: recipe.is_favorite
+      isFavorite: recipe.is_favorite,
     }))
   }
 
-  static async searchRecipes(query?: string, category?: string, sortBy?: string): Promise<Recipe[]> {
+  static async searchRecipes(
+    query?: string,
+    category?: string,
+    sortBy?: string,
+  ): Promise<Recipe[]> {
     const params = new URLSearchParams()
     if (query) params.append('q', query)
     if (category && category !== 'All') params.append('category', category)
     if (sortBy) params.append('sort', sortBy)
-    
+
     const response = await api.get(`/recipes/search?${params.toString()}`)
     const recipes = response.data.recipes || []
     // Map snake_case to camelCase for frontend
     return recipes.map((recipe: any) => ({
       ...recipe,
-      isFavorite: recipe.is_favorite
+      isFavorite: recipe.is_favorite,
     }))
   }
 
@@ -38,11 +42,13 @@ export class RecipeService {
     // Map snake_case to camelCase for frontend
     return {
       ...recipe,
-      isFavorite: recipe.is_favorite
+      isFavorite: recipe.is_favorite,
     }
   }
 
-  static async createRecipe(recipe: Omit<Recipe, 'id' | 'created_at' | 'updated_at' | 'user_id'>): Promise<Recipe> {
+  static async createRecipe(
+    recipe: Omit<Recipe, 'id' | 'created_at' | 'updated_at' | 'user_id'>,
+  ): Promise<Recipe> {
     const response = await api.post('/recipes', recipe)
     // Backend returns { recipe: {...} }, so extract the recipe object
     return response.data.recipe || response.data
@@ -63,9 +69,9 @@ export class RecipeService {
       carbs: draft.carbs,
       fat: draft.fat,
       dietary_preferences: [], // Default - could be inferred from recipe content
-      tags: []
+      tags: [],
     }
-    
+
     return this.createRecipe(recipeData)
   }
 
@@ -78,7 +84,10 @@ export class RecipeService {
     await api.delete(`/recipes/${id}`)
   }
 
-  static async toggleFavorite(id: string, currentStatus?: boolean): Promise<{ is_favorite: boolean; message: string }> {
+  static async toggleFavorite(
+    id: string,
+    currentStatus?: boolean,
+  ): Promise<{ is_favorite: boolean; message: string }> {
     try {
       if (currentStatus) {
         // If currently favorite, unfavorite it
@@ -111,7 +120,7 @@ export class RecipeService {
     // Map snake_case to camelCase for frontend
     return recipes.map((recipe: any) => ({
       ...recipe,
-      isFavorite: recipe.is_favorite
+      isFavorite: recipe.is_favorite,
     }))
   }
-} 
+}

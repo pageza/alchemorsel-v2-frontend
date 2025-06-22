@@ -24,7 +24,7 @@
                   :disabled="isLoading"
                   class="mb-4"
                 ></v-textarea>
-                
+
                 <v-btn
                   type="submit"
                   color="primary"
@@ -60,13 +60,7 @@
           </v-card>
 
           <!-- Error State -->
-          <v-alert
-            v-if="error"
-            type="error"
-            class="mb-6"
-            closable
-            @click:close="error = null"
-          >
+          <v-alert v-if="error" type="error" class="mb-6" closable @click:close="error = null">
             <div class="d-flex align-center justify-space-between">
               <div>{{ error }}</div>
               <v-btn
@@ -87,22 +81,13 @@
           <div v-if="similarRecipes.length > 0" class="mb-6">
             <v-alert type="info" class="mb-4">
               <v-alert-title>Found Similar Recipes!</v-alert-title>
-              We found existing recipes that match your request. You can use one of these or generate a new variation.
+              We found existing recipes that match your request. You can use one of these or
+              generate a new variation.
             </v-alert>
-            
+
             <v-row>
-              <v-col 
-                v-for="recipe in similarRecipes" 
-                :key="recipe.id"
-                cols="12"
-                sm="6"
-                md="4"
-              >
-                <v-card 
-                  class="h-100"
-                  hover
-                  @click="router.push(`/recipes/${recipe.id}`)"
-                >
+              <v-col v-for="recipe in similarRecipes" :key="recipe.id" cols="12" sm="6" md="4">
+                <v-card class="h-100" hover @click="router.push(`/recipes/${recipe.id}`)">
                   <v-card-title>{{ recipe.name }}</v-card-title>
                   <v-card-text>
                     <p class="text-body-2">{{ recipe.description }}</p>
@@ -120,13 +105,9 @@
                 </v-card>
               </v-col>
             </v-row>
-            
+
             <div class="text-center mt-4">
-              <v-btn
-                color="primary"
-                variant="outlined"
-                @click="generateNewVariation"
-              >
+              <v-btn color="primary" variant="outlined" @click="generateNewVariation">
                 Generate New Variation Anyway
               </v-btn>
             </div>
@@ -138,10 +119,10 @@
               <v-icon class="mr-2" color="success">mdi-chef-hat</v-icon>
               {{ currentDraft.name }}
             </v-card-title>
-            
+
             <v-card-text>
               <p class="text-body-1 mb-4">{{ currentDraft.description }}</p>
-              
+
               <!-- Recipe Meta Info -->
               <div class="d-flex flex-wrap gap-2 mb-4">
                 <v-chip color="primary" size="small">
@@ -203,25 +184,33 @@
                 <v-row>
                   <v-col cols="3">
                     <div class="text-center">
-                      <div class="text-h6 font-weight-bold">{{ Math.round(currentDraft.calories) }}</div>
+                      <div class="text-h6 font-weight-bold">
+                        {{ Math.round(currentDraft.calories) }}
+                      </div>
                       <div class="text-caption">Calories</div>
                     </div>
                   </v-col>
                   <v-col cols="3">
                     <div class="text-center">
-                      <div class="text-h6 font-weight-bold">{{ Math.round(currentDraft.protein) }}g</div>
+                      <div class="text-h6 font-weight-bold">
+                        {{ Math.round(currentDraft.protein) }}g
+                      </div>
                       <div class="text-caption">Protein</div>
                     </div>
                   </v-col>
                   <v-col cols="3">
                     <div class="text-center">
-                      <div class="text-h6 font-weight-bold">{{ Math.round(currentDraft.carbs) }}g</div>
+                      <div class="text-h6 font-weight-bold">
+                        {{ Math.round(currentDraft.carbs) }}g
+                      </div>
                       <div class="text-caption">Carbs</div>
                     </div>
                   </v-col>
                   <v-col cols="3">
                     <div class="text-center">
-                      <div class="text-h6 font-weight-bold">{{ Math.round(currentDraft.fat) }}g</div>
+                      <div class="text-h6 font-weight-bold">
+                        {{ Math.round(currentDraft.fat) }}g
+                      </div>
                       <div class="text-caption">Fat</div>
                     </div>
                   </v-col>
@@ -231,32 +220,19 @@
 
             <!-- Action Buttons -->
             <v-card-actions class="pa-4">
-              <v-btn
-                color="success"
-                variant="elevated"
-                :loading="isSaving"
-                @click="saveRecipe"
-              >
+              <v-btn color="success" variant="elevated" :loading="isSaving" @click="saveRecipe">
                 <v-icon start>mdi-content-save</v-icon>
                 Save Recipe
               </v-btn>
-              
+
               <v-spacer></v-spacer>
-              
-              <v-btn
-                color="primary"
-                variant="outlined"
-                @click="showModifyDialog = true"
-              >
+
+              <v-btn color="primary" variant="outlined" @click="showModifyDialog = true">
                 <v-icon start>mdi-pencil</v-icon>
                 Modify
               </v-btn>
-              
-              <v-btn
-                color="secondary"
-                variant="text"
-                @click="startOver"
-              >
+
+              <v-btn color="secondary" variant="text" @click="startOver">
                 <v-icon start>mdi-refresh</v-icon>
                 Start Over
               </v-btn>
@@ -344,17 +320,18 @@ const generateRecipe = async () => {
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     retryAttempt.value = attempt
-    
+
     if (attempt > 1) {
       loadingMessage.value = `Trying again... (${attempt}/${maxRetries})`
-      loadingSubMessage.value = attempt === 2 
-        ? 'Sometimes the best recipes need a second try!' 
-        : 'Third time\'s the charm - perfecting your recipe...'
+      loadingSubMessage.value =
+        attempt === 2
+          ? 'Sometimes the best recipes need a second try!'
+          : "Third time's the charm - perfecting your recipe..."
     }
 
     try {
       const response = await LLMService.generateRecipe(query.value)
-      
+
       // Check if we got similar recipes instead of a new generation
       if (response.similar_recipes && response.similar_recipes.length > 0) {
         similarRecipes.value = response.similar_recipes
@@ -365,14 +342,13 @@ const generateRecipe = async () => {
         currentDraftId.value = response.draft_id || ''
         similarRecipes.value = []
       }
-      
+
       // Success - break out of retry loop
       break
-      
     } catch (err: any) {
       lastError = err
       console.error(`Recipe generation attempt ${attempt} failed:`, err)
-      
+
       // Handle email verification required error (don't retry)
       if (err.response?.status === 403) {
         const errorData = err.response?.data
@@ -391,7 +367,7 @@ const generateRecipe = async () => {
         error.value = 'Rate limit exceeded. Please wait before trying again.'
         break
       }
-      
+
       // If this is the last attempt, set the error
       if (attempt === maxRetries) {
         if (err.response?.status && err.response.status >= 500) {
@@ -400,10 +376,10 @@ const generateRecipe = async () => {
           error.value = `Failed to generate recipe after ${maxRetries} attempts. Please try again.`
         }
       }
-      
+
       // Wait a bit before retrying (except on last attempt)
       if (attempt < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        await new Promise((resolve) => setTimeout(resolve, 1000))
       }
     }
   }
@@ -426,12 +402,13 @@ const generateNewVariation = async () => {
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     retryAttempt.value = attempt
-    
+
     if (attempt > 1) {
       loadingMessage.value = `Trying again... (${attempt}/${maxRetries})`
-      loadingSubMessage.value = attempt === 2 
-        ? 'Sometimes the best recipes need a second try!' 
-        : 'Third time\'s the charm - perfecting your recipe...'
+      loadingSubMessage.value =
+        attempt === 2
+          ? 'Sometimes the best recipes need a second try!'
+          : "Third time's the charm - perfecting your recipe..."
     }
 
     try {
@@ -441,10 +418,9 @@ const generateNewVariation = async () => {
         currentDraftId.value = response.draft_id || ''
       }
       break // Success
-      
     } catch (err: any) {
       console.error(`Recipe variation attempt ${attempt} failed:`, err)
-      
+
       // Handle non-retryable errors
       if (err.response?.status === 403) {
         const errorData = err.response?.data
@@ -463,7 +439,7 @@ const generateNewVariation = async () => {
         error.value = 'Rate limit exceeded. Please wait before trying again.'
         break
       }
-      
+
       // If this is the last attempt, set the error
       if (attempt === maxRetries) {
         if (err.response?.status && err.response.status >= 500) {
@@ -472,10 +448,10 @@ const generateNewVariation = async () => {
           error.value = `Failed to generate recipe after ${maxRetries} attempts. Please try again.`
         }
       }
-      
+
       // Wait before retrying
       if (attempt < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        await new Promise((resolve) => setTimeout(resolve, 1000))
       }
     }
   }
@@ -512,7 +488,7 @@ const saveRecipe = async () => {
 
   try {
     const savedRecipe = await RecipeService.createRecipeFromDraft(currentDraft.value)
-    
+
     // Validate that we have a proper recipe ID before navigating
     if (savedRecipe && savedRecipe.id) {
       console.log('Recipe saved successfully with ID:', savedRecipe.id)
@@ -530,7 +506,8 @@ const saveRecipe = async () => {
         error.value = 'Server error occurred while saving. Please try again.'
       }
     } else if (err && typeof err === 'object' && 'message' in err) {
-      error.value = (err as { message: string }).message || 'Failed to save recipe. Please try again.'
+      error.value =
+        (err as { message: string }).message || 'Failed to save recipe. Please try again.'
     } else {
       error.value = 'Failed to save recipe. Please try again.'
     }
@@ -553,7 +530,7 @@ const startOver = () => {
 // Resend verification email
 const resendVerificationEmail = async () => {
   if (!authStore.user?.email) return
-  
+
   resendingEmail.value = true
   try {
     const response = await AuthService.resendVerificationEmail(authStore.user.email)
@@ -581,7 +558,7 @@ const loadDraftFromUrl = async () => {
     if (response.data.draft) {
       currentDraft.value = response.data.draft
       currentDraftId.value = draftId
-      
+
       // Show notification about the loaded draft
       notificationStore.info('Recipe loaded! You can make additional modifications or save it.')
     }

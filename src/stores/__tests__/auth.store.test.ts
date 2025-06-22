@@ -22,7 +22,7 @@ describe('Auth Store', () => {
     email_verified: true,
     email_verified_at: '2024-01-01T00:00:00Z',
     createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z'
+    updatedAt: '2024-01-01T00:00:00Z',
   }
 
   const mockToken = 'mock-jwt-token'
@@ -30,15 +30,15 @@ describe('Auth Store', () => {
   beforeEach(async () => {
     // Reset all mocks
     vi.clearAllMocks()
-    
+
     // Create a fresh pinia instance
     setActivePinia(createPinia())
-    
+
     // Mock storage service - return null by default
     vi.mocked(StorageService.getToken).mockReturnValue(null)
     vi.mocked(StorageService.setToken).mockImplementation(() => {})
     vi.mocked(StorageService.clearToken).mockImplementation(() => {})
-    
+
     // Dynamically import store to avoid auto-initialization issues
     const { useAuthStore } = await import('../auth.store')
     store = useAuthStore()
@@ -58,14 +58,14 @@ describe('Auth Store', () => {
   describe('Login', () => {
     const loginRequest: LoginRequest = {
       email: 'test@example.com',
-      password: 'password123'
+      password: 'password123',
     }
 
     it('should login successfully', async () => {
-      vi.mocked(AuthService.login).mockResolvedValue({ 
+      vi.mocked(AuthService.login).mockResolvedValue({
         token: mockToken,
         user_id: 'test-id',
-        email_verified: true 
+        email_verified: true,
       })
       vi.mocked(AuthService.getProfile).mockResolvedValue(mockUser)
 
@@ -79,9 +79,9 @@ describe('Auth Store', () => {
     })
 
     it('should handle login with profile fetch failure', async () => {
-      vi.mocked(AuthService.login).mockResolvedValue({ 
+      vi.mocked(AuthService.login).mockResolvedValue({
         token: mockToken,
-        user_id: 'test-id' 
+        user_id: 'test-id',
       })
       vi.mocked(AuthService.getProfile).mockRejectedValue(new Error('Profile fetch failed'))
 
@@ -92,7 +92,7 @@ describe('Auth Store', () => {
       expect(store.isAuthenticated).toBe(true)
       expect(store.user).toMatchObject({
         email: loginRequest.email,
-        username: loginRequest.email
+        username: loginRequest.email,
       })
     })
 
@@ -101,7 +101,7 @@ describe('Auth Store', () => {
       vi.mocked(AuthService.login).mockRejectedValue(error)
 
       await expect(store.login(loginRequest)).rejects.toThrow('Invalid credentials')
-      
+
       expect(store.token).toBeNull()
       expect(store.user).toBeNull()
       expect(store.isAuthenticated).toBe(false)
@@ -110,19 +110,26 @@ describe('Auth Store', () => {
     })
 
     it('should set loading state during login', async () => {
-      vi.mocked(AuthService.login).mockImplementation(() => 
-        new Promise(resolve => setTimeout(() => resolve({ 
-          token: mockToken,
-          user_id: 'test-id' 
-        }), 10))
+      vi.mocked(AuthService.login).mockImplementation(
+        () =>
+          new Promise((resolve) =>
+            setTimeout(
+              () =>
+                resolve({
+                  token: mockToken,
+                  user_id: 'test-id',
+                }),
+              10,
+            ),
+          ),
       )
 
       const loginPromise = store.login(loginRequest)
-      
+
       expect(store.isLoading).toBe(true)
-      
+
       await loginPromise
-      
+
       expect(store.isLoading).toBe(false)
     })
   })
@@ -135,13 +142,13 @@ describe('Auth Store', () => {
       username: 'testuser',
       dietary_lifestyles: ['vegetarian'],
       cuisine_preferences: [],
-      allergies: ['nuts']
+      allergies: ['nuts'],
     }
 
     it('should register successfully', async () => {
-      vi.mocked(AuthService.register).mockResolvedValue({ 
+      vi.mocked(AuthService.register).mockResolvedValue({
         token: mockToken,
-        user_id: 'test-id' 
+        user_id: 'test-id',
       })
       vi.mocked(AuthService.getProfile).mockResolvedValue(mockUser)
 
@@ -155,9 +162,9 @@ describe('Auth Store', () => {
     })
 
     it('should handle register with profile fetch failure', async () => {
-      vi.mocked(AuthService.register).mockResolvedValue({ 
+      vi.mocked(AuthService.register).mockResolvedValue({
         token: mockToken,
-        user_id: 'test-id' 
+        user_id: 'test-id',
       })
       vi.mocked(AuthService.getProfile).mockRejectedValue(new Error('Profile fetch failed'))
 
@@ -171,7 +178,7 @@ describe('Auth Store', () => {
         username: registerRequest.username,
         name: registerRequest.name,
         dietary_lifestyles: registerRequest.dietary_lifestyles,
-        allergens: []
+        allergens: [],
       })
     })
 
@@ -180,7 +187,7 @@ describe('Auth Store', () => {
       vi.mocked(AuthService.register).mockRejectedValue(error)
 
       await expect(store.register(registerRequest)).rejects.toThrow('Email already exists')
-      
+
       expect(store.token).toBeNull()
       expect(store.user).toBeNull()
       expect(store.isAuthenticated).toBe(false)
@@ -220,13 +227,13 @@ describe('Auth Store', () => {
     })
 
     it('should prevent duplicate logout calls', async () => {
-      vi.mocked(AuthService.logout).mockImplementation(() => 
-        new Promise(resolve => setTimeout(resolve, 50))
+      vi.mocked(AuthService.logout).mockImplementation(
+        () => new Promise((resolve) => setTimeout(resolve, 50)),
       )
 
       // Start first logout
       const logout1 = store.logout()
-      
+
       // Try second logout immediately
       const logout2 = store.logout()
 
@@ -265,20 +272,20 @@ describe('Auth Store', () => {
   describe('Computed Properties', () => {
     it('should compute isAuthenticated correctly', () => {
       expect(store.isAuthenticated).toBe(false)
-      
+
       store.token = mockToken
       expect(store.isAuthenticated).toBe(true)
-      
+
       store.token = null
       expect(store.isAuthenticated).toBe(false)
     })
 
     it('should compute currentUser correctly', () => {
       expect(store.currentUser).toBeNull()
-      
+
       store.user = mockUser
       expect(store.currentUser).toEqual(mockUser)
-      
+
       store.user = null
       expect(store.currentUser).toBeNull()
     })
@@ -289,12 +296,12 @@ describe('Auth Store', () => {
       // Mock storage with existing token
       vi.mocked(StorageService.getToken).mockReturnValue(mockToken)
       vi.mocked(AuthService.getProfile).mockResolvedValue(mockUser)
-      
+
       // Call initialize manually
       store.initialize()
-      
+
       expect(store.token).toBe(mockToken)
-      
+
       // Wait for profile fetch
       await vi.waitFor(() => {
         expect(vi.mocked(AuthService.getProfile)).toHaveBeenCalled()

@@ -16,8 +16,12 @@
                     <v-icon v-if="!user?.profile_picture_url" size="50">mdi-account</v-icon>
                   </v-avatar>
                   <div>
-                    <h1 class="text-h4 font-weight-bold mb-2">{{ user?.name || user?.username || 'User' }}</h1>
-                    <p class="text-h6 text-medium-emphasis mb-1">@{{ user?.username || 'username' }}</p>
+                    <h1 class="text-h4 font-weight-bold mb-2">
+                      {{ user?.name || user?.username || 'User' }}
+                    </h1>
+                    <p class="text-h6 text-medium-emphasis mb-1">
+                      @{{ user?.username || 'username' }}
+                    </p>
                     <p class="text-body-1 text-medium-emphasis">{{ user?.email }}</p>
                     <v-chip
                       v-if="user?.role !== 'user'"
@@ -55,7 +59,9 @@
               <v-row>
                 <v-col cols="6" md="3">
                   <div class="text-center">
-                    <div class="text-h4 font-weight-bold text-primary">{{ stats.recipesGenerated }}</div>
+                    <div class="text-h4 font-weight-bold text-primary">
+                      {{ stats.recipesGenerated }}
+                    </div>
                     <div class="text-body-2 text-medium-emphasis">Recipes Created</div>
                   </div>
                 </v-col>
@@ -160,12 +166,7 @@
                     cols="12"
                     md="4"
                   >
-                    <v-card
-                      :to="`/recipes/${recipe.id}`"
-                      class="h-100"
-                      elevation="2"
-                      hover
-                    >
+                    <v-card :to="`/recipes/${recipe.id}`" class="h-100" elevation="2" hover>
                       <v-img
                         :src="recipe.image_url || '/placeholder-recipe.jpg'"
                         height="200"
@@ -180,12 +181,10 @@
               <div v-else class="text-center py-8">
                 <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-chef-hat</v-icon>
                 <h3 class="text-h6 mb-2">No recipes yet</h3>
-                <p class="text-body-1 text-medium-emphasis mb-4">Start creating delicious recipes!</p>
-                <v-btn
-                  color="primary"
-                  prepend-icon="mdi-robot"
-                  @click="$router.push('/generate')"
-                >
+                <p class="text-body-1 text-medium-emphasis mb-4">
+                  Start creating delicious recipes!
+                </p>
+                <v-btn color="primary" prepend-icon="mdi-robot" @click="$router.push('/generate')">
                   Generate Recipe with AI
                 </v-btn>
               </div>
@@ -214,7 +213,7 @@ const stats = ref<DashboardStats>({
   recipesGenerated: 0,
   favorites: 0,
   thisWeek: 0,
-  primaryDiet: 'None'
+  primaryDiet: 'None',
 })
 const recentRecipes = ref<Recipe[]>([])
 const isLoading = ref(true)
@@ -225,23 +224,24 @@ const memberSince = computed(() => {
 })
 
 const formatDietaryPreference = (pref: string) => {
-  return pref.split('-').map(word => 
-    word.charAt(0).toUpperCase() + word.slice(1)
-  ).join(' ')
+  return pref
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
 }
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
-    day: 'numeric'
+    day: 'numeric',
   })
 }
 
 onMounted(async () => {
   try {
     isLoading.value = true
-    
+
     // Load user profile and dashboard data
     const [userProfile, dashboardStats, userRecipes] = await Promise.all([
       UserService.getProfile().catch(() => authStore.user), // Fallback to store user
@@ -249,15 +249,14 @@ onMounted(async () => {
         recipesGenerated: 0,
         favorites: 0,
         thisWeek: 0,
-        primaryDiet: 'None'
+        primaryDiet: 'None',
       })),
-      DashboardService.getRecentFavorites().catch(() => []) // This gets recent favorites, we'll use it as placeholder
+      DashboardService.getRecentFavorites().catch(() => []), // This gets recent favorites, we'll use it as placeholder
     ])
-    
+
     user.value = userProfile || authStore.user
     stats.value = dashboardStats
     recentRecipes.value = userRecipes
-    
   } catch (error) {
     console.error('Failed to load profile data:', error)
     notificationStore.error('Failed to load profile data')

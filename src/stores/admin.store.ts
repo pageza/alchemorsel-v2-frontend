@@ -1,13 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { 
-  User, 
-  Recipe, 
-  AdminAction, 
-  PlatformStats,
-  DailyStats,
-  TopUser 
-} from '@/types'
+import type { User, Recipe, AdminAction, PlatformStats, DailyStats, TopUser } from '@/types'
 import adminService from '@/services/admin.service'
 
 export const useAdminStore = defineStore('admin', () => {
@@ -16,21 +9,21 @@ export const useAdminStore = defineStore('admin', () => {
   const totalUsers = ref(0)
   const currentUserPage = ref(1)
   const userPageSize = ref(20)
-  
+
   const recipes = ref<Recipe[]>([])
   const totalRecipes = ref(0)
   const currentRecipePage = ref(1)
   const recipePageSize = ref(20)
-  
+
   const adminActions = ref<AdminAction[]>([])
   const totalActions = ref(0)
   const currentActionPage = ref(1)
   const actionPageSize = ref(50)
-  
+
   const platformStats = ref<PlatformStats | null>(null)
   const dailyStats = ref<DailyStats[]>([])
   const topUsers = ref<TopUser[]>([])
-  
+
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -40,7 +33,11 @@ export const useAdminStore = defineStore('admin', () => {
     error.value = null
     try {
       if (page) currentUserPage.value = page
-      const response = await adminService.getUsers(currentUserPage.value, userPageSize.value, search)
+      const response = await adminService.getUsers(
+        currentUserPage.value,
+        userPageSize.value,
+        search,
+      )
       users.value = response.users
       totalUsers.value = response.total
     } catch (err: any) {
@@ -130,7 +127,10 @@ export const useAdminStore = defineStore('admin', () => {
     error.value = null
     try {
       if (page) currentRecipePage.value = page
-      const response = await adminService.getRecipesForModeration(currentRecipePage.value, recipePageSize.value)
+      const response = await adminService.getRecipesForModeration(
+        currentRecipePage.value,
+        recipePageSize.value,
+      )
       recipes.value = response.recipes
       totalRecipes.value = response.total
     } catch (err: any) {
@@ -234,7 +234,11 @@ export const useAdminStore = defineStore('admin', () => {
     error.value = null
     try {
       if (page) currentActionPage.value = page
-      const response = await adminService.getAdminActions(currentActionPage.value, actionPageSize.value, filters)
+      const response = await adminService.getAdminActions(
+        currentActionPage.value,
+        actionPageSize.value,
+        filters,
+      )
       adminActions.value = response.actions
       totalActions.value = response.total
     } catch (err: any) {
@@ -295,6 +299,6 @@ export const useAdminStore = defineStore('admin', () => {
     fetchTopUsers,
 
     // Admin Actions Log
-    fetchAdminActions
+    fetchAdminActions,
   }
 })

@@ -61,8 +61,8 @@ This needs investigation to identify the root cause and implement a proper fix, 
           />
 
           <div class="form-options mb-6">
-            <v-checkbox 
-              v-model="formData.rememberMe" 
+            <v-checkbox
+              v-model="formData.rememberMe"
               label="Remember me"
               data-testid="remember-me"
               density="compact"
@@ -155,36 +155,34 @@ const showPassword = ref(false)
 const formData = reactive({
   email: '',
   password: '',
-  rememberMe: false
+  rememberMe: false,
 })
 
 const emailRules = [
   (v: string) => !!v || 'Email is required',
-  (v: string) => /.+@.+\..+/.test(v) || 'Please enter a valid email'
+  (v: string) => /.+@.+\..+/.test(v) || 'Please enter a valid email',
 ]
 
-const passwordRules = [
-  (v: string) => !!v || 'Password is required'
-]
+const passwordRules = [(v: string) => !!v || 'Password is required']
 
 const handleSubmit = async () => {
   console.log('handleSubmit called!')
   console.log('Form data:', formData)
   console.log('Form ref:', form.value)
   console.trace('handleSubmit call stack')
-  
+
   if (!form.value) {
     console.log('No form ref, returning')
     return
   }
-  
+
   // Check if form has actual data
   if (!formData.email || !formData.password) {
     console.log('Form data is empty, not submitting')
     console.log('Email:', formData.email, 'Password:', formData.password ? '***' : 'empty')
     return
   }
-  
+
   try {
     console.log('Validating form...')
     const { valid } = await form.value.validate()
@@ -199,25 +197,33 @@ const handleSubmit = async () => {
     router.push('/dashboard')
   } catch (error: unknown) {
     console.error('Login error:', error)
-    
+
     let errorMessage = 'Failed to login. Please try again.'
-    
+
     if (error && typeof error === 'object') {
       if ('code' in error) {
         const errorCode = (error as { code?: string }).code
         if (errorCode === 'ERR_NETWORK' || errorCode === 'ERR_CONNECTION_REFUSED') {
           errorMessage = 'Backend server is not running. Please start the backend service.'
         }
-      } else if ('response' in error && error.response && typeof error.response === 'object' && 'data' in error.response) {
+      } else if (
+        'response' in error &&
+        error.response &&
+        typeof error.response === 'object' &&
+        'data' in error.response
+      ) {
         const responseData = error.response.data as { message?: string }
         if (responseData.message) {
           errorMessage = responseData.message
         }
-      } else if ('message' in error && typeof (error as { message?: string }).message === 'string') {
+      } else if (
+        'message' in error &&
+        typeof (error as { message?: string }).message === 'string'
+      ) {
         errorMessage = (error as { message: string }).message
       }
     }
-    
+
     errorNotification(errorMessage)
   } finally {
     isLoading.value = false
@@ -300,20 +306,20 @@ const handleSocialLogin = () => {
   .login-container {
     padding: 16px;
   }
-  
+
   .login-card {
     max-width: 100%;
   }
-  
+
   .welcome-title {
     font-size: 1.5rem;
   }
-  
+
   .social-buttons {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .social-button {
     flex: 1 1 100%;
   }
@@ -323,15 +329,15 @@ const handleSocialLogin = () => {
   .card-header {
     padding: 16px 0;
   }
-  
+
   .welcome-title {
     font-size: 1.25rem;
   }
-  
+
   .form-options {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
 }
-</style> 
+</style>

@@ -4,15 +4,15 @@
     <v-container fluid class="hero-section">
       <v-row justify="center" align="center" class="hero-content">
         <v-col cols="12" md="8" lg="6" class="text-center">
-          <h1 style="font-size: 48px; font-weight: bold; margin-bottom: 20px;">
+          <h1 style="font-size: 48px; font-weight: bold; margin-bottom: 20px">
             AI-Powered Recipe Magic
           </h1>
-          <p style="font-size: 20px; margin-bottom: 30px; opacity: 0.95;">
+          <p style="font-size: 20px; margin-bottom: 30px; opacity: 0.95">
             Create personalized recipes tailored to your dietary preferences and allergies
           </p>
           <div class="hero-buttons">
             <v-btn
-              style="background: #c4876b; color: white; padding: 12px 30px;"
+              style="background: #c4876b; color: white; padding: 12px 30px"
               size="large"
               @click="$router.push('/register')"
               class="mr-4 mb-4"
@@ -20,7 +20,7 @@
               Get Started Free
             </v-btn>
             <v-btn
-              style="background: #b5a082; color: white; padding: 12px 30px;"
+              style="background: #b5a082; color: white; padding: 12px 30px"
               size="large"
               @click="$router.push('/login')"
               class="mb-4"
@@ -74,18 +74,8 @@
 
       <!-- Recipe Grid -->
       <v-row v-else-if="featuredRecipes && featuredRecipes.length > 0">
-        <v-col 
-          v-for="recipe in featuredRecipes" 
-          :key="recipe.id"
-          cols="12" 
-          sm="6" 
-          md="4"
-        >
-          <v-card
-            class="recipe-preview-card"
-            hover
-            @click="handleRecipeClick(recipe.id)"
-          >
+        <v-col v-for="recipe in featuredRecipes" :key="recipe.id" cols="12" sm="6" md="4">
+          <v-card class="recipe-preview-card" hover @click="handleRecipeClick(recipe.id)">
             <!-- Recipe Image -->
             <v-img
               v-if="recipe.image_url"
@@ -109,28 +99,31 @@
               <div class="overlay-content">
                 <v-icon size="32" color="white" class="mb-2">mdi-lock</v-icon>
                 <p class="text-white text-center mb-2">Sign up to view full recipe</p>
-                <v-btn
-                  color="primary"
-                  size="small"
-                  @click.stop="$router.push('/register')"
-                >
+                <v-btn color="primary" size="small" @click.stop="$router.push('/register')">
                   Join Now
                 </v-btn>
               </div>
             </div>
 
             <v-card-title class="text-h6">{{ recipe.name }}</v-card-title>
-            
+
             <v-card-text>
               <div class="recipe-meta d-flex align-center mb-2">
                 <v-icon size="16" class="mr-1">mdi-clock-outline</v-icon>
-                <span class="text-body-2 mr-4">{{ formatTime(recipe.prep_time, recipe.cook_time) }}</span>
+                <span class="text-body-2 mr-4">{{
+                  formatTime(recipe.prep_time, recipe.cook_time)
+                }}</span>
                 <v-icon size="16" class="mr-1" v-if="recipe.servings">mdi-account-multiple</v-icon>
-                <span class="text-body-2" v-if="recipe.servings">{{ recipe.servings }} servings</span>
+                <span class="text-body-2" v-if="recipe.servings"
+                  >{{ recipe.servings }} servings</span
+                >
               </div>
-              
+
               <!-- Dietary Tags -->
-              <div class="dietary-tags" v-if="recipe.dietary_tags && recipe.dietary_tags.length > 0">
+              <div
+                class="dietary-tags"
+                v-if="recipe.dietary_tags && recipe.dietary_tags.length > 0"
+              >
                 <v-chip
                   v-for="tag in recipe.dietary_tags.slice(0, 3)"
                   :key="tag"
@@ -149,11 +142,7 @@
       <!-- Fallback Static Recipes -->
       <v-row v-else>
         <v-col cols="12" sm="6" md="4" v-for="recipe in staticRecipes" :key="recipe.id">
-          <v-card
-            class="recipe-preview-card"
-            hover
-            @click="handleRecipeClick(recipe.id)"
-          >
+          <v-card class="recipe-preview-card" hover @click="handleRecipeClick(recipe.id)">
             <div class="recipe-image-placeholder">
               <v-icon size="64" color="grey-lighten-2">mdi-silverware-fork-knife</v-icon>
             </div>
@@ -163,18 +152,14 @@
               <div class="overlay-content">
                 <v-icon size="32" color="white" class="mb-2">mdi-lock</v-icon>
                 <p class="text-white text-center mb-2">Sign up to view full recipe</p>
-                <v-btn
-                  color="primary"
-                  size="small"
-                  @click.stop="$router.push('/register')"
-                >
+                <v-btn color="primary" size="small" @click.stop="$router.push('/register')">
                   Join Now
                 </v-btn>
               </div>
             </div>
 
             <v-card-title class="text-h6">{{ recipe.name }}</v-card-title>
-            
+
             <v-card-text>
               <div class="recipe-meta d-flex align-center mb-2">
                 <v-icon size="16" class="mr-1">mdi-clock-outline</v-icon>
@@ -182,7 +167,7 @@
                 <v-icon size="16" class="mr-1">mdi-account-multiple</v-icon>
                 <span class="text-body-2">{{ recipe.servings }} servings</span>
               </div>
-              
+
               <div class="dietary-tags">
                 <v-chip
                   v-for="tag in recipe.tags"
@@ -208,11 +193,7 @@
           <p class="text-body-1 mb-6">
             Join thousands of home cooks creating amazing meals with AI assistance
           </p>
-          <v-btn
-            color="primary"
-            size="large"
-            @click="$router.push('/register')"
-          >
+          <v-btn color="primary" size="large" @click="$router.push('/register')">
             Get Started Free Today
           </v-btn>
         </v-col>
@@ -242,38 +223,38 @@ const staticRecipes = [
     name: 'Mediterranean Quinoa Bowl',
     time: '25 min',
     servings: '2',
-    tags: ['Vegetarian', 'Gluten-Free', 'Mediterranean']
+    tags: ['Vegetarian', 'Gluten-Free', 'Mediterranean'],
   },
   {
-    id: 'demo-2', 
+    id: 'demo-2',
     name: 'Spicy Thai Basil Chicken',
     time: '20 min',
     servings: '4',
-    tags: ['Thai', 'Spicy', 'High-Protein']
+    tags: ['Thai', 'Spicy', 'High-Protein'],
   },
   {
     id: 'demo-3',
     name: 'Vegan Chocolate Avocado Mousse',
     time: '15 min',
     servings: '6',
-    tags: ['Vegan', 'Dessert', 'No-Bake']
-  }
+    tags: ['Vegan', 'Dessert', 'No-Bake'],
+  },
 ]
 
 // Format time for display
 const formatTime = (prepTime?: number | string, cookTime?: number | string) => {
   if (!prepTime && !cookTime) return '30 min'
-  
+
   const parseTime = (time: number | string) => {
     if (typeof time === 'number') return time
     const match = String(time).match(/(\d+)/)
     return match ? parseInt(match[1]) : 0
   }
-  
+
   const prep = prepTime ? parseTime(prepTime) : 0
   const cook = cookTime ? parseTime(cookTime) : 0
   const total = prep + cook
-  
+
   if (total === 0) return '30 min'
   if (total < 60) return `${total} min`
   const hours = Math.floor(total / 60)

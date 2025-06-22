@@ -9,8 +9,8 @@ vi.mock('@/services/api', () => ({
     get: vi.fn(),
     post: vi.fn(),
     put: vi.fn(),
-    delete: vi.fn()
-  }
+    delete: vi.fn(),
+  },
 }))
 
 // Import api after mocking
@@ -41,8 +41,8 @@ describe('RecipeService', () => {
           fat: 10,
           created_at: '2024-01-01T00:00:00Z',
           updated_at: '2024-01-01T00:00:00Z',
-          user_id: 'user1'
-        }
+          user_id: 'user1',
+        },
       ]
 
       mockApi.get.mockResolvedValue({ data: { recipes: mockRecipes } })
@@ -71,8 +71,8 @@ describe('RecipeService', () => {
           fat: 10,
           created_at: '2024-01-01T00:00:00Z',
           updated_at: '2024-01-01T00:00:00Z',
-          user_id: 'user1'
-        }
+          user_id: 'user1',
+        },
       ]
 
       mockApi.get.mockResolvedValue({ data: { recipes: mockRecipes } })
@@ -101,7 +101,7 @@ describe('RecipeService', () => {
         fat: 12,
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-01T00:00:00Z',
-        user_id: 'user1'
+        user_id: 'user1',
       }
 
       mockApi.get.mockResolvedValue({ data: { recipe: mockRecipe } })
@@ -116,8 +116,8 @@ describe('RecipeService', () => {
       const mockError = {
         response: {
           status: 404,
-          data: { message: 'Recipe not found' }
-        }
+          data: { message: 'Recipe not found' },
+        },
       }
 
       mockApi.get.mockRejectedValue(mockError)
@@ -140,7 +140,7 @@ describe('RecipeService', () => {
         calories: 350,
         protein: 25,
         carbs: 35,
-        fat: 15
+        fat: 15,
       }
 
       const createdRecipe: Recipe = {
@@ -148,7 +148,7 @@ describe('RecipeService', () => {
         id: 'new-recipe-id',
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-01T00:00:00Z',
-        user_id: 'current-user'
+        user_id: 'current-user',
       }
 
       mockApi.post.mockResolvedValue({ data: { recipe: createdRecipe } })
@@ -179,7 +179,7 @@ describe('RecipeService', () => {
         protein: 30,
         carbs: 40,
         fat: 18,
-        user_id: 'user-123'
+        user_id: 'user-123',
       }
 
       const expectedRecipeData = {
@@ -194,7 +194,7 @@ describe('RecipeService', () => {
         carbs: mockDraft.carbs,
         fat: mockDraft.fat,
         dietary_preferences: [],
-        tags: []
+        tags: [],
       }
 
       const createdRecipe: Recipe = {
@@ -202,7 +202,7 @@ describe('RecipeService', () => {
         id: 'draft-recipe-id',
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-01T00:00:00Z',
-        user_id: 'current-user'
+        user_id: 'current-user',
       }
 
       mockApi.post.mockResolvedValue({ data: { recipe: createdRecipe } })
@@ -218,7 +218,7 @@ describe('RecipeService', () => {
     it('should successfully update a recipe', async () => {
       const updateData = {
         name: 'Updated Recipe Name',
-        calories: 500
+        calories: 500,
       }
 
       const updatedRecipe: Recipe = {
@@ -237,7 +237,7 @@ describe('RecipeService', () => {
         fat: 10,
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-02T00:00:00Z',
-        user_id: 'user1'
+        user_id: 'user1',
       }
 
       mockApi.put.mockResolvedValue({ data: updatedRecipe })
@@ -263,7 +263,7 @@ describe('RecipeService', () => {
     it('should successfully favorite a recipe when not currently favorited', async () => {
       const mockResponse = {
         is_favorite: true,
-        message: 'Recipe added to favorites'
+        message: 'Recipe added to favorites',
       }
       mockApi.post.mockResolvedValue({ data: mockResponse })
 
@@ -276,7 +276,7 @@ describe('RecipeService', () => {
     it('should successfully unfavorite a recipe when currently favorited', async () => {
       const mockResponse = {
         is_favorite: false,
-        message: 'Recipe removed from favorites'
+        message: 'Recipe removed from favorites',
       }
       mockApi.delete.mockResolvedValue({ data: mockResponse })
 
@@ -288,11 +288,11 @@ describe('RecipeService', () => {
 
     it('should handle 409 conflict by unfavoriting', async () => {
       const conflictError = {
-        response: { status: 409 }
+        response: { status: 409 },
       }
       const mockResponse = {
         is_favorite: false,
-        message: 'Recipe removed from favorites'
+        message: 'Recipe removed from favorites',
       }
 
       mockApi.post.mockRejectedValueOnce(conflictError)
@@ -307,11 +307,11 @@ describe('RecipeService', () => {
 
     it('should handle 404 not found by favoriting', async () => {
       const notFoundError = {
-        response: { status: 404 }
+        response: { status: 404 },
       }
       const mockResponse = {
         is_favorite: true,
-        message: 'Recipe added to favorites'
+        message: 'Recipe added to favorites',
       }
 
       mockApi.delete.mockRejectedValueOnce(notFoundError)
@@ -326,7 +326,7 @@ describe('RecipeService', () => {
 
     it('should throw errors that are not 409 or 404', async () => {
       const serverError = {
-        response: { status: 500 }
+        response: { status: 500 },
       }
 
       mockApi.post.mockRejectedValue(serverError)

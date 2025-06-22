@@ -1,12 +1,5 @@
 import apiClient from './api'
-import type { 
-  User, 
-  Recipe, 
-  AdminAction, 
-  PlatformStats,
-  DailyStats,
-  TopUser 
-} from '@/types'
+import type { User, Recipe, AdminAction, PlatformStats, DailyStats, TopUser } from '@/types'
 
 interface UsersResponse {
   users: User[]
@@ -53,7 +46,7 @@ class AdminService {
   async getUsers(page = 1, pageSize = 20, search?: string): Promise<UsersResponse> {
     const params: any = { page, page_size: pageSize }
     if (search) params.search = search
-    
+
     const response = await apiClient.get('/admin/users', { params })
     return response.data
   }
@@ -82,7 +75,7 @@ class AdminService {
   // Recipe Moderation
   async getRecipesForModeration(page = 1, pageSize = 20): Promise<RecipesResponse> {
     const response = await apiClient.get('/admin/recipes', {
-      params: { page, page_size: pageSize }
+      params: { page, page_size: pageSize },
     })
     return response.data
   }
@@ -107,27 +100,27 @@ class AdminService {
 
   async getDailyStats(days = 30): Promise<DailyStatsResponse> {
     const response = await apiClient.get('/admin/analytics/daily', {
-      params: { days }
+      params: { days },
     })
     return response.data
   }
 
   async getTopUsers(limit = 10): Promise<TopUsersResponse> {
     const response = await apiClient.get('/admin/analytics/top-users', {
-      params: { limit }
+      params: { limit },
     })
     return response.data
   }
 
   // Admin Actions Log
   async getAdminActions(
-    page = 1, 
-    pageSize = 50, 
+    page = 1,
+    pageSize = 50,
     filters?: {
       adminId?: string
       targetType?: string
       action?: string
-    }
+    },
   ): Promise<AdminActionsResponse> {
     const params: any = { page, page_size: pageSize }
     if (filters?.adminId) params.admin_id = filters.adminId

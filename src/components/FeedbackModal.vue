@@ -5,7 +5,7 @@
         <v-icon left>mdi-bug-report</v-icon>
         Report Bug / Feedback
       </v-card-title>
-      
+
       <v-card-text>
         <v-form ref="form" v-model="valid">
           <v-select
@@ -17,7 +17,7 @@
             data-testid="feedback-type"
             class="mb-3"
           />
-          
+
           <v-text-field
             v-model="formData.title"
             label="Title"
@@ -27,7 +27,7 @@
             data-testid="feedback-title"
             class="mb-3"
           />
-          
+
           <v-textarea
             v-model="formData.description"
             label="Description"
@@ -39,7 +39,7 @@
             placeholder="Please describe what happened or what you'd like to suggest. Include as much detail as possible - what you were doing, what you expected to happen, and what actually happened."
             class="mb-3"
           />
-          
+
           <v-select
             v-model="formData.priority"
             :items="priorityOptions"
@@ -47,22 +47,18 @@
             data-testid="feedback-priority"
             class="mb-3"
           />
-          
-          <v-alert
-            type="info"
-            variant="tonal"
-            density="compact"
-            class="mb-3"
-          >
+
+          <v-alert type="info" variant="tonal" density="compact" class="mb-3">
             <template v-slot:text>
               <small>
-                Session information (browser, current page) will be automatically included to help us debug the issue.
+                Session information (browser, current page) will be automatically included to help
+                us debug the issue.
               </small>
             </template>
           </v-alert>
         </v-form>
       </v-card-text>
-      
+
       <v-card-actions>
         <v-spacer />
         <v-btn
@@ -114,7 +110,7 @@ const notificationStore = useNotificationStore()
 
 const showModal = computed({
   get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value)
+  set: (value) => emit('update:modelValue', value),
 })
 
 const form = ref()
@@ -125,26 +121,26 @@ const formData = ref<FeedbackData>({
   type: 'general',
   title: '',
   description: '',
-  priority: 'medium'
+  priority: 'medium',
 })
 
 const typeOptions = [
   { title: 'Bug Report', value: 'bug' },
   { title: 'Feature Request', value: 'feature' },
-  { title: 'General Feedback', value: 'general' }
+  { title: 'General Feedback', value: 'general' },
 ]
 
 const priorityOptions = [
   { title: 'Low', value: 'low' },
   { title: 'Medium', value: 'medium' },
   { title: 'High', value: 'high' },
-  { title: 'Critical', value: 'critical' }
+  { title: 'Critical', value: 'critical' },
 ]
 
 const rules = {
   required: (value: string) => !!value || 'This field is required',
-  maxLength: (max: number) => (value: string) => 
-    !value || value.length <= max || `Must be ${max} characters or less`
+  maxLength: (max: number) => (value: string) =>
+    !value || value.length <= max || `Must be ${max} characters or less`,
 }
 
 const resetForm = () => {
@@ -152,7 +148,7 @@ const resetForm = () => {
     type: 'general',
     title: '',
     description: '',
-    priority: 'medium'
+    priority: 'medium',
   }
   if (form.value) {
     form.value.resetValidation()
@@ -171,7 +167,7 @@ const collectSessionInfo = () => {
     userAgent: navigator.userAgent,
     url: window.location.href,
     timestamp: new Date().toISOString(),
-    viewport: `${window.innerWidth}x${window.innerHeight}`
+    viewport: `${window.innerWidth}x${window.innerHeight}`,
   }
 }
 
@@ -184,18 +180,18 @@ const submitFeedback = async () => {
 
   try {
     const sessionInfo = collectSessionInfo()
-    
+
     const feedbackData = {
       type: formData.value.type,
       title: formData.value.title,
       description: formData.value.description,
       priority: formData.value.priority,
       user_agent: sessionInfo.userAgent,
-      url: sessionInfo.url
+      url: sessionInfo.url,
     }
 
     await FeedbackService.createFeedback(feedbackData)
-    
+
     notificationStore.success('Thank you! Your feedback has been submitted successfully.')
     closeModal()
   } catch (error) {
@@ -213,7 +209,7 @@ onMounted(() => {
     setTimeout(() => {
       const typeField = document.querySelector('[data-testid="feedback-type"]')
       if (typeField) {
-        (typeField as HTMLElement).focus()
+        ;(typeField as HTMLElement).focus()
       }
     }, 100)
   }

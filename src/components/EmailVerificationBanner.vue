@@ -9,7 +9,9 @@
     <div class="d-flex align-center justify-space-between">
       <div>
         <strong>Verify your email address</strong>
-        <p class="mb-0">Please check your email and click the verification link to access all features.</p>
+        <p class="mb-0">
+          Please check your email and click the verification link to access all features.
+        </p>
       </div>
       <v-btn
         color="primary"
@@ -37,10 +39,12 @@ const loading = ref(false)
 const dismissed = ref(false)
 
 const showBanner = computed(() => {
-  return authStore.isAuthenticated && 
-         authStore.user && 
-         !authStore.user.email_verified && 
-         !dismissed.value
+  return (
+    authStore.isAuthenticated &&
+    authStore.user &&
+    !authStore.user.email_verified &&
+    !dismissed.value
+  )
 })
 
 const dismissBanner = () => {
@@ -49,7 +53,7 @@ const dismissBanner = () => {
 
 const resendEmail = async () => {
   if (!authStore.user?.email) return
-  
+
   loading.value = true
   try {
     const response = await AuthService.resendVerificationEmail(authStore.user.email)

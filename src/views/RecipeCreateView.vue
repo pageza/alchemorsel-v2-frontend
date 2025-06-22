@@ -27,11 +27,7 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
   <div>
     <!-- Loading State -->
     <div v-if="isLoading" class="text-center py-8">
-      <v-progress-circular
-        indeterminate
-        color="primary"
-        size="64"
-      ></v-progress-circular>
+      <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
       <p class="text-h6 mt-4">Loading template...</p>
     </div>
 
@@ -53,23 +49,17 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
             </p>
           </div>
 
-          <v-form
-            ref="form"
-            v-model="isFormValid"
-            @submit.prevent="handleSubmit"
-          >
+          <v-form ref="form" v-model="isFormValid" @submit.prevent="handleSubmit">
             <!-- Basic Information -->
             <v-card class="mb-6">
-              <v-card-title class="text-h5 font-weight-bold">
-                Basic Information
-              </v-card-title>
+              <v-card-title class="text-h5 font-weight-bold"> Basic Information </v-card-title>
               <v-card-text>
                 <v-row>
                   <v-col cols="12">
                     <v-text-field
                       v-model="recipe.name"
                       label="Recipe Name"
-                      :rules="[v => !!v || 'Name is required']"
+                      :rules="[(v) => !!v || 'Name is required']"
                       required
                     ></v-text-field>
                   </v-col>
@@ -77,7 +67,7 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
                     <v-textarea
                       v-model="recipe.description"
                       label="Description"
-                      :rules="[v => !!v || 'Description is required']"
+                      :rules="[(v) => !!v || 'Description is required']"
                       required
                     ></v-textarea>
                   </v-col>
@@ -86,7 +76,7 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
                       v-model="recipe.category"
                       :items="categories"
                       label="Category"
-                      :rules="[v => !!v || 'Category is required']"
+                      :rules="[(v) => !!v || 'Category is required']"
                       required
                     ></v-select>
                   </v-col>
@@ -96,8 +86,8 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
                       label="Cook Time (minutes)"
                       type="number"
                       :rules="[
-                        v => !!v || 'Cook time is required',
-                        v => v > 0 || 'Cook time must be greater than 0'
+                        (v) => !!v || 'Cook time is required',
+                        (v) => v > 0 || 'Cook time must be greater than 0',
                       ]"
                       required
                     ></v-text-field>
@@ -108,9 +98,7 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
 
             <!-- Ingredients -->
             <v-card class="mb-6">
-              <v-card-title class="text-h5 font-weight-bold">
-                Ingredients
-              </v-card-title>
+              <v-card-title class="text-h5 font-weight-bold"> Ingredients </v-card-title>
               <v-card-text>
                 <div
                   v-for="(ingredient, index) in recipe.ingredients"
@@ -122,7 +110,7 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
                     :label="`Ingredient ${index + 1}`"
                     placeholder="e.g., 2 cups all-purpose flour"
                     class="mr-4"
-                    :rules="[v => !!v || 'Ingredient is required']"
+                    :rules="[(v) => !!v || 'Ingredient is required']"
                   ></v-text-field>
                   <v-btn
                     icon="mdi-delete"
@@ -132,11 +120,7 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
                     :disabled="recipe.ingredients.length === 1"
                   ></v-btn>
                 </div>
-                <v-btn
-                  prepend-icon="mdi-plus"
-                  variant="outlined"
-                  @click="addIngredient"
-                >
+                <v-btn prepend-icon="mdi-plus" variant="outlined" @click="addIngredient">
                   Add Ingredient
                 </v-btn>
               </v-card-text>
@@ -144,9 +128,7 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
 
             <!-- Instructions -->
             <v-card class="mb-6">
-              <v-card-title class="text-h5 font-weight-bold">
-                Instructions
-              </v-card-title>
+              <v-card-title class="text-h5 font-weight-bold"> Instructions </v-card-title>
               <v-card-text>
                 <div
                   v-for="(instruction, index) in recipe.instructions"
@@ -157,7 +139,7 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
                     v-model="recipe.instructions[index]"
                     :label="`Step ${index + 1}`"
                     class="mr-4"
-                    :rules="[v => !!v || 'Step is required']"
+                    :rules="[(v) => !!v || 'Step is required']"
                   ></v-textarea>
                   <v-btn
                     icon="mdi-delete"
@@ -167,11 +149,7 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
                     :disabled="recipe.instructions.length === 1"
                   ></v-btn>
                 </div>
-                <v-btn
-                  prepend-icon="mdi-plus"
-                  variant="outlined"
-                  @click="addInstruction"
-                >
+                <v-btn prepend-icon="mdi-plus" variant="outlined" @click="addInstruction">
                   Add Step
                 </v-btn>
               </v-card-text>
@@ -179,9 +157,7 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
 
             <!-- Nutrition Information -->
             <v-card class="mb-6">
-              <v-card-title class="text-h5 font-weight-bold">
-                Nutrition Information
-              </v-card-title>
+              <v-card-title class="text-h5 font-weight-bold"> Nutrition Information </v-card-title>
               <v-card-text>
                 <v-row>
                   <v-col cols="12" md="6">
@@ -216,7 +192,6 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
               </v-card-text>
             </v-card>
 
-
             <!-- Submit Button -->
             <div class="d-flex justify-end">
               <v-btn
@@ -226,7 +201,9 @@ But this form remains accessible via direct URL (/recipes/create) for the scenar
                 :loading="isSubmitting"
                 :disabled="!isFormValid"
               >
-                {{ isEdit ? 'Update Recipe' : isTemplate ? 'Create Modified Recipe' : 'Create Recipe' }}
+                {{
+                  isEdit ? 'Update Recipe' : isTemplate ? 'Create Modified Recipe' : 'Create Recipe'
+                }}
               </v-btn>
             </div>
           </v-form>
@@ -253,14 +230,7 @@ const isTemplate = computed(() => !!route.query.template)
 const templateId = computed(() => route.query.template as string)
 
 // Mock categories - replace with actual categories from your backend
-const categories = [
-  'Breakfast',
-  'Lunch',
-  'Dinner',
-  'Dessert',
-  'Snacks',
-  'Beverages'
-]
+const categories = ['Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Snacks', 'Beverages']
 
 // Initialize recipe data
 const recipe = ref<{
@@ -298,7 +268,7 @@ const recipe = ref<{
   carbs: 0,
   fat: 0,
   dietary_preferences: [],
-  tags: []
+  tags: [],
 })
 
 const isLoading = ref(false)
@@ -324,7 +294,6 @@ const removeInstruction = (index: number) => {
   }
 }
 
-
 // Handle form submission
 const handleSubmit = async () => {
   if (!isFormValid.value) return
@@ -338,7 +307,7 @@ const handleSubmit = async () => {
       // Create new recipe (either from scratch or from template)
       const createdRecipe = await RecipeService.createRecipe(recipe.value)
       console.log('Created recipe:', createdRecipe)
-      
+
       // Navigate to the new recipe details
       router.push(`/recipes/${createdRecipe.id}`)
     }
@@ -353,11 +322,11 @@ const handleSubmit = async () => {
 // Load template data if template ID is provided
 const loadTemplate = async () => {
   if (!templateId.value) return
-  
+
   isLoading.value = true
   try {
     const templateRecipe = await RecipeService.getRecipeById(templateId.value)
-    
+
     // Copy template data but reset ID and dates (creating new recipe)
     recipe.value = {
       name: `${templateRecipe.name} (Modified)`,
@@ -376,7 +345,7 @@ const loadTemplate = async () => {
       carbs: templateRecipe.carbs,
       fat: templateRecipe.fat,
       dietary_preferences: [...templateRecipe.dietary_preferences],
-      tags: [...templateRecipe.tags]
+      tags: [...templateRecipe.tags],
     }
   } catch (error) {
     console.error('Error loading template:', error)
@@ -399,4 +368,4 @@ onMounted(() => {
 .v-card {
   border-radius: 8px;
 }
-</style> 
+</style>

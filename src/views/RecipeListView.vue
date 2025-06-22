@@ -6,7 +6,9 @@
         <v-col cols="12" class="d-flex align-center justify-space-between">
           <div>
             <h1 class="text-h3 font-weight-bold mb-2">Recipes</h1>
-            <p class="text-subtitle-1 text-medium-emphasis">Discover and explore our collection of recipes</p>
+            <p class="text-subtitle-1 text-medium-emphasis">
+              Discover and explore our collection of recipes
+            </p>
           </div>
           <!-- Only show generate button when there are no recipes or no search results -->
           <v-btn
@@ -65,20 +67,12 @@
     <v-container class="py-4">
       <!-- Loading State -->
       <div v-if="isLoading" class="text-center py-8">
-        <v-progress-circular
-          indeterminate
-          color="primary"
-          size="64"
-        ></v-progress-circular>
+        <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
         <p class="text-h6 mt-4">Loading recipes...</p>
       </div>
 
       <!-- Error State -->
-      <v-alert
-        v-else-if="error"
-        type="error"
-        class="mb-4"
-      >
+      <v-alert v-else-if="error" type="error" class="mb-4">
         {{ error }}
       </v-alert>
 
@@ -87,7 +81,11 @@
         <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-chef-hat</v-icon>
         <h2 class="text-h5 mb-2">No recipes found</h2>
         <p class="text-body-1 text-medium-emphasis mb-4">
-          {{ search ? 'No recipes match your search. Try generating one with AI!' : 'Get started by creating your first recipe!' }}
+          {{
+            search
+              ? 'No recipes match your search. Try generating one with AI!'
+              : 'Get started by creating your first recipe!'
+          }}
         </p>
         <div class="d-flex justify-center gap-3">
           <v-btn
@@ -98,12 +96,7 @@
           >
             Generate Recipe with AI
           </v-btn>
-          <v-btn
-            color="secondary"
-            prepend-icon="mdi-plus"
-            to="/recipes/create"
-            variant="outlined"
-          >
+          <v-btn color="secondary" prepend-icon="mdi-plus" to="/recipes/create" variant="outlined">
             Create Recipe
           </v-btn>
         </div>
@@ -111,31 +104,10 @@
 
       <!-- Recipe Grid -->
       <v-row v-else>
-        <v-col
-          v-for="recipe in recipes"
-          :key="recipe.id"
-          cols="12"
-          sm="6"
-          md="4"
-          lg="3"
-        >
-          <v-card
-            :to="`/recipes/${recipe.id}`"
-            class="h-100"
-            elevation="2"
-            hover
-          >
-            <v-img
-              :src="recipe.image_url"
-              height="200"
-              cover
-              class="align-end"
-            >
-              <v-chip
-                class="ma-2"
-                color="primary"
-                size="small"
-              >
+        <v-col v-for="recipe in recipes" :key="recipe.id" cols="12" sm="6" md="4" lg="3">
+          <v-card :to="`/recipes/${recipe.id}`" class="h-100" elevation="2" hover>
+            <v-img :src="recipe.image_url" height="200" cover class="align-end">
+              <v-chip class="ma-2" color="primary" size="small">
                 {{ recipe.category }}
               </v-chip>
               <v-btn
@@ -161,11 +133,7 @@
 
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn
-                variant="text"
-                color="primary"
-                :to="`/recipes/${recipe.id}`"
-              >
+              <v-btn variant="text" color="primary" :to="`/recipes/${recipe.id}`">
                 View Recipe
               </v-btn>
             </v-card-actions>
@@ -190,14 +158,12 @@ const sortBy = ref('newest')
 const shouldShowGenerateButton = computed(() => {
   // Don't show during loading
   if (isLoading.value) return false
-  
+
   // Show if there are no recipes at all, or if search returns no results
   return !recipes.value || recipes.value.length === 0
 })
 
-const categories = [
-  'All', 'Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Snacks', 'Drinks',
-]
+const categories = ['All', 'Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Snacks', 'Drinks']
 
 const sortOptions = [
   { title: 'Newest', value: 'newest' },
@@ -225,13 +191,13 @@ const performSearch = () => {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
   }
-  
+
   searchTimeout = setTimeout(async () => {
     try {
       const searchQuery = search.value.trim()
       const categoryValue = category.value
       const sortValue = sortBy.value
-      
+
       if (searchQuery || categoryValue || sortValue !== 'newest') {
         await searchRecipes(searchQuery || undefined, categoryValue || undefined, sortValue)
       } else {
@@ -266,4 +232,4 @@ onMounted(() => {
   right: 8px;
   z-index: 1;
 }
-</style> 
+</style>

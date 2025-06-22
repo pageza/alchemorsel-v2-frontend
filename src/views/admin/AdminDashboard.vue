@@ -135,9 +135,7 @@
                 <v-list-item-title>
                   {{ user.username || user.email }}
                 </v-list-item-title>
-                <v-list-item-subtitle>
-                  {{ user.recipe_count }} recipes
-                </v-list-item-subtitle>
+                <v-list-item-subtitle> {{ user.recipe_count }} recipes </v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
           </v-list>
@@ -163,14 +161,14 @@ const actionOptions = ref({
   groupBy: [],
   groupDesc: [],
   multiSort: false,
-  mustSort: false
+  mustSort: false,
 })
 
 const actionHeaders = [
   { text: 'Admin', value: 'admin.name' },
   { text: 'Action', value: 'action' },
   { text: 'Target Type', value: 'target_type' },
-  { text: 'Date', value: 'created_at' }
+  { text: 'Date', value: 'created_at' },
 ]
 
 // Computed properties
@@ -202,7 +200,7 @@ onMounted(async () => {
   await Promise.all([
     adminStore.fetchPlatformStats(),
     adminStore.fetchAdminActions(1),
-    adminStore.fetchTopUsers(5)
+    adminStore.fetchTopUsers(5),
   ])
 })
 </script>

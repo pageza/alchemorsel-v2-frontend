@@ -17,7 +17,7 @@
               >
                 {{ successMessage }}
               </v-alert>
-              
+
               <v-alert
                 v-if="errorMessage"
                 type="error"
@@ -44,12 +44,7 @@
             </v-form>
           </v-card-text>
           <v-card-actions>
-            <v-btn
-              color="secondary"
-              variant="text"
-              @click="goToLogin"
-              :disabled="loading"
-            >
+            <v-btn color="secondary" variant="text" @click="goToLogin" :disabled="loading">
               Back to Login
             </v-btn>
             <v-spacer></v-spacer>
@@ -95,10 +90,12 @@ const submitRequest = async () => {
 
   try {
     const response = await AuthService.requestPasswordReset(email.value)
-    successMessage.value = response.message || 'If the email exists, a password reset link has been sent'
+    successMessage.value =
+      response.message || 'If the email exists, a password reset link has been sent'
     email.value = ''
   } catch (error: any) {
-    errorMessage.value = error.response?.data?.error || 'Failed to process request. Please try again.'
+    errorMessage.value =
+      error.response?.data?.error || 'Failed to process request. Please try again.'
   } finally {
     loading.value = false
   }

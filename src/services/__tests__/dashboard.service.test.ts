@@ -15,7 +15,7 @@ describe('DashboardService', () => {
         recipesGenerated: 10,
         favorites: 5,
         thisWeek: 3,
-        primaryDiet: 'Vegan'
+        primaryDiet: 'Vegan',
       }
 
       vi.mocked(api.get).mockResolvedValueOnce({ data: mockStats })
@@ -54,7 +54,7 @@ describe('DashboardService', () => {
           userId: 'user123',
           createdAt: '2024-01-01T00:00:00Z',
           updatedAt: '2024-01-01T00:00:00Z',
-          isFavorite: true
+          isFavorite: true,
         },
         {
           id: '2',
@@ -72,8 +72,8 @@ describe('DashboardService', () => {
           userId: 'user123',
           createdAt: '2024-01-02T00:00:00Z',
           updatedAt: '2024-01-02T00:00:00Z',
-          isFavorite: true
-        }
+          isFavorite: true,
+        },
       ]
 
       vi.mocked(api.get).mockResolvedValueOnce({ data: mockRecipes })
@@ -97,7 +97,9 @@ describe('DashboardService', () => {
       const error = new Error('Failed to fetch favorites')
       vi.mocked(api.get).mockRejectedValueOnce(error)
 
-      await expect(DashboardService.getRecentFavorites()).rejects.toThrow('Failed to fetch favorites')
+      await expect(DashboardService.getRecentFavorites()).rejects.toThrow(
+        'Failed to fetch favorites',
+      )
       expect(api.get).toHaveBeenCalledWith('/dashboard/favorites/recent')
     })
   })

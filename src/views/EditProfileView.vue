@@ -13,16 +13,10 @@
             <h1 class="text-h4 font-weight-bold">Edit Profile</h1>
           </div>
 
-          <v-form
-            ref="form"
-            v-model="isFormValid"
-            @submit.prevent="handleSubmit"
-          >
+          <v-form ref="form" v-model="isFormValid" @submit.prevent="handleSubmit">
             <!-- Profile Picture -->
             <v-card class="mb-6">
-              <v-card-title class="text-h5 font-weight-bold">
-                Profile Picture
-              </v-card-title>
+              <v-card-title class="text-h5 font-weight-bold"> Profile Picture </v-card-title>
               <v-card-text>
                 <div class="d-flex align-center">
                   <v-avatar
@@ -45,16 +39,14 @@
 
             <!-- Basic Information -->
             <v-card class="mb-6">
-              <v-card-title class="text-h5 font-weight-bold">
-                Basic Information
-              </v-card-title>
+              <v-card-title class="text-h5 font-weight-bold"> Basic Information </v-card-title>
               <v-card-text>
                 <v-row>
                   <v-col cols="12">
                     <v-text-field
                       v-model="profile.username"
                       label="Username"
-                      :rules="[v => !!v || 'Username is required']"
+                      :rules="[(v) => !!v || 'Username is required']"
                       required
                     ></v-text-field>
                   </v-col>
@@ -64,8 +56,8 @@
                       label="Email"
                       type="email"
                       :rules="[
-                        v => !!v || 'Email is required',
-                        v => /.+@.+\..+/.test(v) || 'Email must be valid'
+                        (v) => !!v || 'Email is required',
+                        (v) => /.+@.+\..+/.test(v) || 'Email must be valid',
                       ]"
                       required
                       readonly
@@ -86,9 +78,7 @@
 
             <!-- Dietary Lifestyles -->
             <v-card class="mb-6">
-              <v-card-title class="text-h5 font-weight-bold">
-                Dietary Lifestyles
-              </v-card-title>
+              <v-card-title class="text-h5 font-weight-bold"> Dietary Lifestyles </v-card-title>
               <v-card-text>
                 <v-select
                   v-model="selectedDietaryLifestyles"
@@ -103,9 +93,7 @@
 
             <!-- Cuisine Preferences -->
             <v-card class="mb-6">
-              <v-card-title class="text-h5 font-weight-bold">
-                Cuisine Preferences
-              </v-card-title>
+              <v-card-title class="text-h5 font-weight-bold"> Cuisine Preferences </v-card-title>
               <v-card-text>
                 <v-select
                   v-model="selectedCuisinePrefs"
@@ -120,9 +108,7 @@
 
             <!-- Food Allergies -->
             <v-card class="mb-6">
-              <v-card-title class="text-h5 font-weight-bold">
-                Food Allergies
-              </v-card-title>
+              <v-card-title class="text-h5 font-weight-bold"> Food Allergies </v-card-title>
               <v-card-text>
                 <v-select
                   v-model="selectedAllergens"
@@ -137,9 +123,7 @@
 
             <!-- Privacy Settings -->
             <v-card class="mb-6">
-              <v-card-title class="text-h5 font-weight-bold">
-                Privacy Settings
-              </v-card-title>
+              <v-card-title class="text-h5 font-weight-bold"> Privacy Settings </v-card-title>
               <v-card-text>
                 <v-select
                   v-model="profile.privacy_level"
@@ -202,7 +186,7 @@ const profile = ref<User>({
   allergens: [],
   email_verified: false,
   created_at: '',
-  updated_at: ''
+  updated_at: '',
 })
 
 // Form selections
@@ -223,7 +207,7 @@ const dietaryLifestyleTypes = [
   'low_carb',
   'low_fat',
   'high_protein',
-  'custom'
+  'custom',
 ]
 
 const cuisineTypes = [
@@ -242,7 +226,7 @@ const cuisineTypes = [
   'british',
   'spanish',
   'german',
-  'custom'
+  'custom',
 ]
 
 const allergenTypes = [
@@ -258,13 +242,13 @@ const allergenTypes = [
   'mustard',
   'celery',
   'lupin',
-  'sulphites'
+  'sulphites',
 ]
 
 const privacyLevels = [
   { title: 'Public', value: 'public' },
   { title: 'Friends Only', value: 'friends' },
-  { title: 'Private', value: 'private' }
+  { title: 'Private', value: 'private' },
 ]
 
 // Load profile data on mount
@@ -272,12 +256,11 @@ onMounted(async () => {
   try {
     isLoading.value = true
     const userProfile = await UserService.getProfile()
-    
+
     profile.value = userProfile
     selectedDietaryLifestyles.value = userProfile.dietary_lifestyles || []
     selectedCuisinePrefs.value = userProfile.cuisine_preferences || []
-    selectedAllergens.value = userProfile.allergens?.map(a => a.allergen_name) || []
-    
+    selectedAllergens.value = userProfile.allergens?.map((a) => a.allergen_name) || []
   } catch (error) {
     console.error('Failed to load profile:', error)
     notificationStore.error('Failed to load profile data')
@@ -308,18 +291,17 @@ const handleSubmit = async () => {
       preferences: {
         dietary_lifestyles: selectedDietaryLifestyles.value,
         cuisine_preferences: selectedCuisinePrefs.value,
-        allergies: selectedAllergens.value
-      }
+        allergies: selectedAllergens.value,
+      },
     }
 
     await UserService.updateProfile(updateData)
-    
+
     // Update auth store with new user data
     await authStore.fetchProfile()
-    
+
     notificationStore.success('Profile updated successfully!')
     router.push('/profile')
-    
   } catch (error) {
     console.error('Error updating profile:', error)
     notificationStore.error('Failed to update profile. Please try again.')

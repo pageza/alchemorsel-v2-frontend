@@ -5,8 +5,8 @@ import type { RecipeDraft, LLMQueryResponse } from '@/services/llm.service'
 // Mock the api module
 vi.mock('@/services/api', () => ({
   default: {
-    post: vi.fn()
-  }
+    post: vi.fn(),
+  },
 }))
 
 // Import api after mocking
@@ -21,7 +21,7 @@ describe('LLMService', () => {
   describe('generateRecipe', () => {
     it('should successfully generate a recipe from query', async () => {
       const mockQuery = 'Create a vegetarian pasta recipe with mushrooms'
-      
+
       const mockRecipeDraft: RecipeDraft = {
         id: 'draft-123',
         created_at: '2024-01-01T00:00:00Z',
@@ -29,16 +29,11 @@ describe('LLMService', () => {
         name: 'Vegetarian Mushroom Pasta',
         description: 'A delicious vegetarian pasta with fresh mushrooms',
         category: 'main',
-        ingredients: [
-          '400g pasta',
-          '300g mixed mushrooms',
-          '2 cloves garlic',
-          '2 tbsp olive oil'
-        ],
+        ingredients: ['400g pasta', '300g mixed mushrooms', '2 cloves garlic', '2 tbsp olive oil'],
         instructions: [
           'Cook pasta according to package instructions',
           'Sauté mushrooms and garlic in olive oil',
-          'Combine with pasta and serve'
+          'Combine with pasta and serve',
         ],
         prep_time: '15 minutes',
         cook_time: '20 minutes',
@@ -48,25 +43,29 @@ describe('LLMService', () => {
         protein: 15,
         carbs: 65,
         fat: 18,
-        user_id: 'user-123'
+        user_id: 'user-123',
       }
 
       const mockResponse: LLMQueryResponse = {
         recipe: mockRecipeDraft,
-        draft_id: 'draft-123'
+        draft_id: 'draft-123',
       }
 
       mockApi.post.mockResolvedValue({ data: mockResponse })
 
       const result = await LLMService.generateRecipe(mockQuery)
 
-      expect(mockApi.post).toHaveBeenCalledWith('/llm/query', {
-        query: mockQuery,
-        intent: 'generate',
-        skip_similar_check: false
-      }, {
-        timeout: 120000
-      })
+      expect(mockApi.post).toHaveBeenCalledWith(
+        '/llm/query',
+        {
+          query: mockQuery,
+          intent: 'generate',
+          skip_similar_check: false,
+        },
+        {
+          timeout: 120000,
+        },
+      )
       expect(result).toEqual(mockResponse)
     })
 
@@ -76,8 +75,8 @@ describe('LLMService', () => {
       const mockError = {
         response: {
           status: 400,
-          data: { message: 'Query cannot be empty' }
-        }
+          data: { message: 'Query cannot be empty' },
+        },
       }
 
       mockApi.post.mockRejectedValue(mockError)
@@ -91,8 +90,8 @@ describe('LLMService', () => {
       const mockError = {
         response: {
           status: 500,
-          data: { message: 'LLM service temporarily unavailable' }
-        }
+          data: { message: 'LLM service temporarily unavailable' },
+        },
       }
 
       mockApi.post.mockRejectedValue(mockError)
@@ -106,8 +105,8 @@ describe('LLMService', () => {
       const mockError = {
         response: {
           status: 429,
-          data: { message: 'Rate limit exceeded' }
-        }
+          data: { message: 'Rate limit exceeded' },
+        },
       }
 
       mockApi.post.mockRejectedValue(mockError)
@@ -120,7 +119,7 @@ describe('LLMService', () => {
     it('should successfully modify an existing recipe draft', async () => {
       const mockQuery = 'Make this recipe spicier'
       const draftId = 'draft-123'
-      
+
       const mockModifiedDraft: RecipeDraft = {
         id: draftId,
         created_at: '2024-01-01T00:00:00Z',
@@ -128,16 +127,8 @@ describe('LLMService', () => {
         name: 'Spicy Pasta',
         description: 'A spicy pasta dish',
         category: 'main',
-        ingredients: [
-          '400g pasta',
-          '300g mushrooms',
-          '1 tsp chili flakes'
-        ],
-        instructions: [
-          'Cook pasta',
-          'Add chili flakes',
-          'Serve hot'
-        ],
+        ingredients: ['400g pasta', '300g mushrooms', '1 tsp chili flakes'],
+        instructions: ['Cook pasta', 'Add chili flakes', 'Serve hot'],
         prep_time: '15 minutes',
         cook_time: '20 minutes',
         servings: { Value: '4' },
@@ -146,25 +137,29 @@ describe('LLMService', () => {
         protein: 15,
         carbs: 65,
         fat: 18,
-        user_id: 'user-123'
+        user_id: 'user-123',
       }
 
       const mockResponse: LLMQueryResponse = {
         recipe: mockModifiedDraft,
-        draft_id: draftId
+        draft_id: draftId,
       }
 
       mockApi.post.mockResolvedValue({ data: mockResponse })
 
       const result = await LLMService.modifyRecipe(mockQuery, draftId)
 
-      expect(mockApi.post).toHaveBeenCalledWith('/llm/query', {
-        query: mockQuery,
-        intent: 'modify',
-        draft_id: draftId
-      }, {
-        timeout: 120000
-      })
+      expect(mockApi.post).toHaveBeenCalledWith(
+        '/llm/query',
+        {
+          query: mockQuery,
+          intent: 'modify',
+          draft_id: draftId,
+        },
+        {
+          timeout: 120000,
+        },
+      )
       expect(result).toEqual(mockResponse)
     })
 
@@ -175,8 +170,8 @@ describe('LLMService', () => {
       const mockError = {
         response: {
           status: 404,
-          data: { message: 'Draft not found' }
-        }
+          data: { message: 'Draft not found' },
+        },
       }
 
       mockApi.post.mockRejectedValue(mockError)
@@ -191,8 +186,8 @@ describe('LLMService', () => {
       const mockError = {
         response: {
           status: 400,
-          data: { message: 'Modification query cannot be empty' }
-        }
+          data: { message: 'Modification query cannot be empty' },
+        },
       }
 
       mockApi.post.mockRejectedValue(mockError)
@@ -207,7 +202,7 @@ describe('LLMService', () => {
 
       const timeoutError = {
         code: 'ECONNABORTED',
-        message: 'timeout of 30000ms exceeded'
+        message: 'timeout of 30000ms exceeded',
       }
 
       mockApi.post.mockRejectedValue(timeoutError)
@@ -221,8 +216,8 @@ describe('LLMService', () => {
       const authError = {
         response: {
           status: 401,
-          data: { message: 'Authentication required' }
-        }
+          data: { message: 'Authentication required' },
+        },
       }
 
       mockApi.post.mockRejectedValue(authError)

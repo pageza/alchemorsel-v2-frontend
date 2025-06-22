@@ -126,10 +126,7 @@
             class="elevation-1"
           >
             <template #[`item.username`]="{ item }">
-              <router-link
-                :to="`/admin/users/${item.user_id}`"
-                class="text-decoration-none"
-              >
+              <router-link :to="`/admin/users/${item.user_id}`" class="text-decoration-none">
                 {{ item.username || item.email }}
               </router-link>
             </template>
@@ -165,7 +162,9 @@
                 <v-icon color="pink">mdi-heart</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
-                <v-list-item-title>{{ recentStats.new_favorites_7d }} new favorites</v-list-item-title>
+                <v-list-item-title
+                  >{{ recentStats.new_favorites_7d }} new favorites</v-list-item-title
+                >
                 <v-list-item-subtitle>Last 7 days</v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
@@ -193,12 +192,12 @@ const trendOptions = [
   { text: 'Last 7 days', value: 7 },
   { text: 'Last 30 days', value: 30 },
   { text: 'Last 60 days', value: 60 },
-  { text: 'Last 90 days', value: 90 }
+  { text: 'Last 90 days', value: 90 },
 ]
 
 const userHeaders = [
   { text: 'User', value: 'username' },
-  { text: 'Recipes', value: 'recipe_count' }
+  { text: 'Recipes', value: 'recipe_count' },
 ]
 
 // Computed
@@ -215,35 +214,35 @@ async function loadDailyStats() {
 
 function calculateRecentStats() {
   if (!dailyStats.value || dailyStats.value.length === 0) return
-  
+
   const last7Days = dailyStats.value.slice(0, 7)
-  
+
   recentStats.value = {
     new_users_7d: last7Days.reduce((sum, day) => sum + day.new_users, 0),
     new_recipes_7d: last7Days.reduce((sum, day) => sum + day.new_recipes, 0),
-    new_favorites_7d: last7Days.reduce((sum, day) => sum + day.new_favorites, 0)
+    new_favorites_7d: last7Days.reduce((sum, day) => sum + day.new_favorites, 0),
   }
 }
 
 async function updateChart() {
   await nextTick()
-  
+
   if (!chartCanvas.value || !dailyStats.value) return
-  
+
   // Destroy existing chart
   if (chartInstance.value) {
     chartInstance.value.destroy()
   }
-  
+
   const ctx = chartCanvas.value.getContext('2d')
   if (!ctx) return
-  
+
   // Prepare data
-  const labels = dailyStats.value.map(stat => stat.date).reverse()
-  const usersData = dailyStats.value.map(stat => stat.new_users).reverse()
-  const recipesData = dailyStats.value.map(stat => stat.new_recipes).reverse()
-  const favoritesData = dailyStats.value.map(stat => stat.new_favorites).reverse()
-  
+  const labels = dailyStats.value.map((stat) => stat.date).reverse()
+  const usersData = dailyStats.value.map((stat) => stat.new_users).reverse()
+  const recipesData = dailyStats.value.map((stat) => stat.new_recipes).reverse()
+  const favoritesData = dailyStats.value.map((stat) => stat.new_favorites).reverse()
+
   chartInstance.value = new Chart(ctx, {
     type: 'line',
     data: {
@@ -254,44 +253,44 @@ async function updateChart() {
           data: usersData,
           borderColor: 'rgb(25, 118, 210)',
           backgroundColor: 'rgba(25, 118, 210, 0.1)',
-          tension: 0.1
+          tension: 0.1,
         },
         {
           label: 'New Recipes',
           data: recipesData,
           borderColor: 'rgb(56, 142, 60)',
           backgroundColor: 'rgba(56, 142, 60, 0.1)',
-          tension: 0.1
+          tension: 0.1,
         },
         {
           label: 'New Favorites',
           data: favoritesData,
           borderColor: 'rgb(244, 67, 54)',
           backgroundColor: 'rgba(244, 67, 54, 0.1)',
-          tension: 0.1
-        }
-      ]
+          tension: 0.1,
+        },
+      ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: {
-          position: 'top'
+          position: 'top',
         },
         title: {
-          display: false
-        }
+          display: false,
+        },
       },
       scales: {
         y: {
           beginAtZero: true,
           ticks: {
-            precision: 0
-          }
-        }
-      }
-    }
+            precision: 0,
+          },
+        },
+      },
+    },
   })
 }
 
@@ -305,9 +304,9 @@ onMounted(async () => {
   await Promise.all([
     adminStore.fetchPlatformStats(),
     adminStore.fetchDailyStats(trendDays.value),
-    adminStore.fetchTopUsers(10)
+    adminStore.fetchTopUsers(10),
   ])
-  
+
   calculateRecentStats()
   updateChart()
 })

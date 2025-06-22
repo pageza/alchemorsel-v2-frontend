@@ -2,7 +2,7 @@
   <div class="recipe-card" @click="$emit('click')">
     <div class="recipe-image-container">
       <img :src="image" :alt="name" class="recipe-image" />
-      <button 
+      <button
         v-if="showFavoriteButton"
         class="favorite-button"
         :class="{ 'is-favorite': isFavorite }"
@@ -19,7 +19,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const props = defineProps<{ 
+const props = defineProps<{
   image: string
   name: string
   isFavorite?: boolean
@@ -37,7 +37,7 @@ const isLoading = ref(false)
 const handleFavoriteClick = async () => {
   isLoading.value = true
   try {
-    emit('favoriteToggle', props.id || '')  // Use the recipe ID from props
+    emit('favoriteToggle', props.id || '') // Use the recipe ID from props
   } finally {
     isLoading.value = false
   }
@@ -48,7 +48,7 @@ const handleFavoriteClick = async () => {
 .recipe-card {
   background: #3a2a1a;
   border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -57,11 +57,13 @@ const handleFavoriteClick = async () => {
   max-width: 240px;
   margin: 0 8px;
   cursor: pointer;
-  transition: box-shadow 0.18s, transform 0.18s;
+  transition:
+    box-shadow 0.18s,
+    transform 0.18s;
 }
 
 .recipe-card:hover {
-  box-shadow: 0 4px 24px rgba(0,0,0,0.28);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
   transform: translateY(-2px) scale(1.03);
 }
 
@@ -120,4 +122,4 @@ const handleFavoriteClick = async () => {
   text-align: center;
   margin-top: 4px;
 }
-</style> 
+</style>

@@ -23,7 +23,7 @@
         <p>Primary Diet</p>
       </div>
     </div>
-    
+
     <!-- Loading state for stats -->
     <div class="dashboard-stats" v-else>
       <div class="stat-card loading" v-for="i in 4" :key="i">
@@ -35,32 +35,15 @@
     <div class="favorites-section">
       <h2>Recent Favorites</h2>
       <v-row v-if="recentFavorites && recentFavorites.length > 0">
-        <v-col
-          v-for="recipe in recentFavorites"
-          :key="recipe.id"
-          cols="12"
-          sm="6"
-          md="4"
-          lg="3"
-        >
-          <v-card
-            :to="`/recipes/${recipe.id}`"
-            class="h-100"
-            elevation="2"
-            hover
-          >
+        <v-col v-for="recipe in recentFavorites" :key="recipe.id" cols="12" sm="6" md="4" lg="3">
+          <v-card :to="`/recipes/${recipe.id}`" class="h-100" elevation="2" hover>
             <v-img
               :src="recipe.image_url || '/placeholder-recipe.jpg'"
               height="200"
               cover
               class="align-end"
             >
-              <v-chip
-                v-if="recipe.category"
-                class="ma-2"
-                color="primary"
-                size="small"
-              >
+              <v-chip v-if="recipe.category" class="ma-2" color="primary" size="small">
                 {{ recipe.category }}
               </v-chip>
               <v-btn
@@ -85,11 +68,7 @@
 
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn
-                variant="text"
-                color="primary"
-                :to="`/recipes/${recipe.id}`"
-              >
+              <v-btn variant="text" color="primary" :to="`/recipes/${recipe.id}`">
                 View Recipe
               </v-btn>
             </v-card-actions>
@@ -100,11 +79,7 @@
         <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-chef-hat</v-icon>
         <h3>No favorites yet</h3>
         <p>Start exploring recipes and add them to your favorites!</p>
-        <v-btn
-          color="primary"
-          prepend-icon="mdi-magnify"
-          @click="$router.push('/recipes')"
-        >
+        <v-btn color="primary" prepend-icon="mdi-magnify" @click="$router.push('/recipes')">
           Browse Recipes
         </v-btn>
       </div>
@@ -139,17 +114,17 @@ const stats = ref<DashboardStats>({
   recipesGenerated: 0,
   favorites: 0,
   thisWeek: 0,
-  primaryDiet: 'None'
+  primaryDiet: 'None',
 })
 
 const handleFavoriteToggle = async (recipeId: string) => {
   try {
     // Remove from favorites locally immediately for better UX
-    recentFavorites.value = recentFavorites.value.filter(recipe => recipe.id !== recipeId)
-    
+    recentFavorites.value = recentFavorites.value.filter((recipe) => recipe.id !== recipeId)
+
     // Call the store method to update backend
     await recipeStore.toggleFavorite(recipeId, true) // true because it's currently favorited
-    
+
     notificationStore.success('Recipe removed from favorites')
   } catch {
     // Re-add the recipe if the API call failed
@@ -169,9 +144,9 @@ onMounted(async () => {
     // Load dashboard statistics
     const [statsData, favoritesData] = await Promise.all([
       DashboardService.getStats(),
-      DashboardService.getRecentFavorites()
+      DashboardService.getRecentFavorites(),
     ])
-    
+
     stats.value = statsData
     recentFavorites.value = favoritesData
   } catch (error) {
@@ -218,7 +193,7 @@ onMounted(async () => {
   border-radius: 8px;
   padding: 30px;
   text-align: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .stat-card h3 {
@@ -243,7 +218,6 @@ onMounted(async () => {
   margin-bottom: 20px;
   color: #2c3e50;
 }
-
 
 .empty-state {
   text-align: center;
@@ -270,11 +244,11 @@ onMounted(async () => {
   .dashboard-stats {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .stat-card {
     padding: 20px;
   }
-  
+
   .stat-card h3 {
     font-size: 1.75rem;
   }

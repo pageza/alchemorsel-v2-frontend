@@ -51,7 +51,7 @@ export class FeedbackService {
    */
   static async listFeedback(filters?: FeedbackFilters): Promise<FeedbackResponse[]> {
     const params = new URLSearchParams()
-    
+
     if (filters) {
       if (filters.type) params.append('type', filters.type)
       if (filters.status) params.append('status', filters.status)
@@ -63,7 +63,7 @@ export class FeedbackService {
 
     const queryString = params.toString()
     const url = queryString ? `/feedback?${queryString}` : '/feedback'
-    
+
     const response = await api.get<FeedbackResponse[]>(url)
     return response.data
   }
@@ -80,8 +80,8 @@ export class FeedbackService {
    * Update feedback status (admin only)
    */
   static async updateFeedbackStatus(
-    id: string, 
-    data: UpdateFeedbackStatusRequest
+    id: string,
+    data: UpdateFeedbackStatusRequest,
   ): Promise<{ message: string }> {
     const response = await api.put<{ message: string }>(`/feedback/${id}/status`, data)
     return response.data

@@ -7,13 +7,28 @@
         </div>
 
         <nav class="nav-links">
-          <a href="#" @click.prevent="$router.push('/recipes')" :class="{ active: currentRoute === 'recipes' }" data-testid="nav-recipes">
+          <a
+            href="#"
+            @click.prevent="$router.push('/recipes')"
+            :class="{ active: currentRoute === 'recipes' }"
+            data-testid="nav-recipes"
+          >
             Browse Recipes
           </a>
-          <a href="#" @click.prevent="$router.push('/generate')" :class="{ active: currentRoute === 'generate' }" data-testid="nav-generate">
+          <a
+            href="#"
+            @click.prevent="$router.push('/generate')"
+            :class="{ active: currentRoute === 'generate' }"
+            data-testid="nav-generate"
+          >
             Generate Recipe
           </a>
-          <a href="#" @click.prevent="$router.push('/favorites')" :class="{ active: currentRoute === 'favorites' }" data-testid="nav-favorites">
+          <a
+            href="#"
+            @click.prevent="$router.push('/favorites')"
+            :class="{ active: currentRoute === 'favorites' }"
+            data-testid="nav-favorites"
+          >
             My Favorites
           </a>
         </nav>
@@ -79,9 +94,11 @@
       <div class="footer-content">
         <div class="footer-section">
           <h3 class="footer-title">🧪 Alchemorsel</h3>
-          <p class="footer-description">AI-powered recipe generation tailored to your dietary preferences</p>
+          <p class="footer-description">
+            AI-powered recipe generation tailored to your dietary preferences
+          </p>
         </div>
-        
+
         <div class="footer-section">
           <h4>My Account</h4>
           <ul class="footer-links">
@@ -90,7 +107,7 @@
             <li><a href="#" @click.prevent="$router.push('/profile/edit')">Profile Settings</a></li>
           </ul>
         </div>
-        
+
         <div class="footer-section">
           <h4>Recipes</h4>
           <ul class="footer-links">
@@ -99,7 +116,7 @@
             <li><a href="#" @click.prevent="$router.push('/recipes/create')">Create Recipe</a></li>
           </ul>
         </div>
-        
+
         <div class="footer-section">
           <h4>Support</h4>
           <ul class="footer-links">
@@ -109,7 +126,7 @@
           </ul>
         </div>
       </div>
-      
+
       <div class="footer-bottom">
         <p>&copy; 2025 Alchemorsel. All rights reserved.</p>
       </div>
@@ -145,14 +162,14 @@ const userFirstName = computed(() => {
   } else if (!authStore.user?.name && authStore.user?.username) {
     fullName = authStore.user.username
   }
-  
+
   // If it's still an email, extract the part before @
   if (fullName.includes('@')) {
     const emailPart = fullName.split('@')[0]
     // Capitalize first letter
     return emailPart.charAt(0).toUpperCase() + emailPart.slice(1)
   }
-  
+
   // If it's a full name, get the first word and capitalize
   const firstName = fullName.split(' ')[0]
   return firstName.charAt(0).toUpperCase() + firstName.slice(1)
@@ -160,7 +177,12 @@ const userFirstName = computed(() => {
 
 const userInitials = computed(() => {
   const name = userName.value
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 })
 
 const isAdmin = computed(() => {
@@ -172,10 +194,10 @@ const handleLogout = async () => {
     console.log('Already logging out, ignoring...')
     return
   }
-  
+
   console.log('Logout clicked')
   isLoggingOut.value = true
-  
+
   try {
     await authStore.logout()
     console.log('Logout successful, redirecting to home')
@@ -375,33 +397,33 @@ const handleLogout = async () => {
   .navbar {
     padding: 0 15px;
   }
-  
+
   .nav-content {
     gap: 15px;
   }
-  
+
   .nav-brand {
     font-size: 1.25rem;
   }
-  
+
   .nav-links {
     gap: 20px;
     margin-left: 20px;
   }
-  
+
   .nav-links a {
     font-size: 0.9rem;
     padding: 6px 12px;
   }
-  
+
   .welcome-text {
     display: none;
   }
-  
+
   .footer {
     padding: 30px 15px 15px;
   }
-  
+
   .footer-content {
     gap: 20px;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -412,12 +434,12 @@ const handleLogout = async () => {
   .nav-links {
     display: none;
   }
-  
+
   .footer-content {
     grid-template-columns: 1fr;
     text-align: center;
   }
-  
+
   .footer-section {
     margin-bottom: 20px;
   }

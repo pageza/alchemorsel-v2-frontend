@@ -36,9 +36,17 @@ const router = createRouter({
       children: [
         { path: '', name: 'home', component: () => import('../views/LandingView.vue') },
         { path: 'about', name: 'about', component: () => import('../views/AboutView.vue') },
-        { path: 'recipes', name: 'recipes', component: () => import('../views/RecipeListView.vue') },
-        { path: 'recipes/:id', name: 'recipe-detail', component: () => import('../views/RecipeDetailView.vue') }
-      ]
+        {
+          path: 'recipes',
+          name: 'recipes',
+          component: () => import('../views/RecipeListView.vue'),
+        },
+        {
+          path: 'recipes/:id',
+          name: 'recipe-detail',
+          component: () => import('../views/RecipeDetailView.vue'),
+        },
+      ],
     },
     // Authentication routes
     {
@@ -46,11 +54,27 @@ const router = createRouter({
       component: AuthLayout,
       children: [
         { path: 'login', name: 'login', component: () => import('../views/LoginView.vue') },
-        { path: 'register', name: 'register', component: () => import('../views/RegisterView.vue') },
-        { path: 'forgot-password', name: 'forgot-password', component: () => import('../views/ForgotPasswordView.vue') },
-        { path: 'reset-password', name: 'reset-password', component: () => import('../views/ResetPasswordView.vue') },
-        { path: 'verify-email', name: 'verify-email', component: () => import('../views/VerifyEmailView.vue') }
-      ]
+        {
+          path: 'register',
+          name: 'register',
+          component: () => import('../views/RegisterView.vue'),
+        },
+        {
+          path: 'forgot-password',
+          name: 'forgot-password',
+          component: () => import('../views/ForgotPasswordView.vue'),
+        },
+        {
+          path: 'reset-password',
+          name: 'reset-password',
+          component: () => import('../views/ResetPasswordView.vue'),
+        },
+        {
+          path: 'verify-email',
+          name: 'verify-email',
+          component: () => import('../views/VerifyEmailView.vue'),
+        },
+      ],
     },
     // Authenticated user routes
     {
@@ -58,29 +82,41 @@ const router = createRouter({
       component: AuthenticatedLayout,
       meta: { requiresAuth: true },
       children: [
-        { path: 'dashboard', name: 'dashboard', component: () => import('../views/DashboardView.vue') },
-        { 
-          path: 'generate', 
-          name: 'generate', 
+        {
+          path: 'dashboard',
+          name: 'dashboard',
+          component: () => import('../views/DashboardView.vue'),
+        },
+        {
+          path: 'generate',
+          name: 'generate',
           component: () => import('../views/RecipeGeneratorView.vue'),
-          meta: { requiresEmailVerification: false } // Allow viewing/modifying drafts without email verification
+          meta: { requiresEmailVerification: false }, // Allow viewing/modifying drafts without email verification
         },
-        { path: 'favorites', name: 'favorites', component: () => import('../views/FavoritesView.vue') },
+        {
+          path: 'favorites',
+          name: 'favorites',
+          component: () => import('../views/FavoritesView.vue'),
+        },
         { path: 'profile', name: 'profile', component: () => import('../views/ProfileView.vue') },
-        { path: 'profile/edit', name: 'profile-edit', component: () => import('../views/EditProfileView.vue') },
-        { 
-          path: 'recipes/create', 
-          name: 'recipe-create', 
-          component: () => import('../views/RecipeCreateView.vue'),
-          meta: { requiresEmailVerification: true }
+        {
+          path: 'profile/edit',
+          name: 'profile-edit',
+          component: () => import('../views/EditProfileView.vue'),
         },
-        { 
-          path: 'recipes/:id/edit', 
-          name: 'recipe-edit', 
+        {
+          path: 'recipes/create',
+          name: 'recipe-create',
           component: () => import('../views/RecipeCreateView.vue'),
-          meta: { requiresEmailVerification: true }
-        }
-      ]
+          meta: { requiresEmailVerification: true },
+        },
+        {
+          path: 'recipes/:id/edit',
+          name: 'recipe-edit',
+          component: () => import('../views/RecipeCreateView.vue'),
+          meta: { requiresEmailVerification: true },
+        },
+      ],
     },
     // Admin routes
     {
@@ -88,27 +124,53 @@ const router = createRouter({
       component: AuthenticatedLayout,
       meta: { requiresAuth: true, requiresAdmin: true },
       children: [
-        { path: '', name: 'admin-dashboard', component: () => import('../views/admin/AdminDashboard.vue') },
-        { path: 'users', name: 'admin-users', component: () => import('../views/admin/UserManagement.vue') },
-        { path: 'users/:id', name: 'admin-user-detail', component: () => import('../views/admin/UserManagement.vue') },
-        { path: 'recipes', name: 'admin-recipes', component: () => import('../views/admin/RecipeModeration.vue') },
-        { path: 'analytics', name: 'admin-analytics', component: () => import('../views/admin/AdminAnalytics.vue') }
-      ]
-    }
-  ]
+        {
+          path: '',
+          name: 'admin-dashboard',
+          component: () => import('../views/admin/AdminDashboard.vue'),
+        },
+        {
+          path: 'users',
+          name: 'admin-users',
+          component: () => import('../views/admin/UserManagement.vue'),
+        },
+        {
+          path: 'users/:id',
+          name: 'admin-user-detail',
+          component: () => import('../views/admin/UserManagement.vue'),
+        },
+        {
+          path: 'recipes',
+          name: 'admin-recipes',
+          component: () => import('../views/admin/RecipeModeration.vue'),
+        },
+        {
+          path: 'analytics',
+          name: 'admin-analytics',
+          component: () => import('../views/admin/AdminAnalytics.vue'),
+        },
+      ],
+    },
+  ],
 })
 
 // Navigation guards
 router.beforeEach((to, from, next) => {
-  console.log(`🛡️ Router guard: ${String(from.name) || from.path || 'unknown'} → ${String(to.name) || to.path || 'unknown'}`)
+  console.log(
+    `🛡️ Router guard: ${String(from.name) || from.path || 'unknown'} → ${String(to.name) || to.path || 'unknown'}`,
+  )
   console.log(`🛡️ From path: ${from.path}, To path: ${to.path}`)
-  
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
-  const requiresEmailVerification = to.matched.some(record => record.meta.requiresEmailVerification)
-  const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin)
-  
-  console.log(`🛡️ Route requires - Auth: ${requiresAuth}, Email: ${requiresEmailVerification}, Admin: ${requiresAdmin}`)
-  
+
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  const requiresEmailVerification = to.matched.some(
+    (record) => record.meta.requiresEmailVerification,
+  )
+  const requiresAdmin = to.matched.some((record) => record.meta.requiresAdmin)
+
+  console.log(
+    `🛡️ Route requires - Auth: ${requiresAuth}, Email: ${requiresEmailVerification}, Admin: ${requiresAdmin}`,
+  )
+
   // Get user authentication state
   const token = localStorage.getItem('auth_token')
   let user = null
@@ -120,19 +182,21 @@ router.beforeEach((to, from, next) => {
   } catch (e) {
     console.error('🛡️ Error parsing user data:', e)
   }
-  
+
   const isAuthenticated = !!token
   const isEmailVerified = user?.email_verified || false
   const isAdmin = user?.role === 'admin'
-  
-  console.log(`🛡️ User state - Auth: ${isAuthenticated}, Email verified: ${isEmailVerified}, Admin: ${isAdmin}`)
-  
+
+  console.log(
+    `🛡️ User state - Auth: ${isAuthenticated}, Email verified: ${isEmailVerified}, Admin: ${isAdmin}`,
+  )
+
   // Public routes that everyone can access
   const publicRoutes = ['home', 'about', 'recipes', 'recipe-detail']
   const authRoutes = ['login', 'register', 'forgot-password', 'reset-password', 'verify-email']
   const isPublicRoute = publicRoutes.includes(to.name as string)
   const isAuthRoute = authRoutes.includes(to.name as string)
-  
+
   // Unauthenticated users: only landing, about, auth pages, and public recipe views
   if (!isAuthenticated) {
     if (isPublicRoute || isAuthRoute) {
@@ -145,37 +209,39 @@ router.beforeEach((to, from, next) => {
       return
     }
   }
-  
+
   // Authenticated users trying to access auth pages
   if (isAuthenticated && isAuthRoute && to.name !== 'verify-email') {
     console.log('🛡️ Authenticated user trying to access auth page, redirecting to dashboard')
     next({ name: 'dashboard' })
     return
   }
-  
+
   // Admin role check
   if (requiresAdmin && !isAdmin) {
     console.log('🛡️ Non-admin user trying to access admin route, redirecting to dashboard')
     next({ name: 'dashboard' })
     return
   }
-  
+
   // Email verification check for specific routes
   if (requiresEmailVerification && !isEmailVerified) {
-    console.log('🛡️ Unverified user trying to access email-required route, redirecting to dashboard with notification')
+    console.log(
+      '🛡️ Unverified user trying to access email-required route, redirecting to dashboard with notification',
+    )
     // Allow the navigation but the component will handle the verification requirement
     // This way users can see the "verify email" message in context
     next()
     return
   }
-  
+
   // Authentication check for protected routes
   if (requiresAuth && !isAuthenticated) {
     console.log('🛡️ Route requires auth but user not authenticated, redirecting to login')
     next({ name: 'login' })
     return
   }
-  
+
   console.log('🛡️ Navigation allowed')
   next()
 })

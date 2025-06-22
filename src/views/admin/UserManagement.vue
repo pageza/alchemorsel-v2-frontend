@@ -19,13 +19,7 @@
         />
       </v-col>
       <v-col cols="12" md="4">
-        <v-btn
-          color="primary"
-          block
-          @click="searchUsers"
-        >
-          Search
-        </v-btn>
+        <v-btn color="primary" block @click="searchUsers"> Search </v-btn>
       </v-col>
     </v-row>
 
@@ -46,28 +40,13 @@
               {{ item.profile?.username || '-' }}
             </template>
             <template #[`item.role`]="{ item }">
-              <v-chip
-                small
-                :color="getRoleColor(item.role)"
-              >
+              <v-chip small :color="getRoleColor(item.role)">
                 {{ item.role }}
               </v-chip>
             </template>
             <template #[`item.is_banned`]="{ item }">
-              <v-chip
-                v-if="item.is_banned"
-                small
-                color="error"
-              >
-                Banned
-              </v-chip>
-              <v-chip
-                v-else
-                small
-                color="success"
-              >
-                Active
-              </v-chip>
+              <v-chip v-if="item.is_banned" small color="error"> Banned </v-chip>
+              <v-chip v-else small color="success"> Active </v-chip>
             </template>
             <template #[`item.created_at`]="{ item }">
               {{ formatDate(item.created_at) }}
@@ -75,10 +54,7 @@
             <template #[`item.actions`]="{ item }">
               <v-menu offset-y>
                 <template #activator="{ props }">
-                  <v-btn
-                    icon
-                    v-bind="props"
-                  >
+                  <v-btn icon v-bind="props">
                     <v-icon>mdi-dots-vertical</v-icon>
                   </v-btn>
                 </template>
@@ -96,19 +72,13 @@
                     <v-list-item-title>Change Role</v-list-item-title>
                   </v-list-item>
                   <v-divider />
-                  <v-list-item
-                    v-if="!item.is_banned"
-                    @click="openBanDialog(item)"
-                  >
+                  <v-list-item v-if="!item.is_banned" @click="openBanDialog(item)">
                     <v-list-item-icon>
                       <v-icon color="warning">mdi-account-cancel</v-icon>
                     </v-list-item-icon>
                     <v-list-item-title>Ban User</v-list-item-title>
                   </v-list-item>
-                  <v-list-item
-                    v-else
-                    @click="unbanUser(item)"
-                  >
+                  <v-list-item v-else @click="unbanUser(item)">
                     <v-list-item-icon>
                       <v-icon color="success">mdi-account-check</v-icon>
                     </v-list-item-icon>
@@ -175,8 +145,7 @@
               <v-list-item-content>
                 <v-list-item-subtitle>Statistics</v-list-item-subtitle>
                 <v-list-item-title>
-                  {{ userStats.recipe_count }} recipes, 
-                  {{ userStats.favorite_count }} favorites
+                  {{ userStats.recipe_count }} recipes, {{ userStats.favorite_count }} favorites
                 </v-list-item-title>
               </v-list-item-content>
             </v-list-item>
@@ -190,22 +159,12 @@
       <v-card>
         <v-card-title>Change User Role</v-card-title>
         <v-card-text>
-          <v-select
-            v-model="newRole"
-            :items="roles"
-            label="Select new role"
-          />
+          <v-select v-model="newRole" :items="roles" label="Select new role" />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
           <v-btn text @click="roleDialog = false">Cancel</v-btn>
-          <v-btn
-            color="primary"
-            :loading="loading"
-            @click="updateRole"
-          >
-            Update Role
-          </v-btn>
+          <v-btn color="primary" :loading="loading" @click="updateRole"> Update Role </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -215,22 +174,12 @@
       <v-card>
         <v-card-title>Ban User</v-card-title>
         <v-card-text>
-          <v-textarea
-            v-model="banReason"
-            label="Reason for ban"
-            required
-          />
+          <v-textarea v-model="banReason" label="Reason for ban" required />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
           <v-btn text @click="banDialog = false">Cancel</v-btn>
-          <v-btn
-            color="warning"
-            :loading="loading"
-            @click="banUser"
-          >
-            Ban User
-          </v-btn>
+          <v-btn color="warning" :loading="loading" @click="banUser"> Ban User </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -245,13 +194,7 @@
         <v-card-actions>
           <v-spacer />
           <v-btn text @click="deleteDialog = false">Cancel</v-btn>
-          <v-btn
-            color="error"
-            :loading="loading"
-            @click="deleteUser"
-          >
-            Delete User
-          </v-btn>
+          <v-btn color="error" :loading="loading" @click="deleteUser"> Delete User </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -288,7 +231,7 @@ const options = ref({
   groupBy: [],
   groupDesc: [],
   multiSort: false,
-  mustSort: false
+  mustSort: false,
 })
 
 const headers = [
@@ -298,7 +241,7 @@ const headers = [
   { text: 'Role', value: 'role' },
   { text: 'Status', value: 'is_banned' },
   { text: 'Created', value: 'created_at' },
-  { text: 'Actions', value: 'actions', sortable: false }
+  { text: 'Actions', value: 'actions', sortable: false },
 ]
 
 const roles = ['user', 'moderator', 'admin']
@@ -357,7 +300,7 @@ function openRoleDialog(user: User) {
 
 async function updateRole() {
   if (!selectedUser.value) return
-  
+
   try {
     await adminStore.updateUserRole(selectedUser.value.id, newRole.value)
     roleDialog.value = false
@@ -375,7 +318,7 @@ function openBanDialog(user: User) {
 
 async function banUser() {
   if (!selectedUser.value || !banReason.value) return
-  
+
   try {
     await adminStore.banUser(selectedUser.value.id, banReason.value)
     banDialog.value = false
@@ -401,7 +344,7 @@ function openDeleteDialog(user: User) {
 
 async function deleteUser() {
   if (!selectedUser.value) return
-  
+
   try {
     await adminStore.deleteUser(selectedUser.value.id)
     deleteDialog.value = false

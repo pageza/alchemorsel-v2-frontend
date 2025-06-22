@@ -10,14 +10,17 @@ export interface FeaturedRecipesResponse {
 export class FeaturedService {
   static async getFeaturedRecipes(limit = 6): Promise<Recipe[]> {
     const response = await api.get('/recipes/featured', {
-      params: { limit }
+      params: { limit },
     })
     return response.data.recipes
   }
 
-  static async getFeaturedByCategory(category: string, limit = 4): Promise<FeaturedRecipesResponse> {
+  static async getFeaturedByCategory(
+    category: string,
+    limit = 4,
+  ): Promise<FeaturedRecipesResponse> {
     const response = await api.get(`/featured/category/${category}`, {
-      params: { limit }
+      params: { limit },
     })
     return response.data
   }

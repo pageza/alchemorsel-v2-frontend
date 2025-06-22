@@ -17,9 +17,7 @@ export class AuthService {
   }
 
   static async getProfile(): Promise<User> {
-    const response = await api.get<{ profile: User }>(
-      '/profile'
-    )
+    const response = await api.get<{ profile: User }>('/profile')
     return response.data.profile
   }
 
@@ -33,10 +31,13 @@ export class AuthService {
     return response.data
   }
 
-  static async completePasswordReset(token: string, newPassword: string): Promise<{ message: string }> {
-    const response = await api.post<{ message: string }>('/auth/password-reset/complete', { 
-      token, 
-      new_password: newPassword 
+  static async completePasswordReset(
+    token: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
+    const response = await api.post<{ message: string }>('/auth/password-reset/complete', {
+      token,
+      new_password: newPassword,
     })
     return response.data
   }
@@ -50,4 +51,4 @@ export class AuthService {
     const response = await api.post<{ message: string }>('/auth/resend-verification', { email })
     return response.data
   }
-} 
+}

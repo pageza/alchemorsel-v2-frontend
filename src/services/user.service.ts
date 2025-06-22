@@ -39,12 +39,15 @@ export class UserService {
   /**
    * Update dietary preferences specifically.
    */
-  static async updateDietaryPreferences(dietaryPrefs: string[], allergies: string[]): Promise<User> {
+  static async updateDietaryPreferences(
+    dietaryPrefs: string[],
+    allergies: string[],
+  ): Promise<User> {
     return this.updateProfile({
       preferences: {
         dietary_prefs: dietaryPrefs,
-        allergies: allergies
-      }
+        allergies: allergies,
+      },
     })
   }
 }

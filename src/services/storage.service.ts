@@ -10,4 +10,4 @@ export class StorageService {
   static clearToken(): void {
     localStorage.removeItem('auth_token')
   }
-} 
+}

@@ -42,7 +42,7 @@ function goToRecipes() {
   width: 100vw;
   height: 64px;
   background: #2d221a;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -68,12 +68,12 @@ function goToRecipes() {
   font-size: 1rem;
   border-radius: 8px;
 }
-:deep(.v-btn[color="primary"]) {
+:deep(.v-btn[color='primary']) {
   background: #d2691e;
   color: #fff;
   border: none;
 }
-:deep(.v-btn[color="error"]) {
+:deep(.v-btn[color='error']) {
   background: #3a2a1a;
   color: #f5e6c8;
   border: 1.5px solid #a67c52;
@@ -88,7 +88,8 @@ function goToRecipes() {
   padding: 0 20px;
   transition: background 0.2s;
 }
-.navbar-auth-btn:hover, .navbar-auth-btn:focus {
+.navbar-auth-btn:hover,
+.navbar-auth-btn:focus {
   background: #b85c16 !important;
 }
 .navbar-link {
@@ -102,8 +103,9 @@ function goToRecipes() {
   min-width: 0;
   padding: 0 16px;
 }
-.navbar-link:hover, .navbar-link:focus {
+.navbar-link:hover,
+.navbar-link:focus {
   color: #ffe1a6 !important;
   background: none !important;
 }
-</style> 
+</style>

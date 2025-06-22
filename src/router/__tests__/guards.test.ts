@@ -6,7 +6,7 @@ const localStorageMock = {
   getItem: vi.fn(),
   setItem: vi.fn(),
   removeItem: vi.fn(),
-  clear: vi.fn()
+  clear: vi.fn(),
 }
 Object.defineProperty(window, 'localStorage', { value: localStorageMock })
 
@@ -21,16 +21,16 @@ describe('Router Guards', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    
+
     mockTo = {
       name: 'dashboard',
       path: '/dashboard',
-      matched: [{ meta: { requiresAuth: true } }]
+      matched: [{ meta: { requiresAuth: true } }],
     } as any
 
     mockFrom = {
       name: 'home',
-      path: '/'
+      path: '/',
     } as any
 
     mockNext = vi.fn()
@@ -38,10 +38,14 @@ describe('Router Guards', () => {
 
   describe('Authentication Guard Logic', () => {
     // Test the guard logic directly without importing the full router
-    const authGuard = (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
-      const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+    const authGuard = (
+      to: RouteLocationNormalized,
+      from: RouteLocationNormalized,
+      next: NavigationGuardNext,
+    ) => {
+      const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
       const token = localStorage.getItem('auth_token')
-      
+
       if (requiresAuth) {
         if (!token) {
           if (to.name !== 'login') {
@@ -50,13 +54,13 @@ describe('Router Guards', () => {
           }
         }
       }
-      
+
       // Check if user is authenticated but trying to access auth pages
       if (token && (to.name === 'login' || to.name === 'register')) {
         next({ name: 'dashboard' })
         return
       }
-      
+
       next()
     }
 
@@ -124,11 +128,11 @@ describe('Router Guards', () => {
       // This is more of a configuration test than runtime test
       const protectedRoutes = [
         'dashboard',
-        'generate', 
+        'generate',
         'favorites',
         'profile-edit',
         'recipe-create',
-        'recipe-edit'
+        'recipe-edit',
       ]
 
       // In a real test, you would import the routes config and verify
@@ -145,7 +149,7 @@ describe('Router Guards', () => {
         'register',
         'forgot-password',
         'reset-password',
-        'verify-email'
+        'verify-email',
       ]
 
       expect(publicRoutes.length).toBeGreaterThan(0)

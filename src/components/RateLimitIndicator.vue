@@ -20,7 +20,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="text-right">
           <div class="text-h6 font-weight-bold">
             {{ rateLimitStatus.remaining }}/{{ rateLimitStatus.limit }}
@@ -30,7 +30,7 @@
           </div>
         </div>
       </div>
-      
+
       <!-- Progress bar -->
       <v-progress-linear
         v-if="showProgress"
@@ -57,7 +57,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   isLoading: false,
-  showProgress: true
+  showProgress: true,
 })
 
 // Computed properties
@@ -79,16 +79,16 @@ const resetText = computed(() => {
 
 const statusText = computed(() => {
   if (!props.rateLimitStatus) return ''
-  
+
   if (isRateLimited.value) {
     return 'Rate limit reached'
   }
-  
+
   const remaining = props.rateLimitStatus.remaining
   if (remaining === 1) {
     return '1 request remaining'
   }
-  
+
   return `${remaining} requests remaining`
 })
 

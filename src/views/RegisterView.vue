@@ -2,7 +2,7 @@
   <div class="register-page">
     <div class="register-container">
       <h2>Create Your Account</h2>
-      
+
       <v-form
         ref="form"
         v-model="isFormValid"
@@ -58,9 +58,7 @@
           data-testid="password-input"
           class="mb-2"
         />
-        <div class="password-hint mb-4">
-          Min 8 chars, 1 uppercase, 1 number, 1 special char
-        </div>
+        <div class="password-hint mb-4">Min 8 chars, 1 uppercase, 1 number, 1 special char</div>
 
         <!-- Dietary Lifestyles -->
         <div class="form-section mb-4">
@@ -107,7 +105,12 @@
               :key="allergy"
               v-model="formData.allergies"
               :value="allergy"
-              :label="allergy.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')"
+              :label="
+                allergy
+                  .split(' ')
+                  .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                  .join(' ')
+              "
               :data-testid="`allergy-${allergy.replace(/\s+/g, '-')}`"
               density="compact"
               hide-details
@@ -130,9 +133,9 @@
         </v-btn>
 
         <div class="login-link">
-          Already have an account? 
-          <v-btn 
-            variant="text" 
+          Already have an account?
+          <v-btn
+            variant="text"
             color="primary"
             @click="$router.push('/login')"
             data-testid="login-link"
@@ -145,7 +148,6 @@
     </div>
   </div>
 </template>
-
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
@@ -169,7 +171,7 @@ const formData = reactive({
   password: '',
   dietary_lifestyles: [] as string[],
   cuisine_preferences: [] as string[],
-  allergies: [] as string[]
+  allergies: [] as string[],
 })
 
 const dietaryLifestyleOptions = [
@@ -178,17 +180,10 @@ const dietaryLifestyleOptions = [
   'pescatarian',
   'paleo',
   'keto',
-  'mediterranean'
+  'mediterranean',
 ]
 
-const cuisineOptions = [
-  'italian',
-  'mexican',
-  'chinese',
-  'japanese',
-  'indian',
-  'mediterranean'
-]
+const cuisineOptions = ['italian', 'mexican', 'chinese', 'japanese', 'indian', 'mediterranean']
 
 const allergyOptions = [
   'peanuts',
@@ -198,38 +193,38 @@ const allergyOptions = [
   'fish',
   'shellfish',
   'soy',
-  'gluten'
+  'gluten',
 ]
 
 const emailRules = [
   (v: string) => !!v || 'Email is required',
-  (v: string) => /.+@.+\..+/.test(v) || 'Please enter a valid email'
+  (v: string) => /.+@.+\..+/.test(v) || 'Please enter a valid email',
 ]
 
 const usernameRules = [
   (v: string) => !!v || 'Username is required',
-  (v: string) => v.length >= 3 || 'Username must be at least 3 characters'
+  (v: string) => v.length >= 3 || 'Username must be at least 3 characters',
 ]
 
-const fullNameRules = [
-  (v: string) => !!v || 'Full name is required'
-]
+const fullNameRules = [(v: string) => !!v || 'Full name is required']
 
 const passwordRules = [
   (v: string) => !!v || 'Password is required',
   (v: string) => v.length >= 8 || 'Password must be at least 8 characters',
-  (v: string) => /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(v) || 'Password must contain at least 1 uppercase, 1 number, and 1 special character'
+  (v: string) =>
+    /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(v) ||
+    'Password must contain at least 1 uppercase, 1 number, and 1 special character',
 ]
 
 const handleSubmit = async () => {
   if (!form.value) return
-  
+
   try {
     const { valid } = await form.value.validate()
     if (!valid) return
-    
+
     isLoading.value = true
-    
+
     await authStore.register({
       email: formData.email,
       username: formData.username,
@@ -237,17 +232,16 @@ const handleSubmit = async () => {
       password: formData.password,
       dietary_lifestyles: formData.dietary_lifestyles,
       cuisine_preferences: formData.cuisine_preferences,
-      allergies: formData.allergies
+      allergies: formData.allergies,
     })
-    
+
     notificationStore.success('Registration successful! Welcome to Alchemorsel!')
     router.push('/dashboard')
-    
   } catch (error: unknown) {
     console.error('Registration error:', error)
-    
+
     let errorMessage = 'Registration failed. Please try again.'
-    
+
     if (error && typeof error === 'object') {
       if ('code' in error) {
         const errorCode = (error as { code?: string }).code
@@ -256,9 +250,11 @@ const handleSubmit = async () => {
         }
       }
       if ('response' in error) {
-        const response = (error as { response?: { data?: { error?: string; message?: string } } }).response
+        const response = (error as { response?: { data?: { error?: string; message?: string } } })
+          .response
         if (response?.data?.error === 'user already exists') {
-          errorMessage = 'An account with this email already exists. Please use a different email or try logging in.'
+          errorMessage =
+            'An account with this email already exists. Please use a different email or try logging in.'
         } else if (response?.data?.message) {
           errorMessage = response.data.message
         } else if (response?.data?.error) {
@@ -269,7 +265,7 @@ const handleSubmit = async () => {
         errorMessage = (error as { message: string }).message
       }
     }
-    
+
     notificationStore.error(errorMessage)
   } finally {
     isLoading.value = false
@@ -347,21 +343,21 @@ const handleSubmit = async () => {
   .register-page {
     padding: 20px 15px;
   }
-  
+
   .register-container {
     padding: 30px 20px;
     max-width: 100%;
   }
-  
+
   .register-container h2 {
     font-size: 1.5rem;
   }
-  
+
   .checkbox-group {
     flex-direction: column;
     gap: 4px;
   }
-  
+
   .checkbox-item {
     flex: 1 1 100%;
   }
@@ -371,9 +367,9 @@ const handleSubmit = async () => {
   .register-container {
     padding: 20px 15px;
   }
-  
+
   .register-container h2 {
     font-size: 1.25rem;
   }
 }
-</style> 
+</style>

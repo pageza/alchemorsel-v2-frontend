@@ -16,10 +16,10 @@
       <div class="results-info">
         <p>{{ favorites.length }} favorite{{ favorites.length !== 1 ? 's' : '' }}</p>
       </div>
-      
+
       <div class="recipe-grid">
-        <RecipeCard 
-          v-for="recipe in favorites" 
+        <RecipeCard
+          v-for="recipe in favorites"
           :key="recipe.id"
           :id="recipe.id"
           :image="recipe.image_url || '/placeholder-recipe.jpg'"
@@ -37,11 +37,7 @@
       <div class="empty-icon">❤️</div>
       <h3>No favorites yet</h3>
       <p>Discover amazing recipes and add them to your favorites to see them here.</p>
-      <el-button 
-        type="primary" 
-        size="large"
-        @click="$router.push('/recipes')"
-      >
+      <el-button type="primary" size="large" @click="$router.push('/recipes')">
         Browse Recipes
       </el-button>
     </div>
@@ -65,11 +61,11 @@ const loading = ref(true)
 const handleFavoriteToggle = async (recipeId: string) => {
   try {
     // Remove from favorites locally immediately for better UX
-    favorites.value = favorites.value.filter(recipe => recipe.id !== recipeId)
-    
+    favorites.value = favorites.value.filter((recipe) => recipe.id !== recipeId)
+
     // Call the store method to update backend
     await recipeStore.toggleFavorite(recipeId, true) // true because it's currently favorited
-    
+
     notificationStore.success('Recipe removed from favorites')
   } catch {
     // Re-add the recipe if the API call failed
@@ -137,8 +133,12 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .favorites-content {
@@ -187,11 +187,11 @@ onMounted(() => {
   .favorites {
     padding: 20px 15px;
   }
-  
+
   .favorites-header h1 {
     font-size: 1.75rem;
   }
-  
+
   .recipe-grid {
     grid-template-columns: 1fr;
     gap: 20px;

@@ -31,4 +31,4 @@ export default createVuetify({
     aliases,
     sets: { mdi },
   },
-}) 
+})

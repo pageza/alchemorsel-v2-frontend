@@ -18,8 +18,8 @@ export class RateLimitService {
     try {
       const response = await axios.get(`${this.baseURL}/recipe-creation`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+        },
       })
       return response.data
     } catch (error) {
@@ -35,8 +35,8 @@ export class RateLimitService {
     try {
       const response = await axios.get(`${this.baseURL}/recipe-modification/${recipeId}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+        },
       })
       return response.data
     } catch (error) {
@@ -52,17 +52,17 @@ export class RateLimitService {
     const now = new Date()
     const reset = new Date(resetTime * 1000)
     const diffMs = reset.getTime() - now.getTime()
-    
+
     if (diffMs <= 0) {
       return 'Now'
     }
-    
+
     const diffMinutes = Math.ceil(diffMs / (1000 * 60))
-    
+
     if (diffMinutes < 60) {
       return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''}`
     }
-    
+
     const diffHours = Math.ceil(diffMinutes / 60)
     return `${diffHours} hour${diffHours !== 1 ? 's' : ''}`
   }

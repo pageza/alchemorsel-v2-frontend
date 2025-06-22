@@ -6,8 +6,8 @@ import type { User, LoginRequest, RegisterRequest, AuthResponse } from '@/types/
 vi.mock('@/services/api', () => ({
   default: {
     post: vi.fn(),
-    get: vi.fn()
-  }
+    get: vi.fn(),
+  },
 }))
 
 // Import api after mocking
@@ -23,11 +23,11 @@ describe('AuthService', () => {
     it('should successfully login with valid credentials', async () => {
       const mockCredentials: LoginRequest = {
         email: 'test@example.com',
-        password: 'password123'
+        password: 'password123',
       }
 
       const mockResponse: AuthResponse = {
-        token: 'mock-jwt-token'
+        token: 'mock-jwt-token',
       }
 
       mockApi.post.mockResolvedValue({ data: mockResponse })
@@ -41,14 +41,14 @@ describe('AuthService', () => {
     it('should handle login failures', async () => {
       const mockCredentials: LoginRequest = {
         email: 'invalid@example.com',
-        password: 'wrongpassword'
+        password: 'wrongpassword',
       }
 
       const mockError = {
         response: {
           status: 401,
-          data: { message: 'Invalid credentials' }
-        }
+          data: { message: 'Invalid credentials' },
+        },
       }
 
       mockApi.post.mockRejectedValue(mockError)
@@ -66,11 +66,11 @@ describe('AuthService', () => {
         password: 'password123',
         username: 'testuser',
         dietary_preferences: ['vegetarian'],
-        allergies: ['nuts']
+        allergies: ['nuts'],
       }
 
       const mockResponse: AuthResponse = {
-        token: 'mock-jwt-token'
+        token: 'mock-jwt-token',
       }
 
       mockApi.post.mockResolvedValue({ data: mockResponse })
@@ -88,14 +88,14 @@ describe('AuthService', () => {
         password: '123',
         username: '',
         dietary_preferences: [],
-        allergies: []
+        allergies: [],
       }
 
       const mockError = {
         response: {
           status: 400,
-          data: { message: 'Validation failed' }
-        }
+          data: { message: 'Validation failed' },
+        },
       }
 
       mockApi.post.mockRejectedValue(mockError)
@@ -132,11 +132,11 @@ describe('AuthService', () => {
         dietaryPreferences: ['vegetarian'],
         allergies: ['nuts'],
         createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z'
+        updatedAt: '2024-01-01T00:00:00Z',
       }
 
       mockApi.get.mockResolvedValue({
-        data: { profile: mockUser }
+        data: { profile: mockUser },
       })
 
       const result = await AuthService.getProfile()
@@ -149,8 +149,8 @@ describe('AuthService', () => {
       const mockError = {
         response: {
           status: 401,
-          data: { message: 'Unauthorized' }
-        }
+          data: { message: 'Unauthorized' },
+        },
       }
 
       mockApi.get.mockRejectedValue(mockError)

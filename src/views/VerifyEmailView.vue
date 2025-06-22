@@ -8,11 +8,7 @@
           </v-toolbar>
           <v-card-text>
             <div v-if="loading" class="text-center py-8">
-              <v-progress-circular
-                indeterminate
-                color="primary"
-                :size="60"
-              ></v-progress-circular>
+              <v-progress-circular indeterminate color="primary" :size="60"></v-progress-circular>
               <p class="mt-4">Verifying your email...</p>
             </div>
 
@@ -30,11 +26,7 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn
-              v-if="verified || error"
-              color="primary"
-              @click="goToDashboard"
-            >
+            <v-btn v-if="verified || error" color="primary" @click="goToDashboard">
               {{ verified ? 'Go to Dashboard' : 'Go to Login' }}
             </v-btn>
           </v-card-actions>
@@ -75,7 +67,7 @@ onMounted(async () => {
     const response = await AuthService.verifyEmail(token.value)
     verified.value = true
     notificationStore.success(response.message || 'Email verified successfully')
-    
+
     // Update user's verified status if they're logged in
     if (authStore.isAuthenticated) {
       await authStore.fetchProfile()

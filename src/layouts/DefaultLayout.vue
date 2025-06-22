@@ -3,7 +3,7 @@
     <header class="navbar">
       <div class="nav-content">
         <div class="nav-brand" @click="$router.push('/')">🧪 Alchemorsel</div>
-        
+
         <nav class="nav-links">
           <a href="#" @click.prevent="$router.push('/')">Home</a>
           <a href="#" @click.prevent="$router.push('/recipes')">Browse Recipes</a>
@@ -12,21 +12,10 @@
 
         <!-- Show different buttons based on auth status -->
         <div v-if="!isAuthenticated" class="auth-buttons">
-          <v-btn
-            variant="outlined"
-            color="white"
-            @click="handleLoginClick"
-          >
-            Login
-          </v-btn>
-          <v-btn
-            color="secondary"
-            @click="$router.push('/register')"
-          >
-            Sign Up
-          </v-btn>
+          <v-btn variant="outlined" color="white" @click="handleLoginClick"> Login </v-btn>
+          <v-btn color="secondary" @click="$router.push('/register')"> Sign Up </v-btn>
         </div>
-        
+
         <div v-else class="user-menu">
           <span class="welcome-text">Welcome, {{ userFirstName }}</span>
           <v-menu>
@@ -87,9 +76,11 @@
       <div class="footer-content">
         <div class="footer-section">
           <h3 class="footer-title">🧪 Alchemorsel</h3>
-          <p class="footer-description">AI-powered recipe generation tailored to your dietary preferences</p>
+          <p class="footer-description">
+            AI-powered recipe generation tailored to your dietary preferences
+          </p>
         </div>
-        
+
         <div class="footer-section">
           <h4>Quick Links</h4>
           <ul class="footer-links">
@@ -98,17 +89,25 @@
             <li><a href="#" @click.prevent="$router.push('/about')">About</a></li>
           </ul>
         </div>
-        
+
         <div class="footer-section">
           <h4>Account</h4>
           <ul class="footer-links">
-            <li v-if="!isAuthenticated"><a href="#" @click.prevent="$router.push('/login')">Login</a></li>
-            <li v-if="!isAuthenticated"><a href="#" @click.prevent="$router.push('/register')">Sign Up</a></li>
-            <li v-if="isAuthenticated"><a href="#" @click.prevent="$router.push('/dashboard')">Dashboard</a></li>
-            <li v-if="isAuthenticated"><a href="#" @click.prevent="$router.push('/profile/edit')">Profile</a></li>
+            <li v-if="!isAuthenticated">
+              <a href="#" @click.prevent="$router.push('/login')">Login</a>
+            </li>
+            <li v-if="!isAuthenticated">
+              <a href="#" @click.prevent="$router.push('/register')">Sign Up</a>
+            </li>
+            <li v-if="isAuthenticated">
+              <a href="#" @click.prevent="$router.push('/dashboard')">Dashboard</a>
+            </li>
+            <li v-if="isAuthenticated">
+              <a href="#" @click.prevent="$router.push('/profile/edit')">Profile</a>
+            </li>
           </ul>
         </div>
-        
+
         <div class="footer-section">
           <h4>Support</h4>
           <ul class="footer-links">
@@ -118,7 +117,7 @@
           </ul>
         </div>
       </div>
-      
+
       <div class="footer-bottom">
         <p>&copy; 2025 Alchemorsel. All rights reserved.</p>
       </div>
@@ -141,14 +140,14 @@ const userName = computed(() => {
 
 const userFirstName = computed(() => {
   const fullName = authStore.user?.name || authStore.user?.username || 'User'
-  
+
   // If it's an email, extract the part before @
   if (fullName.includes('@')) {
     const emailPart = fullName.split('@')[0]
     // Capitalize first letter
     return emailPart.charAt(0).toUpperCase() + emailPart.slice(1)
   }
-  
+
   // If it's a full name, get the first word and capitalize
   const firstName = fullName.split(' ')[0]
   return firstName.charAt(0).toUpperCase() + firstName.slice(1)
@@ -156,7 +155,12 @@ const userFirstName = computed(() => {
 
 const userInitials = computed(() => {
   const name = userName.value
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 })
 
 const isAdmin = computed(() => {
@@ -172,7 +176,7 @@ const handleLoginClick = async () => {
   console.log('🔑 Is authenticated:', isAuthenticated.value)
   console.log('🔑 Auth store token exists:', !!authStore.token)
   console.log('🔑 Auth store user:', authStore.user)
-  
+
   try {
     console.log('🔑 Attempting router.push("/login")')
     await router.push('/login')
@@ -189,10 +193,10 @@ const handleLogout = async () => {
     console.log('Already logging out from DefaultLayout, ignoring...')
     return
   }
-  
+
   console.log('Logout clicked from DefaultLayout')
   isLoggingOut.value = true
-  
+
   try {
     await authStore.logout()
     console.log('Logout successful from DefaultLayout, redirecting to home')
@@ -407,29 +411,29 @@ const handleLogout = async () => {
   .navbar {
     padding: 0 15px;
   }
-  
+
   .nav-links {
     gap: 20px;
   }
-  
+
   .nav-links a {
     font-size: 0.9rem;
   }
-  
+
   .auth-buttons,
   .user-section,
   .user-menu {
     gap: 8px;
   }
-  
+
   .welcome-text {
     display: none;
   }
-  
+
   .footer {
     padding: 30px 15px 15px;
   }
-  
+
   .footer-content {
     gap: 20px;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -440,30 +444,30 @@ const handleLogout = async () => {
   .nav-links {
     display: none;
   }
-  
+
   .nav-brand {
     font-size: 1.25rem;
   }
-  
+
   .user-section,
   .user-menu {
     flex-direction: column;
     gap: 5px;
   }
-  
+
   .dashboard-btn,
   .logout-btn {
     font-size: 0.8rem;
     padding: 5px 10px;
   }
-  
+
   .footer-content {
     grid-template-columns: 1fr;
     text-align: center;
   }
-  
+
   .footer-section {
     margin-bottom: 20px;
   }
 }
-</style> 
+</style>

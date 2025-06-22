@@ -40,7 +40,7 @@ export function useRateLimit() {
   // Start auto-refresh of rate limit data
   const startAutoRefresh = (intervalMs = 30000) => {
     if (refreshInterval) return
-    
+
     refreshInterval = window.setInterval(() => {
       fetchRecipeCreationLimit()
     }, intervalMs)
@@ -70,12 +70,12 @@ export function useRateLimit() {
     recipeCreationLimit: computed(() => recipeCreationLimit.value),
     isLoading: computed(() => isLoading.value),
     error: computed(() => error.value),
-    
+
     // Computed properties
     canCreateRecipe,
     creationUsagePercentage,
     creationResetTimeFormatted,
-    
+
     // Methods
     fetchRecipeCreationLimit,
     startAutoRefresh,
@@ -107,7 +107,7 @@ export function useRecipeModificationRateLimit(recipeId: string) {
   // Fetch recipe modification rate limit
   const fetchRecipeModificationLimit = async () => {
     if (!recipeId) return
-    
+
     try {
       isLoading.value = true
       error.value = null
@@ -125,12 +125,12 @@ export function useRecipeModificationRateLimit(recipeId: string) {
     modificationLimit: computed(() => modificationLimit.value),
     isLoading: computed(() => isLoading.value),
     error: computed(() => error.value),
-    
+
     // Computed properties
     canModifyRecipe,
     modificationUsagePercentage,
     modificationResetTimeFormatted,
-    
+
     // Methods
     fetchRecipeModificationLimit,
   }
