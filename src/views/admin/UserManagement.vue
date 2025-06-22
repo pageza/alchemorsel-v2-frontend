@@ -288,7 +288,8 @@ async function viewUserDetails(user: User) {
   try {
     const response = await adminStore.getUserDetails(user.id)
     userStats.value = response.stats
-  } catch (error) {
+  } catch {
+    // ESLINT-FIX-2025-J: Remove unused error parameter
     notificationStore.showError('Failed to load user details')
   }
 }
@@ -306,7 +307,8 @@ async function updateRole() {
     await adminStore.updateUserRole(selectedUser.value.id, newRole.value)
     roleDialog.value = false
     notificationStore.showSuccess('User role updated successfully')
-  } catch (error) {
+  } catch {
+    // ESLINT-FIX-2025-J: Remove unused error parameter
     notificationStore.showError('Failed to update user role')
   }
 }
@@ -324,7 +326,8 @@ async function banUser() {
     await adminStore.banUser(selectedUser.value.id, banReason.value)
     banDialog.value = false
     notificationStore.showSuccess('User banned successfully')
-  } catch (error) {
+  } catch {
+    // ESLINT-FIX-2025-J: Remove unused error parameter
     notificationStore.showError('Failed to ban user')
   }
 }
@@ -333,7 +336,8 @@ async function unbanUser(user: User) {
   try {
     await adminStore.unbanUser(user.id)
     notificationStore.showSuccess('User unbanned successfully')
-  } catch (error) {
+  } catch {
+    // ESLINT-FIX-2025-J: Remove unused error parameter
     notificationStore.showError('Failed to unban user')
   }
 }
@@ -350,7 +354,8 @@ async function deleteUser() {
     await adminStore.deleteUser(selectedUser.value.id)
     deleteDialog.value = false
     notificationStore.showSuccess('User deleted successfully')
-  } catch (error) {
+  } catch {
+    // ESLINT-FIX-2025-J: Remove unused error parameter
     notificationStore.showError('Failed to delete user')
   }
 }

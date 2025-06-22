@@ -230,7 +230,8 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRecipes } from '@/composables/useRecipes'
 import { useAuthStore } from '@/stores/auth.store'
-import { useNotificationStore } from '@/stores/notification.store'
+// ESLINT-FIX-2025-J: Remove unused notification store import
+// import { useNotificationStore } from '@/stores/notification.store'
 import ForkRecipeModal from '@/components/ForkRecipeModal.vue'
 import type { Recipe } from '@/types/recipe.types'
 
@@ -238,7 +239,8 @@ const route = useRoute()
 const router = useRouter()
 const { fetchRecipeById, toggleFavorite, isLoading, error, getRecipeById } = useRecipes()
 const authStore = useAuthStore()
-const notificationStore = useNotificationStore()
+// ESLINT-FIX-2025-J: Remove unused notification store import
+// const notificationStore = useNotificationStore()
 
 const recipe = ref<Recipe | null>(null)
 const showForkModal = ref(false)

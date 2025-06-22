@@ -209,7 +209,8 @@ async function hideRecipe() {
     await adminStore.hideRecipe(selectedRecipe.value.id, hideReason.value)
     hideDialog.value = false
     notificationStore.showSuccess('Recipe hidden successfully')
-  } catch (error) {
+  } catch {
+    // ESLINT-FIX-2025-J: Remove unused error parameter
     notificationStore.showError('Failed to hide recipe')
   }
 }
@@ -218,7 +219,8 @@ async function unhideRecipe(recipe: Recipe) {
   try {
     await adminStore.unhideRecipe(recipe.id)
     notificationStore.showSuccess('Recipe unhidden successfully')
-  } catch (error) {
+  } catch {
+    // ESLINT-FIX-2025-J: Remove unused error parameter
     notificationStore.showError('Failed to unhide recipe')
   }
 }
@@ -235,7 +237,8 @@ async function deleteRecipe() {
     await adminStore.deleteRecipe(selectedRecipe.value.id)
     deleteDialog.value = false
     notificationStore.showSuccess('Recipe deleted successfully')
-  } catch (error) {
+  } catch {
+    // ESLINT-FIX-2025-J: Remove unused error parameter
     notificationStore.showError('Failed to delete recipe')
   }
 }

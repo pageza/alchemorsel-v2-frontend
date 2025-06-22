@@ -234,9 +234,10 @@ const handleForgotPassword = () => {
   router.push('/forgot-password')
 }
 
-const handleSocialLogin = () => {
-  // TODO: Implement social login
-}
+// ESLINT-FIX-2025-J: Remove unused social login handler - feature not implemented yet
+// const handleSocialLogin = () => {
+//   // TODO: Implement social login
+// }
 </script>
 
 <style scoped>
