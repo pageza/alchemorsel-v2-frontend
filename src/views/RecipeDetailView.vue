@@ -116,37 +116,63 @@
               <v-card-title class="text-h5 font-weight-bold"> Nutrition </v-card-title>
               <v-card-text>
                 <v-list v-if="hasNutritionalInfo">
+                  <!-- Nutrition Display Toggle -->
+                  <div class="d-flex align-center mb-4">
+                    <v-chip-group v-model="nutritionDisplayMode" mandatory>
+                      <v-chip value="total" size="small" variant="outlined">
+                        Total Recipe
+                      </v-chip>
+                      <v-chip 
+                        value="serving" 
+                        size="small" 
+                        variant="outlined"
+                      >
+                        Per Serving
+                      </v-chip>
+                    </v-chip-group>
+                  </div>
+
+                  <!-- Serving size info -->
+                  <div class="mb-3">
+                    <v-chip color="secondary" size="small" variant="tonal">
+                      <v-icon start size="small">mdi-account-multiple</v-icon>
+                      {{ effectiveServings }} servings
+                      <span v-if="!recipe.servings || recipe.servings <= 0" class="text-caption ml-1">(estimated)</span>
+                    </v-chip>
+                  </div>
+
+                  <!-- Nutrition values -->
                   <v-list-item
-                    v-if="recipe.calories > 0"
-                    title="Calories"
-                    :subtitle="`${Math.round(recipe.calories)} kcal`"
+                    v-if="displayCalories > 0"
+                    :title="nutritionDisplayMode === 'total' ? 'Total Calories' : 'Calories per Serving'"
+                    :subtitle="`${Math.round(displayCalories)} kcal`"
                   >
                     <template v-slot:prepend>
                       <v-icon color="orange">mdi-fire</v-icon>
                     </template>
                   </v-list-item>
                   <v-list-item
-                    v-if="recipe.protein > 0"
-                    title="Protein"
-                    :subtitle="`${Math.round(recipe.protein)}g`"
+                    v-if="displayProtein > 0"
+                    :title="nutritionDisplayMode === 'total' ? 'Total Protein' : 'Protein per Serving'"
+                    :subtitle="`${Math.round(displayProtein)}g`"
                   >
                     <template v-slot:prepend>
                       <v-icon color="red">mdi-arm-flex</v-icon>
                     </template>
                   </v-list-item>
                   <v-list-item
-                    v-if="recipe.carbs > 0"
-                    title="Carbohydrates"
-                    :subtitle="`${Math.round(recipe.carbs)}g`"
+                    v-if="displayCarbs > 0"
+                    :title="nutritionDisplayMode === 'total' ? 'Total Carbohydrates' : 'Carbohydrates per Serving'"
+                    :subtitle="`${Math.round(displayCarbs)}g`"
                   >
                     <template v-slot:prepend>
                       <v-icon color="brown">mdi-barley</v-icon>
                     </template>
                   </v-list-item>
                   <v-list-item
-                    v-if="recipe.fat > 0"
-                    title="Fat"
-                    :subtitle="`${Math.round(recipe.fat)}g`"
+                    v-if="displayFat > 0"
+                    :title="nutritionDisplayMode === 'total' ? 'Total Fat' : 'Fat per Serving'"
+                    :subtitle="`${Math.round(displayFat)}g`"
                   >
                     <template v-slot:prepend>
                       <v-icon color="green">mdi-water</v-icon>
@@ -244,6 +270,7 @@ const authStore = useAuthStore()
 
 const recipe = ref<Recipe | null>(null)
 const showForkModal = ref(false)
+const nutritionDisplayMode = ref<'total' | 'serving'>('serving')
 
 // Computed property to check if nutritional info is available
 const hasNutritionalInfo = computed(() => {
@@ -286,6 +313,45 @@ const difficultyColor = computed(() => {
     default:
       return 'secondary'
   }
+})
+
+// Computed property for effective servings (with fallback)
+const effectiveServings = computed(() => {
+  if (!recipe.value) return 4
+  return recipe.value.servings && recipe.value.servings > 0 ? recipe.value.servings : 4
+})
+
+// Computed properties for nutrition display
+const displayCalories = computed(() => {
+  if (!recipe.value) return 0
+  if (nutritionDisplayMode.value === 'total') {
+    return recipe.value.calories
+  }
+  return recipe.value.calories / effectiveServings.value
+})
+
+const displayProtein = computed(() => {
+  if (!recipe.value) return 0
+  if (nutritionDisplayMode.value === 'total') {
+    return recipe.value.protein
+  }
+  return recipe.value.protein / effectiveServings.value
+})
+
+const displayCarbs = computed(() => {
+  if (!recipe.value) return 0
+  if (nutritionDisplayMode.value === 'total') {
+    return recipe.value.carbs
+  }
+  return recipe.value.carbs / effectiveServings.value
+})
+
+const displayFat = computed(() => {
+  if (!recipe.value) return 0
+  if (nutritionDisplayMode.value === 'total') {
+    return recipe.value.fat
+  }
+  return recipe.value.fat / effectiveServings.value
 })
 
 // Load recipe by ID

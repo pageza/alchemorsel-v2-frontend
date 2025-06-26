@@ -13,6 +13,16 @@
       </button>
     </div>
     <div class="recipe-name">{{ name }}</div>
+    <div v-if="servings || calories || caloriesPerServing" class="recipe-info">
+      <div v-if="servings" class="info-item">
+        <v-icon size="small" class="info-icon">mdi-account-group</v-icon>
+        <span>{{ servings }} servings</span>
+      </div>
+      <div v-if="caloriesPerServing || calories" class="info-item">
+        <v-icon size="small" class="info-icon">mdi-fire</v-icon>
+        <span>{{ Math.round(caloriesPerServing || calories || 0) }} cal</span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -25,6 +35,9 @@ const props = defineProps<{
   isFavorite?: boolean
   showFavoriteButton?: boolean
   id?: string
+  servings?: string
+  calories?: number
+  caloriesPerServing?: number
 }>()
 
 const emit = defineEmits<{
@@ -121,5 +134,25 @@ const handleFavoriteClick = async () => {
   color: #f5e6c8;
   text-align: center;
   margin-top: 4px;
+}
+
+.recipe-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.875rem;
+  color: #d4c5b3;
+}
+
+.info-icon {
+  color: #c49b7e;
 }
 </style>

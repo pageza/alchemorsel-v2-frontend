@@ -19,7 +19,7 @@
         <p>This Week</p>
       </div>
       <div class="stat-card">
-        <h3>{{ stats.primaryDiet }}</h3>
+        <h3>{{ stats.primaryDiet || 'Not Set' }}</h3>
         <p>Primary Diet</p>
       </div>
     </div>

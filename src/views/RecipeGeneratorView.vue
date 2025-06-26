@@ -139,7 +139,8 @@
                 </v-chip>
                 <v-chip color="orange" size="small">
                   <v-icon start>mdi-fire</v-icon>
-                  {{ Math.round(currentDraft.calories) }} cal
+                  {{ Math.round(currentDraft.calories_per_serving || currentDraft.calories) }} cal/serving
+                  <!-- DEBUG: {{ currentDraft.calories_per_serving }}/{{ currentDraft.calories }} -->
                 </v-chip>
               </div>
 
@@ -185,7 +186,7 @@
                   <v-col cols="3">
                     <div class="text-center">
                       <div class="text-h6 font-weight-bold">
-                        {{ Math.round(currentDraft.calories) }}
+                        {{ Math.round(currentDraft.calories_per_serving || currentDraft.calories) }}
                       </div>
                       <div class="text-caption">Calories</div>
                     </div>
@@ -193,7 +194,7 @@
                   <v-col cols="3">
                     <div class="text-center">
                       <div class="text-h6 font-weight-bold">
-                        {{ Math.round(currentDraft.protein) }}g
+                        {{ Math.round(currentDraft.protein_per_serving || currentDraft.protein) }}g
                       </div>
                       <div class="text-caption">Protein</div>
                     </div>
@@ -201,7 +202,7 @@
                   <v-col cols="3">
                     <div class="text-center">
                       <div class="text-h6 font-weight-bold">
-                        {{ Math.round(currentDraft.carbs) }}g
+                        {{ Math.round(currentDraft.carbs_per_serving || currentDraft.carbs) }}g
                       </div>
                       <div class="text-caption">Carbs</div>
                     </div>
@@ -209,7 +210,7 @@
                   <v-col cols="3">
                     <div class="text-center">
                       <div class="text-h6 font-weight-bold">
-                        {{ Math.round(currentDraft.fat) }}g
+                        {{ Math.round(currentDraft.fat_per_serving || currentDraft.fat) }}g
                       </div>
                       <div class="text-caption">Fat</div>
                     </div>
@@ -511,6 +512,8 @@ const modifyRecipe = async () => {
 
   try {
     const response = await LLMService.modifyRecipe(modifyQuery.value, currentDraftId.value)
+    console.log('🔍 DEBUG: Modification response:', response)
+    console.log('🔍 DEBUG: Response recipe nutrition:', response.recipe?.calories, response.recipe?.calories_per_serving)
     currentDraft.value = response.recipe || null
     showModifyDialog.value = false
     modifyQuery.value = ''

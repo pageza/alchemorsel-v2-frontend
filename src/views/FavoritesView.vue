@@ -24,6 +24,8 @@
           :id="recipe.id"
           :image="recipe.image_url || '/placeholder-recipe.jpg'"
           :name="recipe.name"
+          :servings="recipe.servings?.toString()"
+          :calories="recipe.calories"
           :showFavoriteButton="true"
           :isFavorite="true"
           @click="$router.push(`/recipes/${recipe.id}`)"
