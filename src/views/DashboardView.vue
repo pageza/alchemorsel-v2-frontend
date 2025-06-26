@@ -19,7 +19,7 @@
         <p>This Week</p>
       </div>
       <div class="stat-card">
-        <h3>{{ stats.primaryDiet || 'Not Set' }}</h3>
+        <h3>{{ formatDietName(stats.primaryDiet) || 'Not Set' }}</h3>
         <p>Primary Diet</p>
       </div>
     </div>
@@ -116,6 +116,21 @@ const stats = ref<DashboardStats>({
   thisWeek: 0,
   primaryDiet: 'None',
 })
+
+// Format diet names for display (capitalize and handle special cases)
+const formatDietName = (dietName: string) => {
+  if (!dietName) return ''
+  
+  // Handle special cases with underscores or hyphens
+  const formatted = dietName
+    .replace(/_/g, ' ')           // Replace underscores with spaces
+    .replace(/-/g, ' ')           // Replace hyphens with spaces
+    .split(' ')                   // Split into words
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
+    .join(' ')                    // Join back together
+  
+  return formatted
+}
 
 const handleFavoriteToggle = async (recipeId: string) => {
   try {

@@ -86,7 +86,22 @@
                   label="Dietary Lifestyles"
                   multiple
                   chips
-                  hint="Select your dietary lifestyle choices (e.g., vegetarian, keto, paleo)"
+                  hint="Select your dietary lifestyle choices (e.g., vegetarian, keto, paleo, mediterranean)"
+                ></v-select>
+              </v-card-text>
+            </v-card>
+
+            <!-- Dietary Restrictions -->
+            <v-card class="mb-6">
+              <v-card-title class="text-h5 font-weight-bold"> Dietary Restrictions </v-card-title>
+              <v-card-text>
+                <v-select
+                  v-model="selectedDietaryRestrictions"
+                  :items="dietaryRestrictionTypes"
+                  label="Dietary Restrictions"
+                  multiple
+                  chips
+                  hint="Select dietary restrictions due to health, medical, or intolerance reasons"
                 ></v-select>
               </v-card-text>
             </v-card>
@@ -191,23 +206,44 @@ const profile = ref<User>({
 
 // Form selections
 const selectedDietaryLifestyles = ref<string[]>([])
+const selectedDietaryRestrictions = ref<string[]>([])
 const selectedCuisinePrefs = ref<string[]>([])
 const selectedAllergens = ref<string[]>([])
 
-// Options (must match database enum values)
+// Dietary Lifestyles - comprehensive eating patterns/philosophies (NOT restrictions/allergies)
 const dietaryLifestyleTypes = [
-  'vegetarian',
+  // Plant-based lifestyles
   'vegan',
+  'vegetarian',
   'pescatarian',
+  'flexitarian',
+  'plant_based',
+  
+  // Popular diet patterns
   'paleo',
   'keto',
   'mediterranean',
   'whole30',
   'raw',
+  'intermittent_fasting',
+  
+  // Macronutrient-focused
   'low_carb',
-  'low_fat',
+  'low_fat', 
   'high_protein',
+  
+  // Custom option
   'custom',
+]
+
+// Dietary Restrictions - medical/health-based restrictions (separate from allergies)
+const dietaryRestrictionTypes = [
+  'gluten-free',
+  'dairy-free',
+  'nut-free',
+  'soy-free',
+  'egg-free',
+  'shellfish-free',
 ]
 
 const cuisineTypes = [
@@ -258,7 +294,16 @@ onMounted(async () => {
     const userProfile = await UserService.getProfile()
 
     profile.value = userProfile
-    selectedDietaryLifestyles.value = userProfile.dietary_lifestyles || []
+    
+    // Split dietary preferences into lifestyles vs restrictions
+    const allDietaryPrefs = userProfile.dietary_lifestyles || []
+    selectedDietaryLifestyles.value = allDietaryPrefs.filter(pref => 
+      dietaryLifestyleTypes.includes(pref)
+    )
+    selectedDietaryRestrictions.value = allDietaryPrefs.filter(pref => 
+      dietaryRestrictionTypes.includes(pref)
+    )
+    
     selectedCuisinePrefs.value = userProfile.cuisine_preferences || []
     selectedAllergens.value = userProfile.allergens?.map((a) => a.allergen_name) || []
   } catch (error) {
@@ -289,9 +334,9 @@ const handleSubmit = async () => {
       bio: profile.value.bio || '',
       privacy_level: profile.value.privacy_level || 'public',
       preferences: {
-        dietary_lifestyles: selectedDietaryLifestyles.value,
-        cuisine_preferences: selectedCuisinePrefs.value,
+        dietary_prefs: [...selectedDietaryLifestyles.value, ...selectedDietaryRestrictions.value],
         allergies: selectedAllergens.value,
+        favorite_cuisine: selectedCuisinePrefs.value.join(','), // Convert array to string for now
       },
     }
 
