@@ -105,7 +105,7 @@
                     :title="ingredient"
                   >
                     <template v-slot:prepend>
-                      <v-checkbox-btn></v-checkbox-btn>
+                      <v-icon size="small" color="primary">mdi-circle-medium</v-icon>
                     </template>
                   </v-list-item>
                 </v-list>
