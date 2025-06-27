@@ -114,33 +114,35 @@
           </div>
 
           <!-- Generated Recipe Display -->
-          <v-card v-if="currentDraft" class="mb-6">
-            <v-card-title class="d-flex align-center">
-              <v-icon class="mr-2" color="success">mdi-chef-hat</v-icon>
-              {{ currentDraft.name }}
+          <v-card v-if="currentDraft" class="mb-6" elevation="4">
+            <v-card-title class="d-flex align-center bg-surface-variant pa-6">
+              <v-icon class="mr-3" color="success" size="large">mdi-chef-hat</v-icon>
+              <div>
+                <div class="text-h5 font-weight-bold">{{ currentDraft.name }}</div>
+                <div class="text-body-2 text-medium-emphasis mt-1">AI Generated Recipe</div>
+              </div>
             </v-card-title>
 
-            <v-card-text>
-              <p class="text-body-1 mb-4">{{ currentDraft.description }}</p>
+            <v-card-text class="pa-6">
+              <p class="text-body-1 mb-6 text-medium-emphasis">{{ currentDraft.description }}</p>
 
               <!-- Recipe Meta Info -->
-              <div class="d-flex flex-wrap gap-2 mb-4">
-                <v-chip color="primary" size="small">
-                  <v-icon start>mdi-clock-outline</v-icon>
+              <div class="d-flex flex-wrap gap-2 mb-6">
+                <v-chip color="primary" size="small" variant="tonal">
+                  <v-icon start size="small">mdi-clock-outline</v-icon>
                   {{ currentDraft.prep_time }} prep + {{ currentDraft.cook_time }} cook
                 </v-chip>
-                <v-chip color="secondary" size="small">
-                  <v-icon start>mdi-account-group</v-icon>
+                <v-chip color="secondary" size="small" variant="tonal">
+                  <v-icon start size="small">mdi-account-group</v-icon>
                   {{ currentDraft.servings.Value }} servings
                 </v-chip>
-                <v-chip color="accent" size="small">
-                  <v-icon start>mdi-chart-line</v-icon>
+                <v-chip color="accent" size="small" variant="tonal">
+                  <v-icon start size="small">mdi-chart-line</v-icon>
                   {{ currentDraft.difficulty }}
                 </v-chip>
-                <v-chip color="orange" size="small">
-                  <v-icon start>mdi-fire</v-icon>
+                <v-chip color="orange" size="small" variant="tonal">
+                  <v-icon start size="small">mdi-fire</v-icon>
                   {{ Math.round(currentDraft.calories_per_serving || currentDraft.calories) }} cal/serving
-                  <!-- DEBUG: {{ currentDraft.calories_per_serving }}/{{ currentDraft.calories }} -->
                 </v-chip>
               </div>
 
@@ -180,60 +182,83 @@
               </div>
 
               <!-- Nutrition Info -->
-              <div class="mb-6">
-                <h3 class="text-h6 mb-3">Nutrition (per serving)</h3>
-                <v-row>
-                  <v-col cols="3">
-                    <div class="text-center">
-                      <div class="text-h6 font-weight-bold">
-                        {{ Math.round(currentDraft.calories_per_serving || currentDraft.calories) }}
+              <v-card variant="tonal" class="mb-6">
+                <v-card-subtitle class="pb-2">
+                  <v-icon start size="small">mdi-nutrition</v-icon>
+                  Nutrition (per serving)
+                </v-card-subtitle>
+                <v-card-text class="pt-0">
+                  <v-row>
+                    <v-col cols="6" sm="3">
+                      <div class="text-center">
+                        <div class="text-h6 font-weight-bold text-primary">
+                          {{ Math.round(currentDraft.calories_per_serving || currentDraft.calories) }}
+                        </div>
+                        <div class="text-caption text-medium-emphasis">Calories</div>
                       </div>
-                      <div class="text-caption">Calories</div>
-                    </div>
-                  </v-col>
-                  <v-col cols="3">
-                    <div class="text-center">
-                      <div class="text-h6 font-weight-bold">
-                        {{ Math.round(currentDraft.protein_per_serving || currentDraft.protein) }}g
+                    </v-col>
+                    <v-col cols="6" sm="3">
+                      <div class="text-center">
+                        <div class="text-h6 font-weight-bold text-success">
+                          {{ Math.round(currentDraft.protein_per_serving || currentDraft.protein) }}g
+                        </div>
+                        <div class="text-caption text-medium-emphasis">Protein</div>
                       </div>
-                      <div class="text-caption">Protein</div>
-                    </div>
-                  </v-col>
-                  <v-col cols="3">
-                    <div class="text-center">
-                      <div class="text-h6 font-weight-bold">
-                        {{ Math.round(currentDraft.carbs_per_serving || currentDraft.carbs) }}g
+                    </v-col>
+                    <v-col cols="6" sm="3">
+                      <div class="text-center">
+                        <div class="text-h6 font-weight-bold text-warning">
+                          {{ Math.round(currentDraft.carbs_per_serving || currentDraft.carbs) }}g
+                        </div>
+                        <div class="text-caption text-medium-emphasis">Carbs</div>
                       </div>
-                      <div class="text-caption">Carbs</div>
-                    </div>
-                  </v-col>
-                  <v-col cols="3">
-                    <div class="text-center">
-                      <div class="text-h6 font-weight-bold">
-                        {{ Math.round(currentDraft.fat_per_serving || currentDraft.fat) }}g
+                    </v-col>
+                    <v-col cols="6" sm="3">
+                      <div class="text-center">
+                        <div class="text-h6 font-weight-bold text-secondary">
+                          {{ Math.round(currentDraft.fat_per_serving || currentDraft.fat) }}g
+                        </div>
+                        <div class="text-caption text-medium-emphasis">Fat</div>
                       </div>
-                      <div class="text-caption">Fat</div>
-                    </div>
-                  </v-col>
-                </v-row>
-              </div>
+                    </v-col>
+                  </v-row>
+                </v-card-text>
+              </v-card>
             </v-card-text>
 
             <!-- Action Buttons -->
-            <v-card-actions class="pa-4">
-              <v-btn color="success" variant="elevated" :loading="isSaving" @click="saveRecipe">
+            <v-card-actions class="pa-6 pt-0">
+              <v-btn 
+                color="success" 
+                variant="elevated" 
+                size="large"
+                :loading="isSaving" 
+                @click="saveRecipe"
+                class="mr-3"
+              >
                 <v-icon start>mdi-content-save</v-icon>
                 Save Recipe
               </v-btn>
 
-              <v-spacer></v-spacer>
-
-              <v-btn color="primary" variant="outlined" @click="showModifyDialog = true">
+              <v-btn 
+                color="primary" 
+                variant="outlined" 
+                size="large"
+                @click="showModifyDialog = true"
+                class="mr-3"
+              >
                 <v-icon start>mdi-pencil</v-icon>
                 Modify
               </v-btn>
 
-              <v-btn color="secondary" variant="text" @click="startOver">
+              <v-spacer></v-spacer>
+
+              <v-btn 
+                color="secondary" 
+                variant="text" 
+                size="large"
+                @click="startOver"
+              >
                 <v-icon start>mdi-refresh</v-icon>
                 Start Over
               </v-btn>
