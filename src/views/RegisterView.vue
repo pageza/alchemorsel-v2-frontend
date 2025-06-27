@@ -175,15 +175,45 @@ const formData = reactive({
 })
 
 const dietaryLifestyleOptions = [
-  'vegetarian',
   'vegan',
+  'vegetarian', 
   'pescatarian',
+  'flexitarian',
+  'plant_based',
   'paleo',
   'keto',
   'mediterranean',
+  'whole30',
+  'raw',
+  'intermittent_fasting',
+  'low_carb',
+  'low_fat',
+  'high_protein',
+  'gluten-free',
+  'dairy-free',
+  'nut-free',
+  'soy-free',
+  'egg-free',
+  'shellfish-free',
 ]
 
-const cuisineOptions = ['italian', 'mexican', 'chinese', 'japanese', 'indian', 'mediterranean']
+const cuisineOptions = [
+  'mediterranean',
+  'mexican',
+  'italian',
+  'chinese',
+  'japanese',
+  'indian',
+  'thai',
+  'french',
+  'greek',
+  'korean',
+  'middle_eastern',
+  'american',
+  'british',
+  'spanish',
+  'german',
+]
 
 const allergyOptions = [
   'peanuts',
@@ -194,6 +224,11 @@ const allergyOptions = [
   'shellfish',
   'soy',
   'gluten',
+  'sesame',
+  'mustard',
+  'celery',
+  'lupin',
+  'sulphites',
 ]
 
 const emailRules = [
