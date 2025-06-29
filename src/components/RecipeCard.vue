@@ -1,7 +1,12 @@
 <template>
   <div class="recipe-card" @click="$emit('click')">
     <div class="recipe-image-container">
-      <img :src="image" :alt="name" class="recipe-image" />
+      <img 
+        :src="image || '/placeholder-recipe.jpg'" 
+        :alt="name" 
+        class="recipe-image"
+        @error="handleImageError"
+      />
       <button
         v-if="showFavoriteButton"
         class="favorite-button"
@@ -54,6 +59,11 @@ const handleFavoriteClick = async () => {
   } finally {
     isLoading.value = false
   }
+}
+
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  img.src = '/placeholder-recipe.jpg' // Fallback to placeholder
 }
 </script>
 

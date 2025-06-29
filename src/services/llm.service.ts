@@ -7,6 +7,8 @@ export interface RecipeDraft {
   name: string
   description: string
   category: string
+  cuisine: string
+  image_url: string
   ingredients: string[]
   instructions: string[]
   prep_time: string
@@ -85,6 +87,29 @@ export interface FinalizeResponse {
   draft_id: string
   recipe: RecipeDraft
   status: string
+}
+
+// Image generation interfaces
+export interface GenerateRecipeImageRequest {
+  draft_id: string
+}
+
+export interface GenerateRecipeImageResponse {
+  draft_id: string
+  image_url: string
+  status: string
+  message?: string
+}
+
+export interface GenerateImageFromPromptRequest {
+  prompt: string
+  size?: string
+}
+
+export interface GenerateImageFromPromptResponse {
+  image_url: string
+  status: string
+  message?: string
 }
 
 export class LLMService {
@@ -180,6 +205,64 @@ export class LLMService {
     }
 
     // Step 3: Finalize recipe
+    const finalResponse = await this.finalizeRecipe(basicResponse.draft_id)
+    return finalResponse
+  }
+
+  // Image generation methods
+  static async generateRecipeImage(draftId: string): Promise<GenerateRecipeImageResponse> {
+    const response = await api.post('/images/generate-recipe', { draft_id: draftId }, {
+      timeout: 60000, // 1 minute timeout for image generation
+    })
+    return response.data
+  }
+
+  static async generateImageFromPrompt(prompt: string, size = '1024x1024'): Promise<GenerateImageFromPromptResponse> {
+    const response = await api.post('/images/generate', { prompt, size }, {
+      timeout: 60000, // 1 minute timeout for image generation
+    })
+    return response.data
+  }
+
+  // Enhanced progressive recipe generation with optional image generation
+  static async generateRecipeProgressiveWithImage(
+    query: string,
+    onBasicGenerated?: (basic: BasicRecipeResponse) => void,
+    onNutritionCalculated?: (nutrition: NutritionResponse) => void,
+    onImageGenerated?: (imageResponse: GenerateRecipeImageResponse) => void,
+    generateImage = true,
+  ): Promise<FinalizeResponse> {
+    // Step 1: Generate basic recipe
+    const basicResponse = await this.generateBasicRecipe(query)
+    if (onBasicGenerated) {
+      onBasicGenerated(basicResponse)
+    }
+
+    // Step 2: Calculate nutrition
+    try {
+      const nutritionResponse = await this.calculateNutrition(basicResponse.draft_id)
+      if (onNutritionCalculated) {
+        onNutritionCalculated(nutritionResponse)
+      }
+    } catch (error) {
+      console.warn('Failed to calculate nutrition:', error)
+      // Continue without nutrition data
+    }
+
+    // Step 3: Generate image if requested
+    if (generateImage) {
+      try {
+        const imageResponse = await this.generateRecipeImage(basicResponse.draft_id)
+        if (onImageGenerated) {
+          onImageGenerated(imageResponse)
+        }
+      } catch (error) {
+        console.warn('Failed to generate image:', error)
+        // Continue without image
+      }
+    }
+
+    // Step 4: Finalize recipe
     const finalResponse = await this.finalizeRecipe(basicResponse.draft_id)
     return finalResponse
   }

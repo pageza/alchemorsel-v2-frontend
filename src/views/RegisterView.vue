@@ -60,64 +60,65 @@
         />
         <div class="password-hint mb-4">Min 8 chars, 1 uppercase, 1 number, 1 special char</div>
 
-        <!-- Dietary Lifestyles -->
-        <div class="form-section mb-4">
-          <v-label class="form-label mb-2">Dietary Lifestyles</v-label>
-          <div class="checkbox-group" data-testid="dietary-lifestyles">
-            <v-checkbox
-              v-for="lifestyle in dietaryLifestyleOptions"
-              :key="lifestyle"
-              v-model="formData.dietary_lifestyles"
-              :value="lifestyle"
-              :label="lifestyle.charAt(0).toUpperCase() + lifestyle.slice(1)"
-              :data-testid="`dietary-${lifestyle}`"
-              density="compact"
-              hide-details
-              class="checkbox-item"
-            />
-          </div>
-        </div>
+        <!-- Primary Dietary Preference -->
+        <v-select
+          v-model="formData.primary_dietary_preference"
+          label="Primary Dietary Preference"
+          :items="dietaryPreferenceOptions"
+          item-title="label"
+          item-value="value"
+          variant="outlined"
+          density="comfortable"
+          data-testid="primary-dietary-preference"
+          class="mb-4"
+          clearable
+        />
 
-        <!-- Cuisine Preferences -->
-        <div class="form-section mb-4">
-          <v-label class="form-label mb-2">Cuisine Preferences</v-label>
-          <div class="checkbox-group" data-testid="cuisine-preferences">
-            <v-checkbox
-              v-for="cuisine in cuisineOptions"
-              :key="cuisine"
-              v-model="formData.cuisine_preferences"
-              :value="cuisine"
-              :label="cuisine.charAt(0).toUpperCase() + cuisine.slice(1)"
-              :data-testid="`cuisine-${cuisine}`"
-              density="compact"
-              hide-details
-              class="checkbox-item"
-            />
-          </div>
-        </div>
+        <!-- Additional Dietary Preferences (Optional) -->
+        <v-select
+          v-model="formData.additional_dietary_preferences"
+          label="Additional Dietary Preferences (Optional)"
+          :items="dietaryPreferenceOptions"
+          item-title="label"
+          item-value="value"
+          variant="outlined"
+          density="comfortable"
+          multiple
+          chips
+          data-testid="additional-dietary-preferences"
+          class="mb-4"
+          clearable
+        />
+
+        <!-- Favorite Cuisine -->
+        <v-select
+          v-model="formData.favorite_cuisine"
+          label="Favorite Cuisine (Optional)"
+          :items="cuisineOptions"
+          item-title="label"
+          item-value="value"
+          variant="outlined"
+          density="comfortable"
+          data-testid="favorite-cuisine"
+          class="mb-4"
+          clearable
+        />
 
         <!-- Food Allergies -->
-        <div class="form-section mb-4">
-          <v-label class="form-label mb-2">Food Allergies</v-label>
-          <div class="checkbox-group" data-testid="allergies">
-            <v-checkbox
-              v-for="allergy in allergyOptions"
-              :key="allergy"
-              v-model="formData.allergies"
-              :value="allergy"
-              :label="
-                allergy
-                  .split(' ')
-                  .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                  .join(' ')
-              "
-              :data-testid="`allergy-${allergy.replace(/\s+/g, '-')}`"
-              density="compact"
-              hide-details
-              class="checkbox-item"
-            />
-          </div>
-        </div>
+        <v-select
+          v-model="formData.allergies"
+          label="Food Allergies (Optional)"
+          :items="allergyOptions"
+          item-title="label"
+          item-value="value"
+          variant="outlined"
+          density="comfortable"
+          multiple
+          chips
+          data-testid="allergies"
+          class="mb-4"
+          clearable
+        />
 
         <v-btn
           type="submit"
@@ -169,66 +170,67 @@ const formData = reactive({
   username: '',
   full_name: '',
   password: '',
-  dietary_lifestyles: [] as string[],
-  cuisine_preferences: [] as string[],
+  primary_dietary_preference: '',
+  additional_dietary_preferences: [] as string[],
+  favorite_cuisine: '',
   allergies: [] as string[],
 })
 
-const dietaryLifestyleOptions = [
-  'vegan',
-  'vegetarian', 
-  'pescatarian',
-  'flexitarian',
-  'plant_based',
-  'paleo',
-  'keto',
-  'mediterranean',
-  'whole30',
-  'raw',
-  'intermittent_fasting',
-  'low_carb',
-  'low_fat',
-  'high_protein',
-  'gluten-free',
-  'dairy-free',
-  'nut-free',
-  'soy-free',
-  'egg-free',
-  'shellfish-free',
+// Match backend enum values exactly
+const dietaryPreferenceOptions = [
+  { label: 'Omnivore', value: 'omnivore' },
+  { label: 'Vegetarian', value: 'vegetarian' },
+  { label: 'Vegan', value: 'vegan' },
+  { label: 'Pescatarian', value: 'pescatarian' },
+  { label: 'Flexitarian', value: 'flexitarian' },
+  { label: 'Keto', value: 'keto' },
+  { label: 'Paleo', value: 'paleo' },
+  { label: 'Low Carb', value: 'low-carb' },
+  { label: 'Low Fat', value: 'low-fat' },
+  { label: 'Mediterranean', value: 'mediterranean' },
+  { label: 'Whole30', value: 'whole30' },
+  { label: 'Carnivore', value: 'carnivore' },
+  { label: 'Gluten-Free', value: 'gluten-free' },
+  { label: 'Dairy-Free', value: 'dairy-free' },
+  { label: 'Nut-Free', value: 'nut-free' },
+  { label: 'Soy-Free', value: 'soy-free' },
+  { label: 'Egg-Free', value: 'egg-free' },
+  { label: 'Shellfish-Free', value: 'shellfish-free' },
+  { label: 'Custom', value: 'custom' },
 ]
 
 const cuisineOptions = [
-  'mediterranean',
-  'mexican',
-  'italian',
-  'chinese',
-  'japanese',
-  'indian',
-  'thai',
-  'french',
-  'greek',
-  'korean',
-  'middle_eastern',
-  'american',
-  'british',
-  'spanish',
-  'german',
+  { label: 'Mediterranean', value: 'mediterranean' },
+  { label: 'Mexican', value: 'mexican' },
+  { label: 'Italian', value: 'italian' },
+  { label: 'Chinese', value: 'chinese' },
+  { label: 'Japanese', value: 'japanese' },
+  { label: 'Indian', value: 'indian' },
+  { label: 'Thai', value: 'thai' },
+  { label: 'French', value: 'french' },
+  { label: 'Greek', value: 'greek' },
+  { label: 'Korean', value: 'korean' },
+  { label: 'Middle Eastern', value: 'middle_eastern' },
+  { label: 'American', value: 'american' },
+  { label: 'British', value: 'british' },
+  { label: 'Spanish', value: 'spanish' },
+  { label: 'German', value: 'german' },
 ]
 
 const allergyOptions = [
-  'peanuts',
-  'tree nuts',
-  'dairy',
-  'eggs',
-  'fish',
-  'shellfish',
-  'soy',
-  'gluten',
-  'sesame',
-  'mustard',
-  'celery',
-  'lupin',
-  'sulphites',
+  { label: 'Peanuts', value: 'peanuts' },
+  { label: 'Tree Nuts', value: 'tree nuts' },
+  { label: 'Dairy', value: 'dairy' },
+  { label: 'Eggs', value: 'eggs' },
+  { label: 'Fish', value: 'fish' },
+  { label: 'Shellfish', value: 'shellfish' },
+  { label: 'Soy', value: 'soy' },
+  { label: 'Gluten', value: 'gluten' },
+  { label: 'Sesame', value: 'sesame' },
+  { label: 'Mustard', value: 'mustard' },
+  { label: 'Celery', value: 'celery' },
+  { label: 'Lupin', value: 'lupin' },
+  { label: 'Sulphites', value: 'sulphites' },
 ]
 
 const emailRules = [
@@ -260,13 +262,23 @@ const handleSubmit = async () => {
 
     isLoading.value = true
 
+    // Build dietary preferences array
+    const dietaryPreferences = []
+    if (formData.primary_dietary_preference) {
+      dietaryPreferences.push(formData.primary_dietary_preference)
+    }
+    dietaryPreferences.push(...formData.additional_dietary_preferences)
+
+    // Build cuisine preferences array
+    const cuisinePreferences = formData.favorite_cuisine ? [formData.favorite_cuisine] : []
+
     await authStore.register({
       email: formData.email,
       username: formData.username,
       name: formData.full_name,
       password: formData.password,
-      dietary_lifestyles: formData.dietary_lifestyles,
-      cuisine_preferences: formData.cuisine_preferences,
+      dietary_lifestyles: dietaryPreferences,
+      cuisine_preferences: cuisinePreferences,
       allergies: formData.allergies,
     })
 
@@ -350,18 +362,6 @@ const handleSubmit = async () => {
   display: block;
 }
 
-.checkbox-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.checkbox-item {
-  flex: 0 0 auto;
-  margin-right: 0;
-}
-
 .password-hint {
   font-size: 0.875rem;
   color: #7f8c8d;
@@ -386,15 +386,6 @@ const handleSubmit = async () => {
 
   .register-container h2 {
     font-size: 1.5rem;
-  }
-
-  .checkbox-group {
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .checkbox-item {
-    flex: 1 1 100%;
   }
 }
 

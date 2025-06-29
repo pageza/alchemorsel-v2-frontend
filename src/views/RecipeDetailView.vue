@@ -85,7 +85,19 @@
             </div>
           </v-col>
           <v-col cols="12" md="4">
-            <v-img :src="recipe.image_url" height="400" cover class="rounded-lg"></v-img>
+            <v-img 
+              :src="recipe.image_url || '/placeholder-recipe.jpg'" 
+              height="400" 
+              cover 
+              class="rounded-lg"
+              alt="Recipe image"
+            >
+              <template v-slot:placeholder>
+                <div class="d-flex align-center justify-center fill-height">
+                  <v-icon size="48" color="grey-lighten-2">mdi-image</v-icon>
+                </div>
+              </template>
+            </v-img>
           </v-col>
         </v-row>
       </v-container>
